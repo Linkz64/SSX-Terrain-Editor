@@ -1,0 +1,387 @@
+[gd_scene load_steps=5 format=3 uid="uid://e3mf5oewrsw3"]
+
+[ext_resource type="Theme" uid="uid://btd276sukesp4" path="res://assets/themes/main.theme" id="1_c58m6"]
+[ext_resource type="Script" uid="uid://knltk8gqw0nw" path="res://gui/main_gui/tree.gd" id="1_yw1lf"]
+[ext_resource type="Texture2D" uid="uid://de2nmqkmqxpyu" path="res://assets/ui/placeholder_fake_viewport.jpg" id="3_ew3qc"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ew3qc"]
+bg_color = Color(0.129412, 0.129412, 0.129412, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="MainGUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_lock_ = true
+
+[node name="ViewportPlaceholder" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 32.0
+offset_right = -320.0
+texture = ExtResource("3_ew3qc")
+expand_mode = 1
+stretch_mode = 6
+metadata/_edit_lock_ = true
+
+[node name="MenuBarBG" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 32.0
+grow_horizontal = 2
+color = Color(0.1479, 0.15674, 0.17, 1)
+metadata/_edit_lock_ = true
+
+[node name="MenuBar" type="MenuBar" parent="MenuBarBG"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -13.0
+offset_bottom = 13.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_c58m6")
+switch_on_hover = false
+
+[node name="File" type="PopupMenu" parent="MenuBarBG/MenuBar"]
+size = Vector2i(110, 197)
+item_count = 6
+item_0/text = "New"
+item_0/id = 0
+item_1/text = "Save"
+item_1/id = 2
+item_2/text = "Save As.."
+item_2/id = 3
+item_3/text = "Load"
+item_3/id = 4
+item_4/text = "Import Json"
+item_4/id = 1
+item_5/text = "Export Json"
+item_5/id = 6
+
+[node name="Edit" type="PopupMenu" parent="MenuBarBG/MenuBar"]
+auto_translate_mode = 1
+item_count = 2
+item_0/text = "Rename"
+item_0/id = 0
+item_1/text = "PLACEHOLDER"
+item_1/id = 1
+
+[node name="Tools" type="PopupMenu" parent="MenuBarBG/MenuBar"]
+auto_translate_mode = 1
+item_count = 2
+item_0/text = "PLACEHOLDER"
+item_0/id = 0
+item_1/text = "PLACEHOLDER"
+item_1/id = 1
+
+[node name="RightPanel" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -320.0
+offset_top = 32.0
+grow_horizontal = 0
+grow_vertical = 2
+color = Color(0.18, 0.18, 0.18, 1)
+
+[node name="TreeButtons" type="Control" parent="RightPanel"]
+layout_mode = 2
+anchors_preset = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -320.0
+offset_bottom = 36.0
+grow_horizontal = 2
+
+[node name="Extras" type="MenuButton" parent="RightPanel/TreeButtons"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.125
+offset_left = 276.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -8.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme = ExtResource("1_c58m6")
+text = "☰"
+flat = false
+expand_icon = true
+item_count = 3
+popup/item_0/text = "Select All Objects"
+popup/item_0/id = 0
+popup/item_1/text = "Select All Objects in Group"
+popup/item_1/id = 1
+popup/item_2/text = "Duplicate Selected Objects"
+popup/item_2/id = 2
+
+[node name="Container" type="HBoxContainer" parent="RightPanel/TreeButtons"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -132.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AddObject" type="Button" parent="RightPanel/TreeButtons/Container"]
+clip_contents = true
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("1_c58m6")
+text = "+ Object"
+
+[node name="AddGroup" type="Button" parent="RightPanel/TreeButtons/Container"]
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("1_c58m6")
+text = "+ Group"
+
+[node name="Delete" type="Button" parent="RightPanel/TreeButtons/Container"]
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("1_c58m6")
+text = "- Delete"
+expand_icon = true
+
+[node name="PropertiesPanelScroll" type="ScrollContainer" parent="RightPanel"]
+clip_contents = false
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.695
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -0.360046
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="SegmentPropertiesVBox" type="VBoxContainer" parent="RightPanel/PropertiesPanelScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HSeparator2" type="HSeparator" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox"]
+layout_mode = 2
+
+[node name="SegmentProperties" type="Label" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox"]
+layout_mode = 2
+text = "Segment Properties"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox"]
+layout_mode = 2
+
+[node name="SurfaceTypeHBox" type="HBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox"]
+layout_mode = 2
+
+[node name="SurfaceType" type="Label" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/SurfaceTypeHBox"]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Surface Type"
+
+[node name="SurfaceTypeDropdown" type="MenuButton" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/SurfaceTypeHBox"]
+visible = false
+layout_mode = 2
+text = "▼ Snow Main"
+flat = false
+
+[node name="SurfaceTypeInt" type="SpinBox" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/SurfaceTypeHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TexturePathHBox" type="HBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="TexturePath" type="Label" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/TexturePathHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Texture Path"
+
+[node name="SpinBox" type="LineEdit" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/TexturePathHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "0001.png"
+
+[node name="ShowoffOnly" type="CheckBox" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox"]
+layout_mode = 2
+text = "Showoff Only"
+
+[node name="UVs" type="VBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox"]
+layout_mode = 2
+
+[node name="UVPoints" type="Label" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "UV Points"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs"]
+layout_mode = 2
+alignment = 1
+
+[node name="VBoxUV0" type="VBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer/VBoxUV0"]
+layout_mode = 2
+
+[node name="x" type="Label" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer/VBoxUV0/HBoxContainer"]
+layout_mode = 2
+text = "x"
+
+[node name="LineEditUV0x" type="LineEdit" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer/VBoxUV0/HBoxContainer"]
+layout_mode = 2
+text = "0.0"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer/VBoxUV0"]
+layout_mode = 2
+
+[node name="y" type="Label" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer/VBoxUV0/HBoxContainer2"]
+layout_mode = 2
+text = "y"
+
+[node name="LineEditUV0y" type="LineEdit" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer/VBoxUV0/HBoxContainer2"]
+layout_mode = 2
+text = "0.0"
+
+[node name="VSeparator" type="VSeparator" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer"]
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+
+[node name="VBoxUV1" type="VBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer/VBoxUV1"]
+layout_mode = 2
+
+[node name="x" type="Label" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer/VBoxUV1/HBoxContainer"]
+layout_mode = 2
+text = "x"
+
+[node name="LineEditUV1x" type="LineEdit" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer/VBoxUV1/HBoxContainer"]
+layout_mode = 2
+text = "0.0"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer/VBoxUV1"]
+layout_mode = 2
+
+[node name="y" type="Label" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer/VBoxUV1/HBoxContainer2"]
+layout_mode = 2
+text = "y"
+
+[node name="LineEditUV1y" type="LineEdit" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer/VBoxUV1/HBoxContainer2"]
+layout_mode = 2
+text = "0.0"
+
+[node name="HSeparator" type="HSeparator" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs"]
+custom_minimum_size = Vector2(164, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs"]
+layout_mode = 2
+alignment = 1
+
+[node name="VBoxUV2" type="VBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2/VBoxUV2"]
+layout_mode = 2
+
+[node name="x" type="Label" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2/VBoxUV2/HBoxContainer"]
+layout_mode = 2
+text = "x"
+
+[node name="LineEditUV2x" type="LineEdit" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2/VBoxUV2/HBoxContainer"]
+layout_mode = 2
+text = "0.0"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2/VBoxUV2"]
+layout_mode = 2
+
+[node name="y" type="Label" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2/VBoxUV2/HBoxContainer2"]
+layout_mode = 2
+text = "y"
+
+[node name="LineEditUV2y" type="LineEdit" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2/VBoxUV2/HBoxContainer2"]
+layout_mode = 2
+text = "0.0"
+
+[node name="VSeparator2" type="VSeparator" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2"]
+custom_minimum_size = Vector2(25, 0)
+layout_mode = 2
+
+[node name="VBoxUV3" type="VBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2/VBoxUV3"]
+layout_mode = 2
+
+[node name="x" type="Label" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2/VBoxUV3/HBoxContainer"]
+layout_mode = 2
+text = "x"
+
+[node name="LineEditUV3x" type="LineEdit" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2/VBoxUV3/HBoxContainer"]
+layout_mode = 2
+text = "0.0"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2/VBoxUV3"]
+layout_mode = 2
+
+[node name="y" type="Label" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2/VBoxUV3/HBoxContainer2"]
+layout_mode = 2
+text = "y"
+
+[node name="LineEditUV3y" type="LineEdit" parent="RightPanel/PropertiesPanelScroll/SegmentPropertiesVBox/UVs/HBoxContainer2/VBoxUV3/HBoxContainer2"]
+layout_mode = 2
+text = "0.0"
+
+[node name="Tree" type="Tree" parent="RightPanel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.695
+offset_top = 36.0
+offset_bottom = -0.360046
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_ew3qc")
+hide_root = true
+select_mode = 2
+scroll_horizontal_enabled = false
+auto_tooltip = false
+script = ExtResource("1_yw1lf")
+
+[connection signal="pressed" from="RightPanel/TreeButtons/Container/AddObject" to="RightPanel/Tree" method="_on_add_object_button_pressed"]
+[connection signal="pressed" from="RightPanel/TreeButtons/Container/AddGroup" to="RightPanel/Tree" method="_on_add_group_button_pressed"]
+[connection signal="pressed" from="RightPanel/TreeButtons/Container/Delete" to="RightPanel/Tree" method="_on_delete_pressed"]
+[connection signal="button_clicked" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_item_button_clicked"]
+[connection signal="item_activated" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_item_activated"]
+[connection signal="item_edited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_item_edited"]
+[connection signal="mouse_entered" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_exited"]
