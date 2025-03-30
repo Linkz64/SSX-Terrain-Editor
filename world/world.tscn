@@ -1,0 +1,84 @@
+[gd_scene load_steps=14 format=3 uid="uid://u05bpkyyiist"]
+
+[ext_resource type="Script" uid="uid://b36brfw6yyoya" path="res://world/world.gd" id="1_tcf2h"]
+[ext_resource type="PackedScene" uid="uid://cb0osf8ki8tco" path="res://world/main_camera.tscn" id="2_4717r"]
+[ext_resource type="Script" uid="uid://b1dy4istah4oo" path="res://world/axis_lines.gd" id="3_4717r"]
+[ext_resource type="PackedScene" uid="uid://b1jsuu0erff0w" path="res://assets/world/start_gates_reference.glb" id="4_h5o24"]
+[ext_resource type="Texture2D" uid="uid://bnrxur5hw5emw" path="res://assets/world/missing_texture.tres" id="4_mmdvd"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_fn3g3"]
+sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+ground_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+
+[sub_resource type="Sky" id="Sky_sc4t8"]
+sky_material = SubResource("ProceduralSkyMaterial_fn3g3")
+
+[sub_resource type="Environment" id="Environment_ai45w"]
+background_mode = 2
+sky = SubResource("Sky_sc4t8")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4717r"]
+shading_mode = 0
+vertex_color_use_as_albedo = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fn3g3"]
+albedo_texture = ExtResource("4_mmdvd")
+
+[sub_resource type="BoxMesh" id="BoxMesh_6xmxd"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sc4t8"]
+albedo_texture = ExtResource("4_mmdvd")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_h5o24"]
+
+[node name="World" type="Node3D"]
+script = ExtResource("1_tcf2h")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ai45w")
+
+[node name="MainCamera" parent="." instance=ExtResource("2_4717r")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.18502, 0.756203, 2.34154)
+fov = 70.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866024, -0.433016, 0.250001, 0.448025, -0.450052, 0.77248, -0.221983, 0.780993, 0.583759, 0, 0, 0)
+shadow_enabled = true
+
+[node name="AxisLines" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_4717r")
+script = ExtResource("3_4717r")
+
+[node name="Cube" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.439908, 0.390574, 0.808661, 0, 0.900471, -0.434917, -0.898043, 0.191323, 0.396124, -0.00182271, -0.00191504, -1.80675)
+material_override = SubResource("StandardMaterial3D_fn3g3")
+mesh = SubResource("BoxMesh_6xmxd")
+
+[node name="start_gates_reference" parent="." instance=ExtResource("4_h5o24")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -27.2568, 0)
+
+[node name="Plane" type="MeshInstance3D" parent="."]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, -8.06509)
+visible = false
+material_override = SubResource("StandardMaterial3D_sc4t8")
+mesh = SubResource("PlaneMesh_h5o24")
+
+[node name="Plane2" type="MeshInstance3D" parent="."]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, -18.0651)
+visible = false
+material_override = SubResource("StandardMaterial3D_sc4t8")
+mesh = SubResource("PlaneMesh_h5o24")
+
+[node name="Plane3" type="MeshInstance3D" parent="."]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 10, 0, -18.0651)
+visible = false
+material_override = SubResource("StandardMaterial3D_sc4t8")
+mesh = SubResource("PlaneMesh_h5o24")
+
+[node name="Plane4" type="MeshInstance3D" parent="."]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 10, 0, -8.06509)
+visible = false
+material_override = SubResource("StandardMaterial3D_sc4t8")
+mesh = SubResource("PlaneMesh_h5o24")

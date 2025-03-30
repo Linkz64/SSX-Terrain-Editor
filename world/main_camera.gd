@@ -1,0 +1,50 @@
+extends Camera3D
+
+
+const ROTATION_SENSITIVITY = Vector2(0.005, 0.01)
+const SPEED_RANGE = {"min": 1, "max": 80}
+var movable: bool = false
+var speed: float = 10
+var _rotation: Vector2 = Vector2.ZERO
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not movable:
+		return
+
+	if event is InputEventMouseMotion:
+		_rotation.y += event.screen_relative.x * ROTATION_SENSITIVITY.x
+		_rotation.x += event.screen_relative.y * ROTATION_SENSITIVITY.y
+		_rotation.x = clampf(_rotation.x, deg_to_rad(-90), deg_to_rad(90))
+		
+	if Input.is_action_just_pressed("CameraSpeedUp"):
+		speed += 2
+	if Input.is_action_just_pressed("CameraSpeedDown"):
+		speed -= 2
+	speed = clampf(speed, SPEED_RANGE["min"], SPEED_RANGE["max"])
+
+
+func _process(delta: float) -> void:
+	if not movable:
+		return
+	
+	self.quaternion = Quaternion(Vector3.UP, -_rotation.y)
+	self.quaternion = Quaternion(self.basis.x, -_rotation.x) * self.quaternion
+	
+	var direction := Vector3.ZERO
+	if Input.is_action_pressed("CameraForward"):
+		direction += -basis.z
+	if Input.is_action_pressed("CameraBackward"):
+		direction += basis.z
+	if Input.is_action_pressed("CameraLeft"):
+		direction += -basis.x
+	if Input.is_action_pressed("CameraRight"):
+		direction += basis.x
+	if Input.is_action_pressed("CameraUp"):
+		direction += basis.y
+	if Input.is_action_pressed("CameraDown"):
+		direction += -basis.y
+	self.global_translate(direction * speed * delta)
+	
+	
+	

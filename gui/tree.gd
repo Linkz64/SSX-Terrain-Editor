@@ -1,12 +1,11 @@
 extends Tree
 
+# CLEANUP AND DIVIDE
 
 const EYE_CLOSE = preload("res://assets/ui/eye_close_16.svg")
 const EYE_OPEN = preload("res://assets/ui/eye_open_16.svg")
 
-@onready var tree_extras: MenuButton = $"../TreeButtons/Extras"
-@onready var properties_panel: ScrollContainer = $"../PropertiesPanelScroll"
-
+@export var tree_extras: MenuButton
 
 var root: TreeItem
 var used_group_names: Dictionary # Unique group names
@@ -16,9 +15,7 @@ var group_id: int = 0
 var object_id: int = 0
 var is_mouse_inside_tree: bool = false
 var is_tree_focused: bool = false
-var initial_anchor_bottom: float = 0.0
 
-var DEBUG_on = false
 
 func _ready():
 	root = self.create_item()
@@ -26,21 +23,6 @@ func _ready():
 	var poop: PopupMenu = tree_extras.get_popup()
 	poop.index_pressed.connect(_on_select_all_button)
 	
-	initial_anchor_bottom = self.anchor_bottom
-
-
-
-func _unhandled_input(_event: InputEvent) -> void:
-	# DEBUG CODE
-	if Input.is_action_just_pressed("ui_right"):
-		if DEBUG_on:
-			self.anchor_bottom = initial_anchor_bottom
-			properties_panel.show()
-		else:
-			self.anchor_bottom = 1
-			properties_panel.hide()
-		DEBUG_on = not DEBUG_on
-
 
 func _input(event: InputEvent) -> void:
 	# Make sure the tree is focused to use the delete key safely.
