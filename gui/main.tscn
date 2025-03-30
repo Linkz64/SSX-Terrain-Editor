@@ -132,6 +132,7 @@ item_1/id = 1
 
 [node name="ImportJson" type="FileDialog" parent="MenuBarBG"]
 title = "Open a Directory"
+size = Vector2i(1380, 360)
 ok_button_text = "Select Current Folder"
 file_mode = 2
 access = 2
@@ -700,9 +701,8 @@ text = "Edit"
 
 [connection signal="mouse_entered" from="MainViewport" to="MainViewport" method="_on_sub_viewport_container_mouse_entered"]
 [connection signal="mouse_exited" from="MainViewport" to="MainViewport" method="_on_sub_viewport_container_mouse_exited"]
-[connection signal="json_imported" from="MenuBarBG" to="." method="_on_menu_bar_bg_json_imported"]
 [connection signal="index_pressed" from="MenuBarBG/MenuBar/File" to="MenuBarBG" method="_on_file_index_pressed"]
-[connection signal="dir_selected" from="MenuBarBG/ImportJson" to="MenuBarBG" method="_on_file_dialog_dir_selected"]
+[connection signal="dir_selected" from="MenuBarBG/ImportJson" to="." method="_on_import_json_dir_selected"]
 [connection signal="pressed" from="RightPanel/TreeButtons/Container/AddObject" to="RightPanel/Tree" method="_on_add_object_button_pressed"]
 [connection signal="pressed" from="RightPanel/TreeButtons/Container/AddGroup" to="RightPanel/Tree" method="_on_add_group_button_pressed"]
 [connection signal="pressed" from="RightPanel/TreeButtons/Container/Delete" to="RightPanel/Tree" method="_on_delete_pressed"]

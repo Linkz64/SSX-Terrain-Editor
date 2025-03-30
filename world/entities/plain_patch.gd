@@ -1,21 +1,14 @@
 extends MeshInstance3D
 
 
-func uv_point(UVs: Array, pos: Vector2) -> Vector2:
-	
+func uv_point(UVs: Array[Vector2], pos: Vector2) -> Vector2:
 	var a = UVs[0].lerp(UVs[2], pos.x)
 	var b = UVs[1].lerp(UVs[3], pos.x)
 	var c = a.lerp(b, pos.y)
-	
-	#var a = UVs[2].lerp(UVs[0], pos.x)
-	#var b = UVs[3].lerp(UVs[1], pos.x)
-	#var c = a.lerp(b, pos.y)
 	return c
 	
 
-
-
-func set_points(control_points: Array, UVs: Array):
+func set_points(control_points: Array[Vector3], UVs: Array[Vector2]):
 	# Generate tesselated mesh
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -45,7 +38,7 @@ func set_points(control_points: Array, UVs: Array):
 	mesh = surface.commit()
 
 
-func _evaluate_bezier_surface(control_points: Array, u:float, v:float) -> Vector3:
+func _evaluate_bezier_surface(control_points: Array[Vector3], u:float, v:float) -> Vector3:
 	# Compute 4 control points along the u direction
 	var u_points: Array[Vector3] = []
 	for i in 4:
