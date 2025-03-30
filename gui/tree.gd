@@ -1,6 +1,7 @@
 extends Tree
 
 # CLEANUP AND DIVIDE
+# Give button handling to the right panel
 
 const EYE_CLOSE = preload("res://assets/ui/eye_close_16.svg")
 const EYE_OPEN = preload("res://assets/ui/eye_open_16.svg")
@@ -196,6 +197,19 @@ func duplicate_object_item(item: TreeItem):
 	var hue = Color.GRAY if is_group_visible else Color.WEB_GRAY 
 	new_object.set_custom_color(0, hue)
 	new_object.set_meta("type", "object")
+
+
+func create_from_json(patches: Array[JsonPatch]) -> Error:
+	self.clear()
+	used_group_names.clear()
+	used_object_names.clear()
+	root = self.create_item()
+	var group: TreeItem = create_group()
+	for patch in patches:
+		if patch.patch_name in used_object_names:
+			return ERR_ALREADY_IN_USE
+		create_object(group).set_text(0, patch.patch_name)
+	return OK
 
 
 func _on_select_all_button(index: int):

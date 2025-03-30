@@ -20,6 +20,7 @@ tonemap_mode = 2
 glow_enabled = true
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4717r"]
+no_depth_test = true
 shading_mode = 0
 vertex_color_use_as_albedo = true
 
@@ -40,7 +41,7 @@ script = ExtResource("1_tcf2h")
 environment = SubResource("Environment_ai45w")
 
 [node name="MainCamera" parent="." instance=ExtResource("2_4717r")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.18502, 0.756203, 2.34154)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.18502, 3.21052, 8.75602)
 fov = 70.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
@@ -52,7 +53,7 @@ material_override = SubResource("StandardMaterial3D_4717r")
 script = ExtResource("3_4717r")
 
 [node name="Cube" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.439908, 0.390574, 0.808661, 0, 0.900471, -0.434917, -0.898043, 0.191323, 0.396124, -0.00182271, -0.00191504, -1.80675)
+transform = Transform3D(0.439908, 0.390574, 0.808661, 0, 0.900471, -0.434917, -0.898043, 0.191323, 0.396124, 0, 0, 0)
 material_override = SubResource("StandardMaterial3D_fn3g3")
 mesh = SubResource("BoxMesh_6xmxd")
 
@@ -60,25 +61,6 @@ mesh = SubResource("BoxMesh_6xmxd")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -27.2568, 0)
 
 [node name="Plane" type="MeshInstance3D" parent="."]
-transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, -8.06509)
-visible = false
-material_override = SubResource("StandardMaterial3D_sc4t8")
-mesh = SubResource("PlaneMesh_h5o24")
-
-[node name="Plane2" type="MeshInstance3D" parent="."]
-transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, -18.0651)
-visible = false
-material_override = SubResource("StandardMaterial3D_sc4t8")
-mesh = SubResource("PlaneMesh_h5o24")
-
-[node name="Plane3" type="MeshInstance3D" parent="."]
-transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 10, 0, -18.0651)
-visible = false
-material_override = SubResource("StandardMaterial3D_sc4t8")
-mesh = SubResource("PlaneMesh_h5o24")
-
-[node name="Plane4" type="MeshInstance3D" parent="."]
-transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 10, 0, -8.06509)
-visible = false
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0)
 material_override = SubResource("StandardMaterial3D_sc4t8")
 mesh = SubResource("PlaneMesh_h5o24")

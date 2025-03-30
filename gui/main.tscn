@@ -29,7 +29,7 @@ corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
-[node name="Main" type="Control"]
+[node name="Main" type="Control" node_paths=PackedStringArray("tree")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -37,6 +37,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_7ykw0")
+tree = NodePath("RightPanel/Tree")
 metadata/_edit_lock_ = true
 
 [node name="ViewportBG" type="ColorRect" parent="."]
