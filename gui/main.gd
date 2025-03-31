@@ -5,10 +5,12 @@ const PLAIN_PATCH = preload("res://world/entities/plain_patch.tscn")
 @onready var world_cam: Node3D = $MainViewport/MainRender/World/MainCamera
 @onready var axis_cam_pivot: Node3D = $AxisHelperViewport/AxisHelperSubViewport/AxisCamPivot
 @export var tree: Tree
+@onready var object_mode_tools: PanelContainer = $ToolBar/ObjectModeTools
+@onready var edit_mode_tools: PanelContainer = $ToolBar/EditModeTools
 
 
-func _ready():
-	get_viewport().debug_draw = Viewport.DEBUG_DRAW_WIREFRAME
+#func _ready():
+	#get_viewport().debug_draw = Viewport.DEBUG_DRAW_WIREFRAME
 
 func _process(delta):
 	axis_cam_pivot.rotation = world_cam.rotation
@@ -35,8 +37,14 @@ func _on_import_json_dir_selected(dir: String) -> void:
 		plain_inst.scale /= 100
 	
 	
-	
-	
-	
-	
-	
+
+
+
+
+func _on_mode_switch_toggled(toggled_on: bool) -> void:
+	if toggled_on:
+		object_mode_tools.visible = false
+		edit_mode_tools.visible = true
+	else:
+		object_mode_tools.visible = true
+		edit_mode_tools.visible = false

@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://e3mf5oewrsw3"]
+[gd_scene load_steps=27 format=3 uid="uid://e3mf5oewrsw3"]
 
 [ext_resource type="Script" uid="uid://cc2fe8opu3qij" path="res://gui/main.gd" id="1_7ykw0"]
 [ext_resource type="Script" uid="uid://ds5elcpcvw0nj" path="res://gui/main_viewport.gd" id="2_6eus7"]
@@ -12,6 +12,8 @@
 [ext_resource type="Script" uid="uid://b5tcb6v3b23n" path="res://gui/right_panel.gd" id="6_imv73"]
 [ext_resource type="Script" uid="uid://clad0n2qh36je" path="res://gui/properties_panel.gd" id="8_iauxb"]
 [ext_resource type="Script" uid="uid://cfl5qs2rnowfq" path="res://gui/editing_mode_switch.gd" id="10_iauxb"]
+[ext_resource type="Texture2D" uid="uid://cqbg8vtrvux3p" path="res://assets/ui/clipboard_copy.svg" id="13_e3mo4"]
+[ext_resource type="Texture2D" uid="uid://dg3oyl8q8we64" path="res://assets/ui/delete_x.svg" id="13_sttc5"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iauxb"]
 shading_mode = 0
@@ -64,17 +66,6 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sha4r"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-bg_color = Color(0.17, 0.17, 0.17, 0)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_imv73"]
 bg_color = Color(0, 0, 0, 0.517647)
 corner_radius_top_left = 5
@@ -88,6 +79,17 @@ border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sha4r"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.17, 0.17, 0.17, 0)
 corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
@@ -142,14 +144,13 @@ render_target_update_mode = 4
 [node name="AxisHelperViewport" type="SubViewportContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.833
-anchor_top = 0.03
-anchor_right = 0.833
-anchor_bottom = 0.03
-offset_left = -127.36
-offset_top = -0.399998
-offset_right = 0.639893
-offset_bottom = 127.6
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -448.0
+offset_top = 32.0
+offset_right = -320.0
+offset_bottom = 160.0
+mouse_filter = 2
 stretch = true
 
 [node name="AxisHelperSubViewport" type="SubViewport" parent="AxisHelperViewport"]
@@ -319,9 +320,9 @@ item_1/id = 1
 [node name="View" type="PopupMenu" parent="MenuBarBG/MenuBar"]
 auto_translate_mode = 1
 item_count = 2
-item_0/text = "PLACEHOLDER"
+item_0/text = "Focus on Selected"
 item_0/id = 0
-item_1/text = "PLACEHOLDER"
+item_1/text = "Overlay Wireframe"
 item_1/id = 1
 
 [node name="ImportJson" type="FileDialog" parent="MenuBarBG"]
@@ -626,24 +627,213 @@ text = "y"
 layout_mode = 2
 text = "1.0"
 
-[node name="ToolBar" type="Control" parent="."]
+[node name="EditingMode" type="Control" parent="."]
 anchors_preset = 0
-offset_top = 128.0
-offset_right = 152.0
-offset_bottom = 416.0
+offset_left = 8.0
+offset_top = 40.0
+offset_right = 140.0
+offset_bottom = 68.0
+mouse_filter = 2
+script = ExtResource("10_iauxb")
 
-[node name="EditModeTools" type="PanelContainer" parent="ToolBar"]
+[node name="ModeSwitch" type="Button" parent="EditingMode"]
+layout_mode = 0
+offset_right = 92.0
+offset_bottom = 28.0
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_imv73")
+toggle_mode = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="EditingMode/ModeSwitch"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 17
+alignment = 1
+
+[node name="Object3" type="Label" parent="EditingMode/ModeSwitch/HBoxContainer"]
+layout_mode = 2
+text = "Object"
+
+[node name="Edit3" type="Label" parent="EditingMode/ModeSwitch/HBoxContainer"]
+layout_mode = 2
+text = "Edit"
+
+[node name="OutlineMode0" type="Panel" parent="EditingMode/ModeSwitch"]
+layout_mode = 0
+offset_right = 52.5
+offset_bottom = 28.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
+
+[node name="OutlineMode1" type="Panel" parent="EditingMode/ModeSwitch"]
+layout_mode = 0
+offset_left = 56.0
+offset_right = 92.0
+offset_bottom = 28.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
+
+[node name="ToolBar" type="Control" parent="."]
+anchors_preset = 0
+offset_top = 128.0
+offset_right = 152.0
+offset_bottom = 416.0
+mouse_filter = 2
+
+[node name="ObjectModeTools" type="PanelContainer" parent="ToolBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_sha4r")
+metadata/_edit_lock_ = true
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="ToolBar/ObjectModeTools"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="AddObject" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+focus_mode = 0
+
+[node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/AddObject"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 30.0
+offset_bottom = -2.0
+grow_vertical = 2
+texture = ExtResource("5_bqrtb")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="ToolBar/ObjectModeTools/VBoxContainer2/AddObject"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 36.0
+offset_top = -9.0
+offset_right = 120.0
+offset_bottom = 9.0
+grow_vertical = 2
+text = "Add"
+
+[node name="DeleteObject" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+focus_mode = 0
+
+[node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/DeleteObject"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 30.0
+offset_bottom = -2.0
+grow_vertical = 2
+texture = ExtResource("5_bqrtb")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="ToolBar/ObjectModeTools/VBoxContainer2/DeleteObject"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 36.0
+offset_top = -9.0
+offset_right = 120.0
+offset_bottom = 9.0
+grow_vertical = 2
+text = "Delete"
+
+[node name="DuplicateObject" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+focus_mode = 0
+
+[node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/DuplicateObject"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 30.0
+offset_bottom = -2.0
+grow_vertical = 2
+texture = ExtResource("5_bqrtb")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="ToolBar/ObjectModeTools/VBoxContainer2/DuplicateObject"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 36.0
+offset_top = -9.0
+offset_right = 120.0
+offset_bottom = 9.0
+grow_vertical = 2
+text = "Duplicate"
+
+[node name="Snap" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+focus_mode = 0
+
+[node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/Snap"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 30.0
+offset_bottom = -2.0
+grow_vertical = 2
+texture = ExtResource("5_bqrtb")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="ToolBar/ObjectModeTools/VBoxContainer2/Snap"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 36.0
+offset_top = -9.0
+offset_right = 120.0
+offset_bottom = 9.0
+grow_vertical = 2
+text = "Snap Tool"
+
+[node name="EditModeTools" type="PanelContainer" parent="ToolBar"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_sha4r")
 metadata/_edit_lock_ = true
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="ToolBar/EditModeTools"]
 layout_mode = 2
+mouse_filter = 2
 
 [node name="AddSegment" type="Button" parent="ToolBar/EditModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
@@ -765,158 +955,94 @@ offset_bottom = 9.0
 grow_vertical = 2
 text = "Reset Corner"
 
-[node name="ObjectModeTools" type="PanelContainer" parent="ToolBar"]
-visible = false
+[node name="Messages" type="Control" parent="."]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -248.0
+offset_right = 1920.0
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Messages"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = -216.0
+offset_right = -6.0
+offset_bottom = -2.0
 grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_sha4r")
-metadata/_edit_lock_ = true
-
-[node name="VBoxContainer2" type="VBoxContainer" parent="ToolBar/ObjectModeTools"]
-layout_mode = 2
-
-[node name="AddObject" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
-custom_minimum_size = Vector2(0, 36)
-layout_mode = 2
-focus_mode = 0
-
-[node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/AddObject"]
-layout_mode = 1
-anchors_preset = 9
-anchor_bottom = 1.0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 30.0
-offset_bottom = -2.0
-grow_vertical = 2
-texture = ExtResource("5_bqrtb")
-expand_mode = 2
-stretch_mode = 4
-
-[node name="Label" type="Label" parent="ToolBar/ObjectModeTools/VBoxContainer2/AddObject"]
-layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_left = 36.0
-offset_top = -9.0
-offset_right = 120.0
-offset_bottom = 9.0
-grow_vertical = 2
-text = "Add"
-
-[node name="DeleteObject" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
-custom_minimum_size = Vector2(0, 36)
-layout_mode = 2
-focus_mode = 0
-
-[node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/DeleteObject"]
-layout_mode = 1
-anchors_preset = 9
-anchor_bottom = 1.0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 30.0
-offset_bottom = -2.0
-grow_vertical = 2
-texture = ExtResource("5_bqrtb")
-expand_mode = 2
-stretch_mode = 4
-
-[node name="Label" type="Label" parent="ToolBar/ObjectModeTools/VBoxContainer2/DeleteObject"]
-layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_left = 36.0
-offset_top = -9.0
-offset_right = 120.0
-offset_bottom = 9.0
-grow_vertical = 2
-text = "Delete"
-
-[node name="Snap" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
-custom_minimum_size = Vector2(0, 36)
-layout_mode = 2
-focus_mode = 0
-
-[node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/Snap"]
-layout_mode = 1
-anchors_preset = 9
-anchor_bottom = 1.0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 30.0
-offset_bottom = -2.0
-grow_vertical = 2
-texture = ExtResource("5_bqrtb")
-expand_mode = 2
-stretch_mode = 4
-
-[node name="Label" type="Label" parent="ToolBar/ObjectModeTools/VBoxContainer2/Snap"]
-layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_left = 36.0
-offset_top = -9.0
-offset_right = 120.0
-offset_bottom = 9.0
-grow_vertical = 2
-text = "Snap Tool"
-
-[node name="EditingMode" type="Control" parent="."]
-anchors_preset = 0
-offset_left = 8.0
-offset_top = 40.0
-offset_right = 140.0
-offset_bottom = 68.0
-script = ExtResource("10_iauxb")
-
-[node name="ModeSwitch" type="Button" parent="EditingMode"]
-layout_mode = 0
-offset_right = 92.0
-offset_bottom = 28.0
-focus_mode = 0
-theme_override_styles/normal = SubResource("StyleBoxFlat_imv73")
-toggle_mode = true
-
-[node name="HBoxContainer" type="HBoxContainer" parent="EditingMode/ModeSwitch"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 17
-alignment = 1
-
-[node name="Object3" type="Label" parent="EditingMode/ModeSwitch/HBoxContainer"]
-layout_mode = 2
-text = "Object"
-
-[node name="Edit3" type="Label" parent="EditingMode/ModeSwitch/HBoxContainer"]
-layout_mode = 2
-text = "Edit"
-
-[node name="OutlineMode0" type="Panel" parent="EditingMode/ModeSwitch"]
-layout_mode = 0
-offset_right = 52.5
-offset_bottom = 28.0
+grow_vertical = 0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
+alignment = 2
 
-[node name="OutlineMode1" type="Panel" parent="EditingMode/ModeSwitch"]
-layout_mode = 0
-offset_left = 56.0
-offset_right = 92.0
-offset_bottom = 28.0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
+[node name="MessagePlaceholder" type="PanelContainer" parent="Messages/VBoxContainer"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Messages/VBoxContainer/MessagePlaceholder"]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="MessageDelete" type="Button" parent="Messages/VBoxContainer/MessagePlaceholder/HBoxContainer"]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+focus_mode = 0
+icon = ExtResource("13_sttc5")
+icon_alignment = 1
+expand_icon = true
+
+[node name="MessageCopy" type="Button" parent="Messages/VBoxContainer/MessagePlaceholder/HBoxContainer"]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+focus_mode = 0
+icon = ExtResource("13_e3mo4")
+icon_alignment = 1
+expand_icon = true
+
+[node name="MessageLabel" type="Label" parent="Messages/VBoxContainer/MessagePlaceholder/HBoxContainer"]
+layout_mode = 2
+text = "Test Message: This is a test message. If you keep testing the test message. It's going to test you."
+
+[node name="Padding" type="Control" parent="Messages/VBoxContainer/MessagePlaceholder/HBoxContainer"]
+layout_mode = 2
+
+[node name="MessagePlaceholder2" type="PanelContainer" parent="Messages/VBoxContainer"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Messages/VBoxContainer/MessagePlaceholder2"]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="MessageDelete" type="Button" parent="Messages/VBoxContainer/MessagePlaceholder2/HBoxContainer"]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+focus_mode = 0
+icon = ExtResource("13_sttc5")
+icon_alignment = 1
+expand_icon = true
+
+[node name="MessageCopy" type="Button" parent="Messages/VBoxContainer/MessagePlaceholder2/HBoxContainer"]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+focus_mode = 0
+icon = ExtResource("13_e3mo4")
+icon_alignment = 1
+expand_icon = true
+
+[node name="MessageLabel" type="Label" parent="Messages/VBoxContainer/MessagePlaceholder2/HBoxContainer"]
+layout_mode = 2
+text = "Warning: This test message will attack if provoked."
+
+[node name="Padding" type="Control" parent="Messages/VBoxContainer/MessagePlaceholder2/HBoxContainer"]
+layout_mode = 2
 
 [connection signal="mouse_entered" from="MainViewport" to="MainViewport" method="_on_sub_viewport_container_mouse_entered"]
 [connection signal="mouse_exited" from="MainViewport" to="MainViewport" method="_on_sub_viewport_container_mouse_exited"]
@@ -930,4 +1056,5 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
 [connection signal="item_edited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_item_edited"]
 [connection signal="mouse_entered" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_exited"]
+[connection signal="toggled" from="EditingMode/ModeSwitch" to="." method="_on_mode_switch_toggled"]
 [connection signal="toggled" from="EditingMode/ModeSwitch" to="EditingMode" method="_on_mode_switch_toggled"]
