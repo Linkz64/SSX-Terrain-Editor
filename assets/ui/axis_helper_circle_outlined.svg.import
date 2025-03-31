@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://nrvjxwuh8dat"
-path.s3tc="res://.godot/imported/icon_godot.svg-7c854a6b5eff2307f759033bb0804b09.s3tc.ctex"
+uid="uid://c16hsyh3l7gdi"
+path.s3tc="res://.godot/imported/axis_helper_circle_outlined.svg-7c3514e551fa84876d0a3e5dcaa43a50.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/icon_godot.svg"
-dest_files=["res://.godot/imported/icon_godot.svg-7c854a6b5eff2307f759033bb0804b09.s3tc.ctex"]
+source_file="res://assets/ui/axis_helper_circle_outlined.svg"
+dest_files=["res://.godot/imported/axis_helper_circle_outlined.svg-7c3514e551fa84876d0a3e5dcaa43a50.s3tc.ctex"]
 
 [params]
 

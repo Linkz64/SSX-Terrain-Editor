@@ -2,13 +2,16 @@ extends Control
 
 
 const PLAIN_PATCH = preload("res://world/entities/plain_patch.tscn")
-
+@onready var world_cam: Node3D = $MainViewport/MainRender/World/MainCamera
+@onready var axis_cam_pivot: Node3D = $AxisHelperViewport/AxisHelperSubViewport/AxisCamPivot
 @export var tree: Tree
 
 
-#func _ready():
-	#get_viewport().debug_draw = Viewport.DEBUG_DRAW_WIREFRAME
+func _ready():
+	get_viewport().debug_draw = Viewport.DEBUG_DRAW_WIREFRAME
 
+func _process(delta):
+	axis_cam_pivot.rotation = world_cam.rotation
 
 func _unhandled_input(_event: InputEvent) -> void:
 	if Input.is_action_just_pressed("ui_cancel"):

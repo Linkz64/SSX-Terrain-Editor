@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://e3mf5oewrsw3"]
+[gd_scene load_steps=25 format=3 uid="uid://e3mf5oewrsw3"]
 
 [ext_resource type="Script" uid="uid://cc2fe8opu3qij" path="res://gui/main.gd" id="1_7ykw0"]
 [ext_resource type="Script" uid="uid://ds5elcpcvw0nj" path="res://gui/main_viewport.gd" id="2_6eus7"]
@@ -6,10 +6,56 @@
 [ext_resource type="Theme" uid="uid://btd276sukesp4" path="res://assets/themes/main.theme" id="3_nhllx"]
 [ext_resource type="Script" uid="uid://knltk8gqw0nw" path="res://gui/tree.gd" id="4_kh6el"]
 [ext_resource type="Script" uid="uid://d2c18ybhelsh6" path="res://gui/menu_bar.gd" id="4_o7ktr"]
+[ext_resource type="Texture2D" uid="uid://csam46wcqiqdn" path="res://assets/ui/axis_helper_circle.svg" id="4_qnngp"]
+[ext_resource type="Texture2D" uid="uid://c16hsyh3l7gdi" path="res://assets/ui/axis_helper_circle_outlined.svg" id="5_bhyba"]
 [ext_resource type="Texture2D" uid="uid://nrvjxwuh8dat" path="res://assets/icon_godot.svg" id="5_bqrtb"]
 [ext_resource type="Script" uid="uid://b5tcb6v3b23n" path="res://gui/right_panel.gd" id="6_imv73"]
 [ext_resource type="Script" uid="uid://clad0n2qh36je" path="res://gui/properties_panel.gd" id="8_iauxb"]
 [ext_resource type="Script" uid="uid://cfl5qs2rnowfq" path="res://gui/editing_mode_switch.gd" id="10_iauxb"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iauxb"]
+shading_mode = 0
+disable_ambient_light = true
+disable_fog = true
+
+[sub_resource type="SphereMesh" id="SphereMesh_qnngp"]
+material = SubResource("StandardMaterial3D_iauxb")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bhyba"]
+shading_mode = 0
+specular_mode = 2
+disable_ambient_light = true
+albedo_color = Color(0.74, 0.1332, 0.22422, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_e3mo4"]
+material = SubResource("StandardMaterial3D_bhyba")
+height = 1.0
+radial_segments = 6
+rings = 0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sttc5"]
+shading_mode = 0
+specular_mode = 2
+disable_ambient_light = true
+albedo_color = Color(0.244447, 0.74, 0.1332, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_y34gh"]
+material = SubResource("StandardMaterial3D_sttc5")
+height = 1.0
+radial_segments = 6
+rings = 0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2lfdd"]
+shading_mode = 0
+specular_mode = 2
+disable_ambient_light = true
+albedo_color = Color(0.1332, 0.426487, 0.74, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_c4ive"]
+material = SubResource("StandardMaterial3D_2lfdd")
+height = 1.0
+radial_segments = 6
+rings = 0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ew3qc"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 1)
@@ -92,6 +138,135 @@ size = Vector2i(1599, 1048)
 render_target_update_mode = 4
 
 [node name="World" parent="MainViewport/MainRender" instance=ExtResource("2_iqv6a")]
+
+[node name="AxisHelperViewport" type="SubViewportContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.833
+anchor_top = 0.03
+anchor_right = 0.833
+anchor_bottom = 0.03
+offset_left = -127.36
+offset_top = -0.399998
+offset_right = 0.639893
+offset_bottom = 127.6
+stretch = true
+
+[node name="AxisHelperSubViewport" type="SubViewport" parent="AxisHelperViewport"]
+own_world_3d = true
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(128, 128)
+size_2d_override_stretch = true
+render_target_update_mode = 4
+
+[node name="AxisCamPivot" type="Node3D" parent="AxisHelperViewport/AxisHelperSubViewport"]
+
+[node name="AxisCam" type="Camera3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisCamPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+projection = 1
+size = 1.2
+far = 100.0
+
+[node name="AxisHelper" type="Node3D" parent="AxisHelperViewport/AxisHelperSubViewport"]
+
+[node name="SpriteX" type="Sprite3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper"]
+transform = Transform3D(1.15, 0, 0, 0, 1.15, 0, 0, 0, 1.15, 0.35, 0, 0)
+modulate = Color(0.854902, 0.156863, 0.27451, 1)
+billboard = 1
+texture = ExtResource("4_qnngp")
+
+[node name="SpriteY" type="Sprite3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper"]
+transform = Transform3D(1.15, 0, 0, 0, 1.15, 0, 0, 0, 1.15, 0, 0.35, 0)
+modulate = Color(0.301961, 0.854902, 0.156863, 1)
+billboard = 1
+texture = ExtResource("4_qnngp")
+
+[node name="SpriteZ" type="Sprite3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper"]
+transform = Transform3D(1.15, 0, 0, 0, 1.15, 0, 0, 0, 1.15, 0, 0, 0.35)
+modulate = Color(0.156863, 0.545098, 0.854902, 1)
+billboard = 1
+texture = ExtResource("4_qnngp")
+
+[node name="SpriteBackX" type="Sprite3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper"]
+transform = Transform3D(1.15, 0, 0, 0, 1.15, 0, 0, 0, 1.15, -0.35, 0, 0)
+modulate = Color(0.854902, 0.156863, 0.27451, 1)
+billboard = 1
+texture = ExtResource("5_bhyba")
+
+[node name="SpriteBackY" type="Sprite3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper"]
+transform = Transform3D(1.15, 0, 0, 0, 1.15, 0, 0, 0, 1.15, 0, -0.35, 0)
+modulate = Color(0.301961, 0.854902, 0.156863, 1)
+billboard = 1
+texture = ExtResource("5_bhyba")
+
+[node name="SpriteBackZ" type="Sprite3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper"]
+transform = Transform3D(1.15, 0, 0, 0, 1.15, 0, 0, 0, 1.15, 0, 0, -0.35)
+modulate = Color(0.156863, 0.545098, 0.854902, 1)
+billboard = 1
+texture = ExtResource("5_bhyba")
+
+[node name="LabelX" type="Label3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 0, 0)
+sorting_offset = 0.1
+billboard = 1
+modulate = Color(0, 0, 0, 1)
+text = "X"
+font_size = 26
+outline_size = 0
+
+[node name="LabelY" type="Label3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+sorting_offset = 0.1
+billboard = 1
+modulate = Color(0, 0, 0, 1)
+text = "Y"
+font_size = 26
+outline_size = 0
+
+[node name="LabelZ" type="Label3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.35)
+sorting_offset = 0.1
+billboard = 1
+modulate = Color(0, 0, 0, 1)
+text = "Z"
+font_size = 26
+outline_size = 0
+
+[node name="AxisHelperSphere" type="MeshInstance3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper"]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
+visible = false
+cast_shadow = 0
+ignore_occlusion_culling = true
+gi_mode = 0
+mesh = SubResource("SphereMesh_qnngp")
+
+[node name="temp scaling" type="Node3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper"]
+transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0, 0, 0)
+
+[node name="AxisHelperLineX" type="MeshInstance3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper/temp scaling"]
+transform = Transform3D(-2.18557e-09, 0.4, 0, -0.05, -1.74846e-08, 0, 0, 0, 0.05, 0.2, 0, 0)
+cast_shadow = 0
+ignore_occlusion_culling = true
+gi_mode = 0
+mesh = SubResource("CylinderMesh_e3mo4")
+skeleton = NodePath("../..")
+
+[node name="AxisHelperLineY" type="MeshInstance3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper/temp scaling"]
+transform = Transform3D(0.05, 0, 0, 0, 0.4, 0, 0, 0, 0.05, 0, 0.2, 0)
+cast_shadow = 0
+ignore_occlusion_culling = true
+gi_mode = 0
+mesh = SubResource("CylinderMesh_y34gh")
+skeleton = NodePath("../..")
+
+[node name="AxisHelperLineZ" type="MeshInstance3D" parent="AxisHelperViewport/AxisHelperSubViewport/AxisHelper/temp scaling"]
+transform = Transform3D(0.05, 0, 0, 0, -1.74846e-08, -0.05, 0, 0.4, -2.18557e-09, 0, 0, 0.2)
+cast_shadow = 0
+ignore_occlusion_culling = true
+gi_mode = 0
+mesh = SubResource("CylinderMesh_c4ive")
+skeleton = NodePath("../..")
 
 [node name="MenuBarBG" type="ColorRect" parent="."]
 layout_mode = 1
@@ -704,7 +879,7 @@ script = ExtResource("10_iauxb")
 
 [node name="ModeSwitch" type="Button" parent="EditingMode"]
 layout_mode = 0
-offset_right = 100.0
+offset_right = 92.0
 offset_bottom = 28.0
 focus_mode = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_imv73")
@@ -715,10 +890,9 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 22
+theme_override_constants/separation = 17
 alignment = 1
 
 [node name="Object3" type="Label" parent="EditingMode/ModeSwitch/HBoxContainer"]
@@ -731,15 +905,15 @@ text = "Edit"
 
 [node name="OutlineMode0" type="Panel" parent="EditingMode/ModeSwitch"]
 layout_mode = 0
-offset_right = 48.0
+offset_right = 52.5
 offset_bottom = 28.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
 
 [node name="OutlineMode1" type="Panel" parent="EditingMode/ModeSwitch"]
 layout_mode = 0
-offset_left = 60.0
-offset_right = 100.0
+offset_left = 56.0
+offset_right = 92.0
 offset_bottom = 28.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
