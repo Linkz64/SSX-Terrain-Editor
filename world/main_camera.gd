@@ -1,12 +1,14 @@
 extends Camera3D
 
 
-const ROTATION_SENSITIVITY = Vector2(0.005, 0.01)
+const ROTATION_SENSITIVITY = Vector2(0.004, 0.004)
 const SPEED_RANGE = {"min": 1, "max": 200}
 const SPEED_RANGE_CHANGE = 4
 var movable: bool = false
 var speed: float = 30
 var _rotation: Vector2 = Vector2.ZERO
+
+
 
 
 func _unhandled_input(event: InputEvent) -> void:

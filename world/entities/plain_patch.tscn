@@ -4,6 +4,7 @@
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kuu8v"]
 resource_local_to_scene = true
+cull_mode = 2
 
 [node name="PlainPatch" type="MeshInstance3D"]
 material_override = SubResource("StandardMaterial3D_kuu8v")

@@ -20,7 +20,6 @@ tonemap_mode = 2
 glow_enabled = true
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4717r"]
-no_depth_test = true
 shading_mode = 0
 vertex_color_use_as_albedo = true
 

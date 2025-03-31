@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://e3mf5oewrsw3"]
+[gd_scene load_steps=15 format=3 uid="uid://e3mf5oewrsw3"]
 
 [ext_resource type="Script" uid="uid://cc2fe8opu3qij" path="res://gui/main.gd" id="1_7ykw0"]
 [ext_resource type="Script" uid="uid://ds5elcpcvw0nj" path="res://gui/main_viewport.gd" id="2_6eus7"]
@@ -7,9 +7,9 @@
 [ext_resource type="Script" uid="uid://knltk8gqw0nw" path="res://gui/tree.gd" id="4_kh6el"]
 [ext_resource type="Script" uid="uid://d2c18ybhelsh6" path="res://gui/menu_bar.gd" id="4_o7ktr"]
 [ext_resource type="Texture2D" uid="uid://nrvjxwuh8dat" path="res://assets/icon_godot.svg" id="5_bqrtb"]
-[ext_resource type="ButtonGroup" uid="uid://c00aeauuscacf" path="res://assets/button_groups/editing_mode.tres" id="6_36vyg"]
 [ext_resource type="Script" uid="uid://b5tcb6v3b23n" path="res://gui/right_panel.gd" id="6_imv73"]
 [ext_resource type="Script" uid="uid://clad0n2qh36je" path="res://gui/properties_panel.gd" id="8_iauxb"]
+[ext_resource type="Script" uid="uid://cfl5qs2rnowfq" path="res://gui/editing_mode_switch.gd" id="10_iauxb"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ew3qc"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 1)
@@ -24,6 +24,24 @@ content_margin_top = 2.0
 content_margin_right = 2.0
 content_margin_bottom = 2.0
 bg_color = Color(0.17, 0.17, 0.17, 0)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_imv73"]
+bg_color = Color(0, 0, 0, 0.517647)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iauxb"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
 corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
@@ -455,6 +473,7 @@ layout_mode = 2
 [node name="AddSegment" type="Button" parent="ToolBar/EditModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+focus_mode = 0
 
 [node name="TextureRect" type="TextureRect" parent="ToolBar/EditModeTools/VBoxContainer2/AddSegment"]
 layout_mode = 1
@@ -484,6 +503,7 @@ text = "Add Segment"
 [node name="DeleteSegment" type="Button" parent="ToolBar/EditModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+focus_mode = 0
 
 [node name="TextureRect" type="TextureRect" parent="ToolBar/EditModeTools/VBoxContainer2/DeleteSegment"]
 layout_mode = 1
@@ -513,6 +533,7 @@ text = "Delete Segment"
 [node name="Snap" type="Button" parent="ToolBar/EditModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+focus_mode = 0
 
 [node name="TextureRect" type="TextureRect" parent="ToolBar/EditModeTools/VBoxContainer2/Snap"]
 layout_mode = 1
@@ -542,6 +563,7 @@ text = "Snap"
 [node name="ResetCorner" type="Button" parent="ToolBar/EditModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+focus_mode = 0
 
 [node name="TextureRect" type="TextureRect" parent="ToolBar/EditModeTools/VBoxContainer2/ResetCorner"]
 layout_mode = 1
@@ -585,6 +607,7 @@ layout_mode = 2
 [node name="AddObject" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+focus_mode = 0
 
 [node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/AddObject"]
 layout_mode = 1
@@ -614,6 +637,7 @@ text = "Add"
 [node name="DeleteObject" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+focus_mode = 0
 
 [node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/DeleteObject"]
 layout_mode = 1
@@ -643,6 +667,7 @@ text = "Delete"
 [node name="Snap" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+focus_mode = 0
 
 [node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/Snap"]
 layout_mode = 1
@@ -671,34 +696,53 @@ text = "Snap Tool"
 
 [node name="EditingMode" type="Control" parent="."]
 anchors_preset = 0
-offset_left = 4.0
-offset_top = 44.0
-offset_right = 112.0
-offset_bottom = 72.0
+offset_left = 8.0
+offset_top = 40.0
+offset_right = 140.0
+offset_bottom = 68.0
+script = ExtResource("10_iauxb")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="EditingMode"]
+[node name="ModeSwitch" type="Button" parent="EditingMode"]
+layout_mode = 0
+offset_right = 100.0
+offset_bottom = 28.0
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_imv73")
+toggle_mode = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="EditingMode/ModeSwitch"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-metadata/_edit_lock_ = true
+theme_override_constants/separation = 22
+alignment = 1
 
-[node name="Object" type="Button" parent="EditingMode/HBoxContainer"]
-custom_minimum_size = Vector2(50, 0)
+[node name="Object3" type="Label" parent="EditingMode/ModeSwitch/HBoxContainer"]
 layout_mode = 2
-toggle_mode = true
-button_pressed = true
-button_group = ExtResource("6_36vyg")
 text = "Object"
 
-[node name="Edit" type="Button" parent="EditingMode/HBoxContainer"]
-custom_minimum_size = Vector2(50, 0)
+[node name="Edit3" type="Label" parent="EditingMode/ModeSwitch/HBoxContainer"]
 layout_mode = 2
-toggle_mode = true
-button_group = ExtResource("6_36vyg")
 text = "Edit"
+
+[node name="OutlineMode0" type="Panel" parent="EditingMode/ModeSwitch"]
+layout_mode = 0
+offset_right = 48.0
+offset_bottom = 28.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
+
+[node name="OutlineMode1" type="Panel" parent="EditingMode/ModeSwitch"]
+layout_mode = 0
+offset_left = 60.0
+offset_right = 100.0
+offset_bottom = 28.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
 
 [connection signal="mouse_entered" from="MainViewport" to="MainViewport" method="_on_sub_viewport_container_mouse_entered"]
 [connection signal="mouse_exited" from="MainViewport" to="MainViewport" method="_on_sub_viewport_container_mouse_exited"]
@@ -712,3 +756,4 @@ text = "Edit"
 [connection signal="item_edited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_item_edited"]
 [connection signal="mouse_entered" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_exited"]
+[connection signal="toggled" from="EditingMode/ModeSwitch" to="EditingMode" method="_on_mode_switch_toggled"]
