@@ -50,8 +50,7 @@ static func open_extracted_patch_data(multitool_dir: String) -> Array[JsonPatch]
 		
 		# Points
 		for json_point in json_patch["Points"]:
-			var vec3 := Utils.ssx_to_godot_position(
-					Vector3(json_point[0], json_point[1], json_point[2]))
+			var vec3 := Vector3(json_point[0], json_point[1], json_point[2])
 			final_patches.back().points.append(vec3)
 		
 		# Patch style

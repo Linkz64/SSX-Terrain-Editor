@@ -9,6 +9,14 @@ var speed: float = 30
 var _rotation: Vector2 = Vector2.ZERO
 
 
+func _ready() -> void:
+	# Initial rotation. Set _rotation for custom initial rotation
+	_rotation.y = TAU/3
+	_rotation.x = 0
+	self.quaternion = Quaternion(Vector3.RIGHT, PI/2) # Rotate 90 degrees on the X axis
+	self.quaternion *= Quaternion(Vector3.UP, -_rotation.y) # Yaw
+	self.quaternion = Quaternion(self.basis.x, -_rotation.x) * self.quaternion # Pitch
+	
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -24,15 +32,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		speed += SPEED_RANGE_CHANGE
 	if Input.is_action_just_pressed("CameraSpeedDown"):
 		speed -= SPEED_RANGE_CHANGE
-	speed = clampf(speed, SPEED_RANGE["min"], SPEED_RANGE["max"])
 
 
 func _process(delta: float) -> void:
 	if not movable:
 		return
 	
-	self.quaternion = Quaternion(Vector3.UP, -_rotation.y)
-	self.quaternion = Quaternion(self.basis.x, -_rotation.x) * self.quaternion
+	self.quaternion = Quaternion(Vector3.RIGHT, PI/2) # Rotate 90 degrees on the X axis
+	self.quaternion *= Quaternion(Vector3.UP, -_rotation.y) # Yaw
+	self.quaternion = Quaternion(self.basis.x, -_rotation.x) * self.quaternion # Pitch
 	
 	var direction := Vector3.ZERO
 	if Input.is_action_pressed("CameraForward"):
@@ -49,6 +57,3 @@ func _process(delta: float) -> void:
 		direction += -basis.y
 	direction = direction.normalized()
 	self.global_translate(direction * speed * delta)
-	
-	
-	

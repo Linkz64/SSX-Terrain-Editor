@@ -43,7 +43,7 @@ script = ExtResource("1_tcf2h")
 environment = SubResource("Environment_ai45w")
 
 [node name="MainCamera" parent="." instance=ExtResource("2_4717r")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.18502, 3.21052, 8.75602)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 1.18502, 3.21052, 8.75602)
 fov = 70.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
