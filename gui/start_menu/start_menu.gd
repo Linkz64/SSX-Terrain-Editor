@@ -1,0 +1,163 @@
+extends Control
+
+
+signal new_terrain_created(
+		terrain_path: String, 
+		import_json: bool, 
+		grouping_index: Enum.GroupingIndex
+		)
+signal terrain_opened(terrain_path: String)
+
+const RECENT_BUTTON = preload("res://gui/start_menu/recent_button.tscn")
+
+var _new_ssxt_path: String
+
+@onready var start_menu_bg: ColorRect = $"../StartMenuBG"
+@onready var new_path_choice_text: TextEdit = $New/NewPathChoice/NewPathChoiceText
+@onready var path_select_window: FileDialog = $PathSelectWindow
+@onready var import_patches_check_box: CheckBox = $New/ImportPatchesCheckBox
+@onready var grouping_menu_button: MenuButton = $New/GroupingChoice/GroupingMenuButton
+@onready var info_label: Label = $InfoLabel
+@onready var open_terrain_window: FileDialog = $OpenTerrainWindow
+@onready var recents_box: VBoxContainer = $RecentsBox
+
+
+func _ready() -> void:
+	grouping_menu_button.get_popup().connect("index_pressed", grouping_choice_pressed)
+	reload_recents()
+
+
+func reload_recents():
+	if not FileAccess.file_exists("user://recents.dat"):
+		return
+
+	# Re-confirm that the terrain files exists, if then update the recents file
+	var file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.READ)
+	var recents: Array = file.get_var()
+	for path in recents:
+		if not FileAccess.file_exists(path):
+			recents.erase(path)
+	var write_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.WRITE)
+	write_file.store_var(recents)
+
+	# Create Buttons
+	print(recents.size())
+	for path in recents:
+		var splited_path: Array = path.split("/")
+		var button = RECENT_BUTTON.instantiate()
+		button.text = "../" + splited_path[-2].path_join(splited_path[-1])
+		button.set_meta("path", path)
+		recents_box.add_child(button)
+		button.connect("pressed", recent_button_pressed.bind(button))
+
+
+func recent_button_pressed(button: Button):
+	var path = button.get_meta("path")
+	if not FileAccess.file_exists(path):
+		info_label.text = "Terrain file no longer exists"
+		return
+	terrain_opened.emit(path)
+	start_menu_bg.hide()
+	self.hide()
+
+
+func grouping_choice_pressed(index: int):
+	match index:
+		0:
+			grouping_menu_button.text = "None"
+			grouping_menu_button.set_meta("index", Enum.GroupingIndex.NONE)
+		1:
+			grouping_menu_button.text = "Batch"
+			grouping_menu_button.set_meta("index", Enum.GroupingIndex.BATCH)
+		2:
+			grouping_menu_button.text = "Surface Type"
+			grouping_menu_button.set_meta("index", Enum.GroupingIndex.SURFACE_TYPE)
+
+
+func _on_new_path_choice_button_pressed() -> void:
+	path_select_window.show()
+
+
+func _on_path_select_window_file_selected(path: String) -> void:
+	# Only show the parent directory plus file.ssxt
+	var splited_path: Array = path.split("/")
+	new_path_choice_text.text = "../" + splited_path[-2].path_join(splited_path[-1])
+	_new_ssxt_path = path
+
+
+func _on_button_new_pressed() -> void:
+	if _new_ssxt_path.is_empty():
+		info_label.text = "Please select a terrain path"
+		return
+	
+	# Re-confirm that the path is not duplicate, and folder still exists.
+	if FileAccess.file_exists(_new_ssxt_path):
+		info_label.text = "File already exists."
+		return
+		
+	if not DirAccess.dir_exists_absolute(_new_ssxt_path.get_base_dir()):
+		info_label.text = "Folder does not exist."
+		return
+		
+	# Check if json is imported and exists, Only if Import patches is checked
+	var json_path: String = _new_ssxt_path.get_base_dir().path_join("Patches.json")
+	var import_json: bool = false
+	if import_patches_check_box.button_pressed:
+		import_json = true
+		if not FileAccess.file_exists(json_path):
+			info_label.text = "Patches.json does not exist."
+			return
+		
+	# Create ssxt file
+	FileAccess.open(_new_ssxt_path, FileAccess.WRITE)
+	
+	# Update Recents file
+	if FileAccess.file_exists("user://recents.dat"):
+		var read_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.READ)
+		var recents: Array = read_file.get_var()
+		recents.push_back(_new_ssxt_path)
+		if recents.size() > 4:
+			recents.pop_front()
+			
+		var write_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.WRITE)
+		write_file.store_var(recents)
+	else:
+		var write_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.WRITE)
+		write_file.store_var([])
+	
+	# Let main handle the json importing bu connecting to this emited signal.
+	# This script only takes care of creating the terrain file, and
+	# recents file.
+	var grouping: int = grouping_menu_button.get_meta("index")
+	new_terrain_created.emit(_new_ssxt_path, import_json, grouping)
+	
+	start_menu_bg.hide()
+	self.hide()
+	
+
+func _on_button_open_pressed() -> void:
+	open_terrain_window.show()
+
+
+func _on_open_terrain_window_file_selected(path: String) -> void:
+	if path.get_extension() != "ssxt":
+		open_terrain_window.show()
+		return
+		
+	# Update Recents file
+	if FileAccess.file_exists("user://recents.dat"):
+		var read_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.READ)
+		var recents: Array = read_file.get_var()
+		recents.push_back(path)
+		if recents.size() > 4:
+			recents.pop_front()
+			
+		var write_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.WRITE)
+		write_file.store_var(recents)
+	else:
+		var write_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.WRITE)
+		write_file.store_var([])
+	
+	terrain_opened.emit(path)
+	start_menu_bg.hide()
+	self.hide()

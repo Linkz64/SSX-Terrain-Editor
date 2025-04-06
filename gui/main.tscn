@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://e3mf5oewrsw3"]
+[gd_scene load_steps=31 format=3 uid="uid://e3mf5oewrsw3"]
 
 [ext_resource type="Script" uid="uid://cc2fe8opu3qij" path="res://gui/main.gd" id="1_7ykw0"]
 [ext_resource type="Script" uid="uid://ds5elcpcvw0nj" path="res://gui/main_viewport.gd" id="2_6eus7"]
@@ -14,6 +14,7 @@
 [ext_resource type="Script" uid="uid://cfl5qs2rnowfq" path="res://gui/editing_mode_switch.gd" id="10_iauxb"]
 [ext_resource type="Texture2D" uid="uid://cqbg8vtrvux3p" path="res://assets/ui/clipboard_copy.svg" id="13_e3mo4"]
 [ext_resource type="Texture2D" uid="uid://dg3oyl8q8we64" path="res://assets/ui/delete_x.svg" id="13_sttc5"]
+[ext_resource type="Script" uid="uid://bafvrqoif76eo" path="res://gui/start_menu/start_menu.gd" id="15_c4ive"]
 [ext_resource type="Texture2D" uid="uid://d30ldj3dik5kk" path="res://assets/ui/splash_art.svg" id="15_y34gh"]
 [ext_resource type="Texture2D" uid="uid://b4x88756crr86" path="res://assets/ui/folder_file_choice.svg" id="16_2lfdd"]
 
@@ -973,6 +974,8 @@ offset_top = -248.0
 offset_right = 1920.0
 grow_vertical = 0
 mouse_filter = 2
+metadata/_edit_lock_ = true
+metadata/_edit_group_ = true
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Messages"]
 layout_mode = 1
@@ -1053,17 +1056,17 @@ text = "Warning: This test message will attack if provoked."
 [node name="Padding" type="Control" parent="Messages/VBoxContainer/MessagePlaceholder2/HBoxContainer"]
 layout_mode = 2
 
-[node name="MouseInputBlockerFull" type="Control" parent="."]
-visible = false
+[node name="StartMenuBG" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+color = Color(0, 0, 0, 0.533333)
+metadata/_edit_lock_ = true
 
 [node name="StartMenu" type="Control" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -1076,19 +1079,31 @@ offset_right = 288.0
 offset_bottom = 186.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("15_c4ive")
+
+[node name="PathSelectWindow" type="FileDialog" parent="StartMenu"]
+size = Vector2i(1380, 360)
+access = 2
+filters = PackedStringArray("*.ssxt")
+use_native_dialog = true
+
+[node name="OpenTerrainWindow" type="FileDialog" parent="StartMenu"]
+auto_translate_mode = 1
+title = "Open a File"
+position = Vector2i(0, 36)
+size = Vector2i(1380, 360)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.ssxt")
+use_native_dialog = true
 
 [node name="Panel" type="Panel" parent="StartMenu"]
 clip_contents = true
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -288.0
-offset_top = -186.0
-offset_right = 288.0
-offset_bottom = 186.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_sttc5")
@@ -1135,8 +1150,9 @@ custom_minimum_size = Vector2(128, 32)
 layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 1
-text = "SSXT save path"
+placeholder_text = "SSXT save path"
 editable = false
+autowrap_mode = 1
 
 [node name="NewPathChoiceButton" type="Button" parent="StartMenu/New/NewPathChoice"]
 custom_minimum_size = Vector2(48, 0)
@@ -1171,6 +1187,7 @@ popup/item_1/text = "Batch"
 popup/item_1/id = 1
 popup/item_2/text = "Surface Type"
 popup/item_2/id = 2
+metadata/index = 1
 
 [node name="Buttons" type="HBoxContainer" parent="StartMenu"]
 layout_mode = 1
@@ -1207,18 +1224,12 @@ offset_right = 52.0
 offset_bottom = 192.0
 text = "Recent"
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="StartMenu"]
+[node name="RecentsBox" type="VBoxContainer" parent="StartMenu"]
 layout_mode = 0
 offset_left = 8.0
 offset_top = 194.0
 offset_right = 244.0
 offset_bottom = 322.0
-
-[node name="ButtonRecentTest" type="Button" parent="StartMenu/VBoxContainer2"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "BigMountain.ssxt"
-alignment = 0
 
 [node name="VSeparator" type="VSeparator" parent="StartMenu"]
 layout_mode = 0
@@ -1233,11 +1244,11 @@ offset_left = 76.0
 offset_top = 334.0
 offset_right = 500.0
 offset_bottom = 362.0
-theme_override_colors/font_color = Color(0.93, 0.68727, 0.1209, 1)
+theme_override_colors/font_color = Color(1, 0.190506, 0.140891, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.352941)
 theme_override_constants/shadow_offset_x = -1
 theme_override_font_sizes/font_size = 11
-text = "Warning: Placeholder InfoLabel text. Placeholder InfoLabel text."
+horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 text_overrun_behavior = 3
@@ -1256,3 +1267,8 @@ text_overrun_behavior = 3
 [connection signal="mouse_exited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_exited"]
 [connection signal="toggled" from="EditingMode/ModeSwitch" to="." method="_on_mode_switch_toggled"]
 [connection signal="toggled" from="EditingMode/ModeSwitch" to="EditingMode" method="_on_mode_switch_toggled"]
+[connection signal="file_selected" from="StartMenu/PathSelectWindow" to="StartMenu" method="_on_path_select_window_file_selected"]
+[connection signal="file_selected" from="StartMenu/OpenTerrainWindow" to="StartMenu" method="_on_open_terrain_window_file_selected"]
+[connection signal="pressed" from="StartMenu/New/NewPathChoice/NewPathChoiceButton" to="StartMenu" method="_on_new_path_choice_button_pressed"]
+[connection signal="pressed" from="StartMenu/Buttons/ButtonOpen" to="StartMenu" method="_on_button_open_pressed"]
+[connection signal="pressed" from="StartMenu/Buttons/ButtonNew" to="StartMenu" method="_on_button_new_pressed"]
