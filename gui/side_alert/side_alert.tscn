@@ -1,0 +1,134 @@
+[gd_scene load_steps=8 format=3 uid="uid://dnfcy8f4rsu5l"]
+
+[ext_resource type="Texture2D" uid="uid://dg3oyl8q8we64" path="res://assets/ui/delete_x.svg" id="1_hnbxy"]
+[ext_resource type="Script" uid="uid://vne8ows8kr5r" path="res://gui/side_alert/side_alert.gd" id="1_smokb"]
+[ext_resource type="Texture2D" uid="uid://cqbg8vtrvux3p" path="res://assets/ui/clipboard_copy.svg" id="2_mu5ii"]
+
+[sub_resource type="Animation" id="Animation_smokb"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("..:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_msnfu"]
+resource_name = "fade-in"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("..:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_seh41"]
+resource_name = "fade-out"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("..:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_seh41"]
+_data = {
+&"RESET": SubResource("Animation_smokb"),
+&"fade-in": SubResource("Animation_msnfu"),
+&"fade-out": SubResource("Animation_seh41")
+}
+
+[node name="SideAlert" type="Control"]
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 3
+anchor_top = 0.032
+anchor_bottom = 0.032
+offset_top = -34.56
+offset_right = 670.0
+offset_bottom = 0.439999
+script = ExtResource("1_smokb")
+
+[node name="WarningAlertBG" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(670, 35)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 200.0
+offset_right = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 0
+color = Color(0.190762, 0.190762, 0.190762, 1)
+
+[node name="HBoxContainer" type="HBoxContainer" parent="WarningAlertBG"]
+layout_mode = 2
+offset_right = 906.0
+offset_bottom = 32.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 0
+
+[node name="MessageDelete" type="Button" parent="WarningAlertBG/HBoxContainer"]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+focus_mode = 0
+icon = ExtResource("1_hnbxy")
+icon_alignment = 1
+expand_icon = true
+
+[node name="MessageCopy" type="Button" parent="WarningAlertBG/HBoxContainer"]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+focus_mode = 0
+icon = ExtResource("2_mu5ii")
+icon_alignment = 1
+expand_icon = true
+
+[node name="MessageLabel" type="Label" parent="WarningAlertBG/HBoxContainer"]
+layout_mode = 2
+text = "Test Message: This is a test message. If you keep testing the test message. It's going to test you."
+
+[node name="Padding" type="Control" parent="WarningAlertBG/HBoxContainer"]
+layout_mode = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("../WarningAlertBG")
+libraries = {
+&"": SubResource("AnimationLibrary_seh41")
+}
+
+[node name="Free" type="Timer" parent="."]
+wait_time = 7.0
+one_shot = true
+autostart = true
+
+[node name="FadeOut" type="Timer" parent="."]
+wait_time = 5.0
+one_shot = true
+autostart = true
+
+[connection signal="pressed" from="WarningAlertBG/HBoxContainer/MessageDelete" to="." method="_on_message_delete_pressed"]
+[connection signal="pressed" from="WarningAlertBG/HBoxContainer/MessageCopy" to="." method="_on_message_copy_pressed"]
+[connection signal="timeout" from="Free" to="." method="_on_free_timeout"]
+[connection signal="timeout" from="FadeOut" to="." method="_on_fade_out_timeout"]

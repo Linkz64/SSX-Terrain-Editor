@@ -16,6 +16,10 @@ run/main_scene="uid://e3mf5oewrsw3"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="uid://bgxaivprkhk63"
 
+[autoload]
+
+AlertBus="*res://globals/alert_bus.tscn"
+
 [display]
 
 window/size/viewport_width=1920
