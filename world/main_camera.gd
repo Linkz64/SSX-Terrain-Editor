@@ -10,14 +10,13 @@ var _rotation: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
-	# Initial rotation. Set _rotation for custom initial rotation
-	_rotation.y = TAU/3
+	# Initial rotation. Set _rotation to a custom initial rotation
+	_rotation.y = 0
 	_rotation.x = 0
 	self.quaternion = Quaternion(Vector3.RIGHT, PI/2) # Rotate 90 degrees on the X axis
 	self.quaternion *= Quaternion(Vector3.UP, -_rotation.y) # Yaw
 	self.quaternion = Quaternion(self.basis.x, -_rotation.x) * self.quaternion # Pitch
 	
-
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not movable:

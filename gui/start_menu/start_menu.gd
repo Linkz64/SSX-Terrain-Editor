@@ -27,11 +27,26 @@ func _ready() -> void:
 	reload_recents()
 
 
+func activate():
+	reload_recents()
+	new_path_choice_text.text = ""
+	import_patches_check_box.button_pressed = false
+	grouping_menu_button.text = "Batch"
+	grouping_menu_button.set_meta("index", 1)
+	start_menu_bg.show()
+	self.show()
+
+
+func disactivate():
+	start_menu_bg.hide()
+	self.hide()
+
+
 func reload_recents():
 	if not FileAccess.file_exists("user://recents.dat"):
 		return
 
-	# Re-confirm that the terrain files exists, if then update the recents file
+	# Re-confirm that the terrain files exists, then update the recents file
 	var file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.READ)
 	var recents: Array = file.get_var()
 	for path in recents:
@@ -40,8 +55,10 @@ func reload_recents():
 	var write_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.WRITE)
 	write_file.store_var(recents)
 
-	# Create Buttons
-	print(recents.size())
+	# Delete and Create Buttons
+	for child in recents_box.get_children():
+		child.queue_free()
+	
 	for path in recents:
 		var splited_path: Array = path.split("/")
 		var button = RECENT_BUTTON.instantiate()
@@ -57,8 +74,7 @@ func recent_button_pressed(button: Button):
 		info_label.text = "Terrain file no longer exists"
 		return
 	terrain_opened.emit(path)
-	start_menu_bg.hide()
-	self.hide()
+	disactivate()
 
 
 func grouping_choice_pressed(index: int):
@@ -90,11 +106,7 @@ func _on_button_new_pressed() -> void:
 		info_label.text = "Please select a terrain path"
 		return
 	
-	# Re-confirm that the path is not duplicate, and folder still exists.
-	if FileAccess.file_exists(_new_ssxt_path):
-		info_label.text = "File already exists."
-		return
-		
+	# Re-confirm that the folder still exists.
 	if not DirAccess.dir_exists_absolute(_new_ssxt_path.get_base_dir()):
 		info_label.text = "Folder does not exist."
 		return
@@ -115,24 +127,29 @@ func _on_button_new_pressed() -> void:
 	if FileAccess.file_exists("user://recents.dat"):
 		var read_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.READ)
 		var recents: Array = read_file.get_var()
-		recents.push_back(_new_ssxt_path)
-		if recents.size() > 4:
-			recents.pop_front()
+		
+		# Only append if the file doesnt exist. If it does then wrap to the back of the
+		# recents array.
+		if _new_ssxt_path in recents:
+			recents.remove_at(recents.find(_new_ssxt_path))
+			recents.append(_new_ssxt_path)
+		else:
+			recents.push_back(_new_ssxt_path)
+			if recents.size() > 4:
+				recents.pop_front()			
 			
 		var write_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.WRITE)
 		write_file.store_var(recents)
 	else:
 		var write_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.WRITE)
-		write_file.store_var([])
+		write_file.store_var([_new_ssxt_path])
 	
 	# Let main handle the json importing bu connecting to this emited signal.
 	# This script only takes care of creating the terrain file, and
 	# recents file.
 	var grouping: int = grouping_menu_button.get_meta("index")
 	new_terrain_created.emit(_new_ssxt_path, import_json, grouping)
-	
-	start_menu_bg.hide()
-	self.hide()
+	disactivate()
 	
 
 func _on_button_open_pressed() -> void:
@@ -159,5 +176,4 @@ func _on_open_terrain_window_file_selected(path: String) -> void:
 		write_file.store_var([])
 	
 	terrain_opened.emit(path)
-	start_menu_bg.hide()
-	self.hide()
+	disactivate()
