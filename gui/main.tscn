@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://e3mf5oewrsw3"]
+[gd_scene load_steps=22 format=3 uid="uid://e3mf5oewrsw3"]
 
 [ext_resource type="Script" uid="uid://cc2fe8opu3qij" path="res://gui/main.gd" id="1_7ykw0"]
 [ext_resource type="Script" uid="uid://ds5elcpcvw0nj" path="res://gui/main_viewport.gd" id="2_6eus7"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://clad0n2qh36je" path="res://gui/properties_panel.gd" id="8_iauxb"]
 [ext_resource type="Script" uid="uid://cfl5qs2rnowfq" path="res://gui/editing_mode_switch.gd" id="10_iauxb"]
 [ext_resource type="Script" uid="uid://duxhs1byju36g" path="res://gui/side_alerts_handler.gd" id="12_2lfdd"]
+[ext_resource type="Script" uid="uid://dfdpcnuv85ifc" path="res://gui/start_menu/start_menu_bg.gd" id="13_2lfdd"]
 [ext_resource type="Script" uid="uid://bafvrqoif76eo" path="res://gui/start_menu/start_menu.gd" id="15_c4ive"]
 [ext_resource type="Texture2D" uid="uid://d30ldj3dik5kk" path="res://assets/ui/splash_art.svg" id="15_y34gh"]
 [ext_resource type="Texture2D" uid="uid://b4x88756crr86" path="res://assets/ui/folder_file_choice.svg" id="16_2lfdd"]
@@ -823,10 +824,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.533333)
+script = ExtResource("13_2lfdd")
 metadata/_edit_lock_ = true
 
 [node name="StartMenu" type="Control" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -1027,6 +1028,7 @@ text_overrun_behavior = 3
 [connection signal="mouse_exited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_exited"]
 [connection signal="toggled" from="EditingMode/ModeSwitch" to="." method="_on_mode_switch_toggled"]
 [connection signal="toggled" from="EditingMode/ModeSwitch" to="EditingMode" method="_on_mode_switch_toggled"]
+[connection signal="clicked_bg" from="StartMenuBG" to="StartMenu" method="_on_start_menu_bg_clicked_bg"]
 [connection signal="file_selected" from="StartMenu/PathSelectWindow" to="StartMenu" method="_on_path_select_window_file_selected"]
 [connection signal="file_selected" from="StartMenu/OpenTerrainWindow" to="StartMenu" method="_on_open_terrain_window_file_selected"]
 [connection signal="pressed" from="StartMenu/New/NewPathChoice/NewPathChoiceButton" to="StartMenu" method="_on_new_path_choice_button_pressed"]

@@ -26,7 +26,6 @@ func _ready() -> void:
 	grouping_menu_button.get_popup().connect("index_pressed", grouping_choice_pressed)
 	reload_recents()
 
-
 func activate():
 	reload_recents()
 	new_path_choice_text.text = ""
@@ -176,4 +175,8 @@ func _on_open_terrain_window_file_selected(path: String) -> void:
 		write_file.store_var([])
 	
 	terrain_opened.emit(path)
+	disactivate()
+
+
+func _on_start_menu_bg_clicked_bg() -> void:
 	disactivate()
