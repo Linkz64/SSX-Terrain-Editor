@@ -31,6 +31,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		speed += SPEED_RANGE_CHANGE
 	if Input.is_action_just_pressed("CameraSpeedDown"):
 		speed -= SPEED_RANGE_CHANGE
+	speed  = clampf(speed, SPEED_RANGE["min"], SPEED_RANGE["max"])
 
 
 func _process(delta: float) -> void:
