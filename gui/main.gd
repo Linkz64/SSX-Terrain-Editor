@@ -4,7 +4,6 @@ extends Control
 const PLAIN_PATCH = preload("res://world/entities/plain_patch.tscn")
 
 @export var tree: Tree
-#@onready var axis_cam_pivot: Node3D = $AxisHelperViewport/AxisHelperSubViewport/AxisCamPivot
 @onready var object_mode_tools: PanelContainer = $ToolBar/ObjectModeTools
 @onready var edit_mode_tools: PanelContainer = $ToolBar/EditModeTools
 @onready var start_menu: Control = $StartMenu
@@ -12,6 +11,7 @@ const PLAIN_PATCH = preload("res://world/entities/plain_patch.tscn")
 
 
 func _ready():
+	pass
 	#AlertBus.create_side_alert("AAHHHH", Enum.SideAlertType.ERROR)
 	#await get_tree().create_timer(3).timeout
 	#AlertBus.create_side_alert("jk mothing is wrong", Enum.SideAlertType.LOG)
@@ -21,7 +21,7 @@ func _ready():
 	#AlertBus.create_side_alert("ERROR: GUAH GUAH GUAH GUAH", Enum.SideAlertType.ERROR)
 	
 	# Enable back if not interesting in seeing the alerts above for testing.
-	start_menu.activate()
+	#start_menu.activate()
 
 
 func _unhandled_input(_event: InputEvent) -> void:
@@ -45,10 +45,6 @@ func _on_import_json_dir_selected(dir: String) -> void:
 		plain_inst.set_texture(patch.texture)
 		plain_inst.scale /= 100
 	
-	
-
-
-
 
 func _on_mode_switch_toggled(toggled_on: bool) -> void:
 	if toggled_on:

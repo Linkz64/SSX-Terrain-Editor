@@ -18,7 +18,8 @@ config/icon="uid://bgxaivprkhk63"
 
 [autoload]
 
-AlertBus="*res://globals/alert_bus.tscn"
+AlertBus="*res://globals/alert_bus/alert_bus.tscn"
+ObjectManager="*res://globals/object_manager/object_manager.tscn"
 
 [display]
 

@@ -11,6 +11,7 @@ signal terrain_opened(terrain_path: String)
 const RECENT_BUTTON = preload("res://gui/start_menu/recent_button.tscn")
 
 var _new_ssxt_path: String
+var _opened_once: bool = false
 
 @onready var start_menu_bg: ColorRect = $"../StartMenuBG"
 @onready var new_path_choice_text: TextEdit = $New/NewPathChoice/NewPathChoiceText
@@ -26,6 +27,7 @@ func _ready() -> void:
 	grouping_menu_button.get_popup().connect("index_pressed", grouping_choice_pressed)
 	reload_recents()
 
+
 func activate():
 	reload_recents()
 	new_path_choice_text.text = ""
@@ -37,6 +39,7 @@ func activate():
 
 
 func disactivate():
+	_opened_once = true
 	start_menu_bg.hide()
 	self.hide()
 
@@ -179,4 +182,5 @@ func _on_open_terrain_window_file_selected(path: String) -> void:
 
 
 func _on_start_menu_bg_clicked_bg() -> void:
-	disactivate()
+	if _opened_once:
+		disactivate()
