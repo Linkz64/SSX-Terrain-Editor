@@ -50,6 +50,20 @@ tracks/0/keys = {
 "update": 0,
 "values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
 }
+tracks/1/type = "method"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("..")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.3),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"queue_free"
+}]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_seh41"]
 _data = {
@@ -61,35 +75,34 @@ _data = {
 [node name="SideAlert" type="Control"]
 custom_minimum_size = Vector2(0, 35)
 layout_mode = 3
-anchor_top = 0.032
-anchor_bottom = 0.032
-offset_top = -34.56
-offset_right = 670.0
-offset_bottom = 0.439999
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
 script = ExtResource("1_smokb")
 
-[node name="WarningAlertBG" type="ColorRect" parent="."]
-custom_minimum_size = Vector2(670, 35)
+[node name="InitialBG" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(0, 35)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 200.0
-offset_right = 200.0
+offset_right = -1848.0
 grow_horizontal = 2
 grow_vertical = 2
-size_flags_horizontal = 0
 color = Color(0.190762, 0.190762, 0.190762, 1)
 
-[node name="HBoxContainer" type="HBoxContainer" parent="WarningAlertBG"]
-layout_mode = 2
-offset_right = 906.0
-offset_bottom = 32.0
+[node name="Hbox" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-size_flags_horizontal = 0
 
-[node name="MessageDelete" type="Button" parent="WarningAlertBG/HBoxContainer"]
+[node name="Delete" type="Button" parent="Hbox"]
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
 focus_mode = 0
@@ -97,7 +110,7 @@ icon = ExtResource("1_hnbxy")
 icon_alignment = 1
 expand_icon = true
 
-[node name="MessageCopy" type="Button" parent="WarningAlertBG/HBoxContainer"]
+[node name="Copy" type="Button" parent="Hbox"]
 custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
 focus_mode = 0
@@ -105,30 +118,37 @@ icon = ExtResource("2_mu5ii")
 icon_alignment = 1
 expand_icon = true
 
-[node name="MessageLabel" type="Label" parent="WarningAlertBG/HBoxContainer"]
+[node name="Message" type="Label" parent="Hbox"]
+z_index = 1
 layout_mode = 2
 text = "Test Message: This is a test message. If you keep testing the test message. It's going to test you."
 
-[node name="Padding" type="Control" parent="WarningAlertBG/HBoxContainer"]
-layout_mode = 2
+[node name="LabelBG" type="ColorRect" parent="Hbox/Message"]
+z_index = -1
+custom_minimum_size = Vector2(0, 35)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -8.5
+offset_right = 0.169983
+offset_bottom = 8.5
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.190762, 0.190762, 0.190762, 1)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-root_node = NodePath("../WarningAlertBG")
+root_node = NodePath("../InitialBG")
 libraries = {
 &"": SubResource("AnimationLibrary_seh41")
 }
 
-[node name="Free" type="Timer" parent="."]
-wait_time = 7.0
+[node name="Duration" type="Timer" parent="."]
+editor_description = "Time before fade-out animation plays."
+wait_time = 8.0
 one_shot = true
 autostart = true
 
-[node name="FadeOut" type="Timer" parent="."]
-wait_time = 5.0
-one_shot = true
-autostart = true
-
-[connection signal="pressed" from="WarningAlertBG/HBoxContainer/MessageDelete" to="." method="_on_message_delete_pressed"]
-[connection signal="pressed" from="WarningAlertBG/HBoxContainer/MessageCopy" to="." method="_on_message_copy_pressed"]
-[connection signal="timeout" from="Free" to="." method="_on_free_timeout"]
-[connection signal="timeout" from="FadeOut" to="." method="_on_fade_out_timeout"]
+[connection signal="pressed" from="Hbox/Delete" to="." method="_on_message_delete_pressed"]
+[connection signal="pressed" from="Hbox/Copy" to="." method="_on_message_copy_pressed"]
+[connection signal="timeout" from="Duration" to="." method="_on_duration_timeout"]

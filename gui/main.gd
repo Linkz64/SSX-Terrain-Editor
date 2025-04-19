@@ -11,17 +11,17 @@ const PLAIN_PATCH = preload("res://world/entities/plain_patch.tscn")
 
 
 func _ready():
-	pass
-	#AlertBus.create_side_alert("AAHHHH", Enum.SideAlertType.ERROR)
-	#await get_tree().create_timer(3).timeout
-	#AlertBus.create_side_alert("jk mothing is wrong", Enum.SideAlertType.LOG)
-	#await get_tree().create_timer(3).timeout
-	#AlertBus.create_side_alert("SIKE Watch out!", Enum.SideAlertType.WARNING)
-	#await get_tree().create_timer(3).timeout
-	#AlertBus.create_side_alert("ERROR: GUAH GUAH GUAH GUAH", Enum.SideAlertType.ERROR)
+	AlertBus.create_side_alert("AAHHHH", Enum.SideAlertType.ERROR)
+	await get_tree().create_timer(3).timeout
+	AlertBus.create_side_alert("jk mothing is wrong", Enum.SideAlertType.LOG)
+	await get_tree().create_timer(3).timeout
+	AlertBus.create_side_alert("SIKE Watch out!", Enum.SideAlertType.WARNING)
+	await get_tree().create_timer(3).timeout
+	AlertBus.create_side_alert("ERROR: GUAH GUAH GUAH GUAH", Enum.SideAlertType.ERROR)
 	
 	# Enable back if not interesting in seeing the alerts above for testing.
 	#start_menu.activate()
+	pass
 
 
 func _unhandled_input(_event: InputEvent) -> void:

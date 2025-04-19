@@ -11,7 +11,7 @@
 [ext_resource type="Script" uid="uid://b5tcb6v3b23n" path="res://gui/right_panel.gd" id="6_imv73"]
 [ext_resource type="Script" uid="uid://clad0n2qh36je" path="res://gui/properties_panel.gd" id="8_iauxb"]
 [ext_resource type="Script" uid="uid://cfl5qs2rnowfq" path="res://gui/editing_mode_switch.gd" id="10_iauxb"]
-[ext_resource type="Script" uid="uid://duxhs1byju36g" path="res://gui/side_alerts_handler.gd" id="12_2lfdd"]
+[ext_resource type="PackedScene" uid="uid://dffktx57krq28" path="res://gui/side_alert/side_alerts_handler.tscn" id="12_2lfdd"]
 [ext_resource type="Script" uid="uid://dfdpcnuv85ifc" path="res://gui/start_menu/start_menu_bg.gd" id="13_2lfdd"]
 [ext_resource type="Script" uid="uid://bafvrqoif76eo" path="res://gui/start_menu/start_menu.gd" id="15_c4ive"]
 [ext_resource type="Texture2D" uid="uid://d30ldj3dik5kk" path="res://assets/ui/splash_art.svg" id="15_y34gh"]
@@ -511,6 +511,9 @@ offset_bottom = 28.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
 
+[node name="SideAlertsHandler" parent="." instance=ExtResource("12_2lfdd")]
+layout_mode = 1
+
 [node name="ToolBar" type="Control" parent="."]
 anchors_preset = 0
 offset_top = 128.0
@@ -788,32 +791,6 @@ offset_right = 120.0
 offset_bottom = 9.0
 grow_vertical = 2
 text = "Reset Corner"
-
-[node name="SideAlertsHandler" type="Control" parent="."]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -248.0
-offset_right = 1920.0
-grow_vertical = 0
-mouse_filter = 2
-script = ExtResource("12_2lfdd")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="SideAlertsHandler"]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 2.0
-offset_top = -216.0
-offset_right = -322.0
-offset_bottom = -2.0
-grow_horizontal = 2
-grow_vertical = 0
-mouse_filter = 2
-alignment = 2
 
 [node name="StartMenuBG" type="ColorRect" parent="."]
 visible = false

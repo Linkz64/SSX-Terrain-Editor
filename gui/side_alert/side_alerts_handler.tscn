@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://dffktx57krq28"]
+
+[ext_resource type="Script" uid="uid://duxhs1byju36g" path="res://gui/side_alerts_handler.gd" id="1_88a7d"]
+
+[node name="SideAlertsHandler" type="Control"]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -248.0
+offset_right = 1920.0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("1_88a7d")
