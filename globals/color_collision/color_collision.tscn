@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://dgf66js4cb6s2"]
+
+[node name="ColorCollision" type="Node3D"]

@@ -511,6 +511,32 @@ offset_bottom = 28.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
 
+[node name="Orientation" type="HBoxContainer" parent="EditingMode"]
+layout_mode = 0
+offset_left = 1040.0
+offset_right = 1195.0
+offset_bottom = 26.0
+
+[node name="Global" type="Button" parent="EditingMode/Orientation"]
+layout_mode = 2
+text = "Global"
+
+[node name="Local" type="Button" parent="EditingMode/Orientation"]
+layout_mode = 2
+text = "Local"
+
+[node name="Camera" type="Button" parent="EditingMode/Orientation"]
+layout_mode = 2
+text = "Camera"
+
+[node name="SAC" type="Label" parent="EditingMode"]
+layout_mode = 0
+offset_left = 111.0
+offset_top = 4.0
+offset_right = 222.0
+offset_bottom = 22.0
+text = "SAC Mode: Object"
+
 [node name="SideAlertsHandler" parent="." instance=ExtResource("12_2lfdd")]
 layout_mode = 1
 
