@@ -539,6 +539,8 @@ text = "SAC Mode: Object"
 
 [node name="SideAlertsHandler" parent="." instance=ExtResource("12_2lfdd")]
 layout_mode = 1
+offset_top = -471.0
+offset_right = 971.0
 
 [node name="ToolBar" type="Control" parent="."]
 anchors_preset = 0

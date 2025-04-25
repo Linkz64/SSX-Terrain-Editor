@@ -28,7 +28,3 @@ var shared_segments: Dictionary = {
 	"south-west": null,
 	"south-east": null,
 }
-
-
-func _init(p_position):
-	self.position = p_position

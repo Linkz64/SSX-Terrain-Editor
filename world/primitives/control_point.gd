@@ -14,6 +14,11 @@ var local_position: Vector3 = Vector3.ZERO
 var aligned: bool = true
 
 
+func _init(p_position, p_patch_object):
+	self.position = p_position
+	self.patch_object = p_patch_object
+
+
 func get_global_position() -> Vector3:
 	if not patch_object:
 		push_error("Invalid patch object")

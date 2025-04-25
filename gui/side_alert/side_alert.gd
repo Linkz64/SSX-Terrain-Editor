@@ -11,6 +11,7 @@ const STARTING_OFFSET = 40
 var _move_left_tween: Tween
 var _move_up_tween: Tween
 var _clicked_close: bool = false
+var _move_up_accumulator: float
 
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var message: Label = $Hbox/Message
@@ -19,8 +20,10 @@ var _clicked_close: bool = false
 
 
 func init(text: String, type: Enum.SideAlertType):
+	_move_up_accumulator = self.position.y
 	message.text = text
-	label_bg.size.x += MESSAGE_BG_PADDING
+	label_bg.call_deferred("_set_size", Vector2(label_bg.size.x + MESSAGE_BG_PADDING, label_bg.size.y))
+	
 	match type:
 		Enum.SideAlertType.LOG:
 			message.add_theme_color_override("font_color", LOG_COLOR)
@@ -31,9 +34,13 @@ func init(text: String, type: Enum.SideAlertType):
 	
 
 func move_up():
+	if _move_up_tween:
+		_move_up_tween.kill()
+	_move_up_accumulator -= 35
+	
 	_move_up_tween = create_tween()
-	_move_up_tween.tween_property (self, "position:y", self.position.y - 35, 0.9) \
-			.set_trans(Tween.TRANS_SINE) \
+	_move_up_tween.tween_property (self, "position:y", _move_up_accumulator, 0.9) \
+			.set_trans(Tween.TRANS_EXPO) \
 			.set_ease(Tween.EASE_OUT)
 
 

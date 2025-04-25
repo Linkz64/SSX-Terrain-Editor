@@ -25,7 +25,7 @@ var lightmap_point: Rect2 = Rect2(0, 0, 0.0625, 0.0625)
 var lightmap_id: int = 0
 
 
-# I can set the reference of this objec to null after the PatchObject calls this.
+# I can set the reference of this object to null after the PatchObject calls this.
 func mark_for_deletion() -> Array[int]:
 	return control_point_ids
 	
