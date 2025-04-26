@@ -4,6 +4,7 @@ extends Node
 const DISTANCE_FROM_CAMERA = 10
 
 @export var camera: Camera3D
+@onready var gizmo: Gizmo3D = $"../Gizmo"
 
 
 func _ready() -> void:
@@ -18,3 +19,5 @@ func _on_create_object_request(_object_to_copy: PatchObject):
 		inst.create_copy()
 	else:	
 		inst.create_default()
+	gizmo.select(inst)
+	gizmo.use_local_space = true

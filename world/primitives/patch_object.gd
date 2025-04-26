@@ -13,6 +13,7 @@ constant, and the rest are default values in the segment class.
 
 """
 
+const ICON_GODOT = preload("res://assets/icon_godot.svg")
 const BEZIER_SURFACE_SHADER = preload("res://world/bezier_surface_shader.tres")
 const DEFAULT_SIZE = 10 # 10x10
 
@@ -26,39 +27,24 @@ var segments: Dictionary = {} # Unlimited size.
 var segment_id: int = 0 # Increment when adding segments.
 
 
-	
-
-
 func create_default():
-	const HIGH = DEFAULT_SIZE
-	const TOP_MID = DEFAULT_SIZE - (DEFAULT_SIZE/3)
-	const BOTTOM_MID = DEFAULT_SIZE + (DEFAULT_SIZE/3)
-	const LOW = 0
+	segments[segment_id] = PatchSegment.new()
+	var main_segment = segments[segment_id] as PatchSegment
+	segment_id += 1
 	
-	control_points[control_points_id] = Corner.new(Vector3(0, HIGH, 0), self)
-	var top_left_corner = control_points[control_points_id] as Corner
-	control_points_id += 1
+	for y in range(3, -1, -1):
+		for x in 4:
+			var new_x = x * DEFAULT_SIZE/3.0
+			var new_y = y * DEFAULT_SIZE/3.0
+			control_points[control_points_id] = ControlPoint.new(Vector3(new_x, new_y, 0), self)
+			control_points_id += 1
+
+	# Set the ids for the segment
+	for i in 16:
+		main_segment.control_point_ids.append(i)
+	main_segment.patch_object = self
 	
-	control_points[control_points_id] = Corner.new(Vector3(BOTTOM_MID, HIGH, 0), self)
-	var top_left_handle = control_points[control_points_id] as Handle
-	control_points_id += 1
-	top_left_corner.handles["east"] = top_left_handle
-	top_left_handle.corner = top_left_corner
-	
-	control_points[control_points_id] = Corner.new(Vector3(TOP_MID, HIGH, 0), self)
-	var top_right_handle = control_points[control_points_id] as Handle
-	control_points_id += 1
-	
-	control_points[control_points_id] = Corner.new(Vector3(HIGH, HIGH, 0), self)
-	var top_right_corner = control_points[control_points_id] as Corner
-	control_points_id += 1
-	top_right_corner.handles["west"] = top_right_handle
-	top_right_handle.corner = top_right_corner
-	
-	
-	
-	
-	
+	control_points[5].local_position += Vector3(0, 0, 10)
 	
 	var default_mesh_instance := MeshInstance3D.new()
 	self.add_child(default_mesh_instance)
@@ -66,7 +52,12 @@ func create_default():
 	default_mesh_instance.mesh.surface_set_material(0, ShaderMaterial.new())
 	var mesh_mat := default_mesh_instance.mesh.surface_get_material(0) as ShaderMaterial
 	mesh_mat.shader = BEZIER_SURFACE_SHADER
-
+	mesh_mat.set_shader_parameter("image", ICON_GODOT)
+	
+	var cp_array = []
+	for cp in 16:
+		cp_array.append(control_points[cp].local_position)
+	mesh_mat.set_shader_parameter("control_points", cp_array)
 
 
 func create_copy():

@@ -12,6 +12,8 @@ which other patches are sharing these CPs. If none other is then delete the CPs 
 """
 var control_point_ids: Array[int] = []
 
+var patch_object: PatchObject = null
+
 var surface_type: Enum.SurfaceType = Enum.SurfaceType.SNOW_MAIN
 var texture_filename: String = "0001.png"
 var showoff_only: bool = false

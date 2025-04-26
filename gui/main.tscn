@@ -1,21 +1,23 @@
-[gd_scene load_steps=22 format=3 uid="uid://e3mf5oewrsw3"]
+[gd_scene load_steps=24 format=3 uid="uid://e3mf5oewrsw3"]
 
 [ext_resource type="Script" uid="uid://cc2fe8opu3qij" path="res://gui/main.gd" id="1_7ykw0"]
-[ext_resource type="Script" uid="uid://ds5elcpcvw0nj" path="res://gui/main_viewport.gd" id="2_6eus7"]
+[ext_resource type="Script" uid="uid://ds5elcpcvw0nj" path="res://gui/viewport.gd" id="2_6eus7"]
 [ext_resource type="PackedScene" uid="uid://u05bpkyyiist" path="res://world/world.tscn" id="2_iqv6a"]
-[ext_resource type="Theme" uid="uid://btd276sukesp4" path="res://assets/themes/main.theme" id="3_nhllx"]
-[ext_resource type="PackedScene" uid="uid://ds2dgteaeean1" path="res://gui/axis_helper/axis_helper.tscn" id="4_2lfdd"]
-[ext_resource type="Script" uid="uid://knltk8gqw0nw" path="res://gui/tree.gd" id="4_kh6el"]
+[ext_resource type="PackedScene" uid="uid://ds2dgteaeean1" path="res://gui/viewport_overlay/axis_helper/axis_helper.tscn" id="4_2lfdd"]
 [ext_resource type="Script" uid="uid://d2c18ybhelsh6" path="res://gui/menu_bar.gd" id="4_o7ktr"]
 [ext_resource type="Texture2D" uid="uid://nrvjxwuh8dat" path="res://assets/icon_godot.svg" id="5_bqrtb"]
-[ext_resource type="Script" uid="uid://b5tcb6v3b23n" path="res://gui/right_panel.gd" id="6_imv73"]
-[ext_resource type="Script" uid="uid://clad0n2qh36je" path="res://gui/properties_panel.gd" id="8_iauxb"]
-[ext_resource type="Script" uid="uid://cfl5qs2rnowfq" path="res://gui/editing_mode_switch.gd" id="10_iauxb"]
-[ext_resource type="PackedScene" uid="uid://dffktx57krq28" path="res://gui/side_alert/side_alerts_handler.tscn" id="12_2lfdd"]
+[ext_resource type="Script" uid="uid://b5tcb6v3b23n" path="res://gui/right_panel/right_panel.gd" id="5_ykfrj"]
+[ext_resource type="Theme" uid="uid://btd276sukesp4" path="res://assets/themes/main.theme" id="6_3yo8h"]
+[ext_resource type="Script" uid="uid://knltk8gqw0nw" path="res://gui/right_panel/tree.gd" id="7_86xpt"]
+[ext_resource type="Script" uid="uid://clad0n2qh36je" path="res://gui/right_panel/properties_panel.gd" id="8_x08x8"]
+[ext_resource type="Script" uid="uid://cfl5qs2rnowfq" path="res://gui/viewport_overlay/editing_mode_switch.gd" id="10_iauxb"]
 [ext_resource type="Script" uid="uid://dfdpcnuv85ifc" path="res://gui/start_menu/start_menu_bg.gd" id="13_2lfdd"]
+[ext_resource type="Script" uid="uid://duxhs1byju36g" path="res://gui/side_alert/side_alerts_handler.gd" id="14_y34gh"]
 [ext_resource type="Script" uid="uid://bafvrqoif76eo" path="res://gui/start_menu/start_menu.gd" id="15_c4ive"]
 [ext_resource type="Texture2D" uid="uid://d30ldj3dik5kk" path="res://assets/ui/splash_art.svg" id="15_y34gh"]
 [ext_resource type="Texture2D" uid="uid://b4x88756crr86" path="res://assets/ui/folder_file_choice.svg" id="16_2lfdd"]
+[ext_resource type="Script" uid="uid://dq1j5d7mhplgp" path="res://gui/loading/loading.gd" id="17_ykfrj"]
+[ext_resource type="Texture2D" uid="uid://bgxaivprkhk63" path="res://assets/icon_editor.svg" id="18_3yo8h"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ew3qc"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 1)
@@ -23,6 +25,17 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sha4r"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.17, 0.17, 0.17, 0)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_imv73"]
 bg_color = Color(0, 0, 0, 0.517647)
@@ -42,17 +55,6 @@ corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sha4r"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-bg_color = Color(0.17, 0.17, 0.17, 0)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sttc5"]
 bg_color = Color(0.180392, 0.180392, 0.180392, 1)
 corner_radius_top_left = 4
@@ -60,7 +62,7 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[node name="Main" type="Control" node_paths=PackedStringArray("tree")]
+[node name="Main" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -68,15 +70,14 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_7ykw0")
-tree = NodePath("RightPanel/Tree")
 metadata/_edit_lock_ = true
 
 [node name="ViewportBG" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = -1
+layout_mode = 2
 anchor_top = 0.0296296
 anchor_right = 0.833333
 anchor_bottom = 1.0
+offset_bottom = 0.00012207
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -84,7 +85,7 @@ color = Color(0, 0.24938, 0.440319, 1)
 metadata/_edit_use_anchors_ = true
 metadata/_edit_lock_ = true
 
-[node name="MainViewport" type="SubViewportContainer" parent="."]
+[node name="Viewport" type="SubViewportContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.03
@@ -98,15 +99,15 @@ stretch = true
 script = ExtResource("2_6eus7")
 metadata/_edit_lock_ = true
 
-[node name="MainRender" type="SubViewport" parent="MainViewport"]
+[node name="Render" type="SubViewport" parent="Viewport"]
 transparent_bg = true
 handle_input_locally = false
 size = Vector2i(1599, 1048)
 render_target_update_mode = 4
 
-[node name="World" parent="MainViewport/MainRender" instance=ExtResource("2_iqv6a")]
+[node name="World" parent="Viewport/Render" instance=ExtResource("2_iqv6a")]
 
-[node name="AxisHelperViewport" type="SubViewportContainer" parent="."]
+[node name="AxisHelper" type="SubViewportContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 1.0
@@ -118,7 +119,7 @@ offset_bottom = 160.0
 mouse_filter = 2
 stretch = true
 
-[node name="AxisHelperSubViewport" type="SubViewport" parent="AxisHelperViewport"]
+[node name="Render" type="SubViewport" parent="AxisHelper"]
 own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
@@ -126,50 +127,11 @@ size = Vector2i(128, 128)
 size_2d_override_stretch = true
 render_target_update_mode = 4
 
-[node name="AxisHelper" parent="AxisHelperViewport/AxisHelperSubViewport" node_paths=PackedStringArray("world") instance=ExtResource("4_2lfdd")]
-world = NodePath("../../../MainViewport/MainRender/World")
-
-[node name="MenuBarBG" type="ColorRect" parent="." node_paths=PackedStringArray("start_menu")]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 32.0
-grow_horizontal = 2
-color = Color(0.180392, 0.180392, 0.180392, 1)
-script = ExtResource("4_o7ktr")
-start_menu = NodePath("../StartMenu")
-metadata/_edit_lock_ = true
-
-[node name="MenuBar" type="MenuBar" parent="MenuBarBG"]
-visible = false
-layout_mode = 1
-anchors_preset = 14
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = 143.0
-offset_top = -13.0
-offset_bottom = 13.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("3_nhllx")
-switch_on_hover = false
-
-[node name="StartButton" type="MenuButton" parent="MenuBarBG"]
-layout_mode = 0
-offset_right = 42.0
-offset_bottom = 32.0
-theme_override_font_sizes/font_size = 17
-text = "S"
-item_count = 2
-popup/item_0/text = "Start menu"
-popup/item_0/id = 0
-popup/item_1/text = "Save As"
-popup/item_1/id = 1
+[node name="AxisHelper" parent="AxisHelper/Render" node_paths=PackedStringArray("world") instance=ExtResource("4_2lfdd")]
+world = NodePath("../../../Viewport/Render/World")
 
 [node name="RightPanel" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = -1
+layout_mode = 0
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -178,7 +140,7 @@ offset_top = 32.0
 grow_horizontal = 0
 grow_vertical = 2
 color = Color(0.18, 0.18, 0.18, 1)
-script = ExtResource("6_imv73")
+script = ExtResource("5_ykfrj")
 
 [node name="TreeButtons" type="Control" parent="RightPanel"]
 layout_mode = 2
@@ -202,7 +164,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-theme = ExtResource("3_nhllx")
+theme = ExtResource("6_3yo8h")
 text = "☰"
 flat = false
 expand_icon = true
@@ -230,19 +192,19 @@ grow_vertical = 2
 clip_contents = true
 layout_mode = 2
 focus_mode = 0
-theme = ExtResource("3_nhllx")
+theme = ExtResource("6_3yo8h")
 text = "+ Object"
 
 [node name="AddGroup" type="Button" parent="RightPanel/TreeButtons/Container"]
 layout_mode = 2
 focus_mode = 0
-theme = ExtResource("3_nhllx")
+theme = ExtResource("6_3yo8h")
 text = "+ Group"
 
 [node name="Delete" type="Button" parent="RightPanel/TreeButtons/Container"]
 layout_mode = 2
 focus_mode = 0
-theme = ExtResource("3_nhllx")
+theme = ExtResource("6_3yo8h")
 text = "- Delete"
 expand_icon = true
 
@@ -261,7 +223,7 @@ hide_root = true
 select_mode = 2
 scroll_horizontal_enabled = false
 auto_tooltip = false
-script = ExtResource("4_kh6el")
+script = ExtResource("7_86xpt")
 tree_extras = NodePath("../TreeButtons/Extras")
 
 [node name="PropertiesPanelScroll" type="ScrollContainer" parent="RightPanel"]
@@ -277,7 +239,7 @@ offset_right = -4.0
 offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 0
-script = ExtResource("8_iauxb")
+script = ExtResource("8_x08x8")
 
 [node name="SegmentPropertiesVBox" type="VBoxContainer" parent="RightPanel/PropertiesPanelScroll"]
 layout_mode = 2
@@ -461,95 +423,46 @@ text = "y"
 layout_mode = 2
 text = "1.0"
 
-[node name="EditingMode" type="Control" parent="."]
-anchors_preset = 0
-offset_left = 8.0
-offset_top = 40.0
-offset_right = 140.0
-offset_bottom = 68.0
-mouse_filter = 2
-script = ExtResource("10_iauxb")
-
-[node name="ModeSwitch" type="Button" parent="EditingMode"]
-layout_mode = 0
-offset_right = 92.0
-offset_bottom = 28.0
-focus_mode = 0
-theme_override_styles/normal = SubResource("StyleBoxFlat_imv73")
-toggle_mode = true
-
-[node name="HBoxContainer" type="HBoxContainer" parent="EditingMode/ModeSwitch"]
+[node name="MenuBar" type="ColorRect" parent="." node_paths=PackedStringArray("start_menu")]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = 10
 anchor_right = 1.0
+offset_bottom = 32.0
+grow_horizontal = 2
+color = Color(0.180392, 0.180392, 0.180392, 1)
+script = ExtResource("4_o7ktr")
+start_menu = NodePath("../StartMenu")
+metadata/_edit_lock_ = true
+
+[node name="StartButton" type="MenuButton" parent="MenuBar"]
+layout_mode = 0
+offset_right = 42.0
+offset_bottom = 32.0
+theme_override_font_sizes/font_size = 17
+text = "S"
+item_count = 2
+popup/item_0/text = "Start menu"
+popup/item_0/id = 0
+popup/item_1/text = "Save As"
+popup/item_1/id = 1
+
+[node name="ViewportOverlay" type="Control" parent="."]
+layout_mode = 1
+anchor_top = 0.0296296
+anchor_right = 0.833333
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 17
-alignment = 1
+metadata/_edit_use_anchors_ = true
 
-[node name="Object3" type="Label" parent="EditingMode/ModeSwitch/HBoxContainer"]
-layout_mode = 2
-text = "Object"
-
-[node name="Edit3" type="Label" parent="EditingMode/ModeSwitch/HBoxContainer"]
-layout_mode = 2
-text = "Edit"
-
-[node name="OutlineMode0" type="Panel" parent="EditingMode/ModeSwitch"]
-layout_mode = 0
-offset_right = 52.5
-offset_bottom = 28.0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
-
-[node name="OutlineMode1" type="Panel" parent="EditingMode/ModeSwitch"]
-layout_mode = 0
-offset_left = 56.0
-offset_right = 92.0
-offset_bottom = 28.0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
-
-[node name="Orientation" type="HBoxContainer" parent="EditingMode"]
-layout_mode = 0
-offset_left = 1040.0
-offset_right = 1195.0
-offset_bottom = 26.0
-
-[node name="Global" type="Button" parent="EditingMode/Orientation"]
-layout_mode = 2
-text = "Global"
-
-[node name="Local" type="Button" parent="EditingMode/Orientation"]
-layout_mode = 2
-text = "Local"
-
-[node name="Camera" type="Button" parent="EditingMode/Orientation"]
-layout_mode = 2
-text = "Camera"
-
-[node name="SAC" type="Label" parent="EditingMode"]
-layout_mode = 0
-offset_left = 111.0
-offset_top = 4.0
-offset_right = 222.0
-offset_bottom = 22.0
-text = "SAC Mode: Object"
-
-[node name="SideAlertsHandler" parent="." instance=ExtResource("12_2lfdd")]
-layout_mode = 1
-offset_top = -471.0
-offset_right = 971.0
-
-[node name="ToolBar" type="Control" parent="."]
+[node name="ToolBar" type="Control" parent="ViewportOverlay"]
 anchors_preset = 0
-offset_top = 128.0
+offset_top = 96.0
 offset_right = 152.0
-offset_bottom = 416.0
+offset_bottom = 384.0
 mouse_filter = 2
 
-[node name="ObjectModeTools" type="PanelContainer" parent="ToolBar"]
+[node name="ObjectModeTools" type="PanelContainer" parent="ViewportOverlay/ToolBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -560,16 +473,16 @@ mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_sha4r")
 metadata/_edit_lock_ = true
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="ToolBar/ObjectModeTools"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="ViewportOverlay/ToolBar/ObjectModeTools"]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="AddObject" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
+[node name="AddObject" type="Button" parent="ViewportOverlay/ToolBar/ObjectModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 focus_mode = 0
 
-[node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/AddObject"]
+[node name="TextureRect" type="TextureRect" parent="ViewportOverlay/ToolBar/ObjectModeTools/VBoxContainer2/AddObject"]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
@@ -582,7 +495,7 @@ texture = ExtResource("5_bqrtb")
 expand_mode = 2
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="ToolBar/ObjectModeTools/VBoxContainer2/AddObject"]
+[node name="Label" type="Label" parent="ViewportOverlay/ToolBar/ObjectModeTools/VBoxContainer2/AddObject"]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -594,12 +507,12 @@ offset_bottom = 9.0
 grow_vertical = 2
 text = "Add"
 
-[node name="DeleteObject" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
+[node name="DeleteObject" type="Button" parent="ViewportOverlay/ToolBar/ObjectModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 focus_mode = 0
 
-[node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/DeleteObject"]
+[node name="TextureRect" type="TextureRect" parent="ViewportOverlay/ToolBar/ObjectModeTools/VBoxContainer2/DeleteObject"]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
@@ -612,7 +525,7 @@ texture = ExtResource("5_bqrtb")
 expand_mode = 2
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="ToolBar/ObjectModeTools/VBoxContainer2/DeleteObject"]
+[node name="Label" type="Label" parent="ViewportOverlay/ToolBar/ObjectModeTools/VBoxContainer2/DeleteObject"]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -624,12 +537,12 @@ offset_bottom = 9.0
 grow_vertical = 2
 text = "Delete"
 
-[node name="DuplicateObject" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
+[node name="DuplicateObject" type="Button" parent="ViewportOverlay/ToolBar/ObjectModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 focus_mode = 0
 
-[node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/DuplicateObject"]
+[node name="TextureRect" type="TextureRect" parent="ViewportOverlay/ToolBar/ObjectModeTools/VBoxContainer2/DuplicateObject"]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
@@ -642,7 +555,7 @@ texture = ExtResource("5_bqrtb")
 expand_mode = 2
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="ToolBar/ObjectModeTools/VBoxContainer2/DuplicateObject"]
+[node name="Label" type="Label" parent="ViewportOverlay/ToolBar/ObjectModeTools/VBoxContainer2/DuplicateObject"]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -654,12 +567,12 @@ offset_bottom = 9.0
 grow_vertical = 2
 text = "Duplicate"
 
-[node name="Snap" type="Button" parent="ToolBar/ObjectModeTools/VBoxContainer2"]
+[node name="Snap" type="Button" parent="ViewportOverlay/ToolBar/ObjectModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 focus_mode = 0
 
-[node name="TextureRect" type="TextureRect" parent="ToolBar/ObjectModeTools/VBoxContainer2/Snap"]
+[node name="TextureRect" type="TextureRect" parent="ViewportOverlay/ToolBar/ObjectModeTools/VBoxContainer2/Snap"]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
@@ -672,7 +585,7 @@ texture = ExtResource("5_bqrtb")
 expand_mode = 2
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="ToolBar/ObjectModeTools/VBoxContainer2/Snap"]
+[node name="Label" type="Label" parent="ViewportOverlay/ToolBar/ObjectModeTools/VBoxContainer2/Snap"]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -684,7 +597,7 @@ offset_bottom = 9.0
 grow_vertical = 2
 text = "Snap Tool"
 
-[node name="EditModeTools" type="PanelContainer" parent="ToolBar"]
+[node name="EditModeTools" type="PanelContainer" parent="ViewportOverlay/ToolBar"]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -696,16 +609,16 @@ mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_sha4r")
 metadata/_edit_lock_ = true
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="ToolBar/EditModeTools"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="ViewportOverlay/ToolBar/EditModeTools"]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="AddSegment" type="Button" parent="ToolBar/EditModeTools/VBoxContainer2"]
+[node name="AddSegment" type="Button" parent="ViewportOverlay/ToolBar/EditModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 focus_mode = 0
 
-[node name="TextureRect" type="TextureRect" parent="ToolBar/EditModeTools/VBoxContainer2/AddSegment"]
+[node name="TextureRect" type="TextureRect" parent="ViewportOverlay/ToolBar/EditModeTools/VBoxContainer2/AddSegment"]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
@@ -718,7 +631,7 @@ texture = ExtResource("5_bqrtb")
 expand_mode = 2
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="ToolBar/EditModeTools/VBoxContainer2/AddSegment"]
+[node name="Label" type="Label" parent="ViewportOverlay/ToolBar/EditModeTools/VBoxContainer2/AddSegment"]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -730,12 +643,12 @@ offset_bottom = 9.0
 grow_vertical = 2
 text = "Add Segment"
 
-[node name="DeleteSegment" type="Button" parent="ToolBar/EditModeTools/VBoxContainer2"]
+[node name="DeleteSegment" type="Button" parent="ViewportOverlay/ToolBar/EditModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 focus_mode = 0
 
-[node name="TextureRect" type="TextureRect" parent="ToolBar/EditModeTools/VBoxContainer2/DeleteSegment"]
+[node name="TextureRect" type="TextureRect" parent="ViewportOverlay/ToolBar/EditModeTools/VBoxContainer2/DeleteSegment"]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
@@ -748,7 +661,7 @@ texture = ExtResource("5_bqrtb")
 expand_mode = 2
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="ToolBar/EditModeTools/VBoxContainer2/DeleteSegment"]
+[node name="Label" type="Label" parent="ViewportOverlay/ToolBar/EditModeTools/VBoxContainer2/DeleteSegment"]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -760,12 +673,12 @@ offset_bottom = 9.0
 grow_vertical = 2
 text = "Delete Segment"
 
-[node name="Snap" type="Button" parent="ToolBar/EditModeTools/VBoxContainer2"]
+[node name="Snap" type="Button" parent="ViewportOverlay/ToolBar/EditModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 focus_mode = 0
 
-[node name="TextureRect" type="TextureRect" parent="ToolBar/EditModeTools/VBoxContainer2/Snap"]
+[node name="TextureRect" type="TextureRect" parent="ViewportOverlay/ToolBar/EditModeTools/VBoxContainer2/Snap"]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
@@ -778,7 +691,7 @@ texture = ExtResource("5_bqrtb")
 expand_mode = 2
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="ToolBar/EditModeTools/VBoxContainer2/Snap"]
+[node name="Label" type="Label" parent="ViewportOverlay/ToolBar/EditModeTools/VBoxContainer2/Snap"]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -790,12 +703,12 @@ offset_bottom = 9.0
 grow_vertical = 2
 text = "Snap"
 
-[node name="ResetCorner" type="Button" parent="ToolBar/EditModeTools/VBoxContainer2"]
+[node name="ResetCorner" type="Button" parent="ViewportOverlay/ToolBar/EditModeTools/VBoxContainer2"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 focus_mode = 0
 
-[node name="TextureRect" type="TextureRect" parent="ToolBar/EditModeTools/VBoxContainer2/ResetCorner"]
+[node name="TextureRect" type="TextureRect" parent="ViewportOverlay/ToolBar/EditModeTools/VBoxContainer2/ResetCorner"]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
@@ -808,7 +721,7 @@ texture = ExtResource("5_bqrtb")
 expand_mode = 2
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="ToolBar/EditModeTools/VBoxContainer2/ResetCorner"]
+[node name="Label" type="Label" parent="ViewportOverlay/ToolBar/EditModeTools/VBoxContainer2/ResetCorner"]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -820,7 +733,93 @@ offset_bottom = 9.0
 grow_vertical = 2
 text = "Reset Corner"
 
-[node name="StartMenuBG" type="ColorRect" parent="."]
+[node name="SideAlertsHandler" type="Control" parent="ViewportOverlay"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -471.0
+offset_right = 992.0
+grow_vertical = 0
+script = ExtResource("14_y34gh")
+
+[node name="EditingMode" type="Control" parent="ViewportOverlay"]
+anchors_preset = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 140.0
+offset_bottom = 36.0
+mouse_filter = 2
+script = ExtResource("10_iauxb")
+
+[node name="ModeSwitch" type="Button" parent="ViewportOverlay/EditingMode"]
+layout_mode = 0
+offset_right = 92.0
+offset_bottom = 28.0
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_imv73")
+toggle_mode = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ViewportOverlay/EditingMode/ModeSwitch"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 17
+alignment = 1
+
+[node name="Object3" type="Label" parent="ViewportOverlay/EditingMode/ModeSwitch/HBoxContainer"]
+layout_mode = 2
+text = "Object"
+
+[node name="Edit3" type="Label" parent="ViewportOverlay/EditingMode/ModeSwitch/HBoxContainer"]
+layout_mode = 2
+text = "Edit"
+
+[node name="OutlineMode0" type="Panel" parent="ViewportOverlay/EditingMode/ModeSwitch"]
+layout_mode = 0
+offset_right = 52.5
+offset_bottom = 28.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
+
+[node name="OutlineMode1" type="Panel" parent="ViewportOverlay/EditingMode/ModeSwitch"]
+layout_mode = 0
+offset_left = 56.0
+offset_right = 92.0
+offset_bottom = 28.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
+
+[node name="Orientation" type="HBoxContainer" parent="ViewportOverlay/EditingMode"]
+layout_mode = 0
+offset_left = 1040.0
+offset_right = 1195.0
+offset_bottom = 26.0
+
+[node name="Global" type="Button" parent="ViewportOverlay/EditingMode/Orientation"]
+layout_mode = 2
+text = "Global"
+
+[node name="Local" type="Button" parent="ViewportOverlay/EditingMode/Orientation"]
+layout_mode = 2
+text = "Local"
+
+[node name="Camera" type="Button" parent="ViewportOverlay/EditingMode/Orientation"]
+layout_mode = 2
+text = "Camera"
+
+[node name="SAC" type="Label" parent="ViewportOverlay/EditingMode"]
+layout_mode = 0
+offset_left = 111.0
+offset_top = 4.0
+offset_right = 222.0
+offset_bottom = 22.0
+text = "SAC Mode: Object"
+
+[node name="Loading" type="Control" parent="."]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -828,9 +827,47 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("17_ykfrj")
+
+[node name="BG" type="ColorRect" parent="Loading"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0, 0, 0, 0.533333)
-script = ExtResource("13_2lfdd")
-metadata/_edit_lock_ = true
+
+[node name="Icon" type="TextureRect" parent="Loading"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(20, 20)
+texture = ExtResource("18_3yo8h")
+
+[node name="Label" type="Label" parent="Loading"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -32.0
+offset_top = 23.0
+offset_right = 29.0
+offset_bottom = 41.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Loading..."
 
 [node name="StartMenu" type="Control" parent="."]
 visible = false
@@ -847,6 +884,19 @@ offset_bottom = 186.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("15_c4ive")
+
+[node name="BG" type="ColorRect" parent="StartMenu"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -1.16667
+anchor_top = -0.951613
+anchor_right = 2.16667
+anchor_bottom = 1.95161
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.533333)
+script = ExtResource("13_2lfdd")
+metadata/_edit_use_anchors_ = true
 
 [node name="PathSelectWindow" type="FileDialog" parent="StartMenu"]
 size = Vector2i(1380, 360)
@@ -1021,9 +1071,6 @@ vertical_alignment = 1
 clip_text = true
 text_overrun_behavior = 3
 
-[connection signal="mouse_entered" from="MainViewport" to="MainViewport" method="_on_sub_viewport_container_mouse_entered"]
-[connection signal="mouse_exited" from="MainViewport" to="MainViewport" method="_on_sub_viewport_container_mouse_exited"]
-[connection signal="pressed" from="MenuBarBG/StartButton" to="MenuBarBG" method="_on_start_button_pressed"]
 [connection signal="pressed" from="RightPanel/TreeButtons/Container/AddObject" to="RightPanel/Tree" method="_on_add_object_button_pressed"]
 [connection signal="pressed" from="RightPanel/TreeButtons/Container/AddGroup" to="RightPanel/Tree" method="_on_add_group_button_pressed"]
 [connection signal="pressed" from="RightPanel/TreeButtons/Container/Delete" to="RightPanel/Tree" method="_on_delete_pressed"]
@@ -1032,9 +1079,9 @@ text_overrun_behavior = 3
 [connection signal="item_edited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_item_edited"]
 [connection signal="mouse_entered" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_exited"]
-[connection signal="toggled" from="EditingMode/ModeSwitch" to="." method="_on_mode_switch_toggled"]
-[connection signal="toggled" from="EditingMode/ModeSwitch" to="EditingMode" method="_on_mode_switch_toggled"]
-[connection signal="clicked_bg" from="StartMenuBG" to="StartMenu" method="_on_start_menu_bg_clicked_bg"]
+[connection signal="toggled" from="ViewportOverlay/EditingMode/ModeSwitch" to="." method="_on_mode_switch_toggled"]
+[connection signal="toggled" from="ViewportOverlay/EditingMode/ModeSwitch" to="ViewportOverlay/EditingMode" method="_on_mode_switch_toggled"]
+[connection signal="clicked_bg" from="StartMenu/BG" to="StartMenu" method="_on_start_menu_bg_clicked_bg"]
 [connection signal="file_selected" from="StartMenu/PathSelectWindow" to="StartMenu" method="_on_path_select_window_file_selected"]
 [connection signal="file_selected" from="StartMenu/OpenTerrainWindow" to="StartMenu" method="_on_open_terrain_window_file_selected"]
 [connection signal="pressed" from="StartMenu/New/NewPathChoice/NewPathChoiceButton" to="StartMenu" method="_on_new_path_choice_button_pressed"]

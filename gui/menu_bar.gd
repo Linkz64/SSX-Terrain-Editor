@@ -7,13 +7,13 @@ extends ColorRect
 
 
 func _ready() -> void:
-	start_button.get_popup().connect("index_pressed", _on_s_index_pressed)
+	start_button.get_popup().connect("index_pressed", _on_index_pressed)
+	start_button.pressed.connect(_on_start_button_pressed)
 
 
-func _on_s_index_pressed(index: int) -> void:
-	match index:
-		0:
-			start_menu.activate()
+func _on_index_pressed(index: int) -> void:
+	if index == 0:
+		start_menu.activate()
 
 
 func _on_start_button_pressed() -> void:

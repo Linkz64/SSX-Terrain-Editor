@@ -7,19 +7,10 @@ const PLAIN_PATCH = preload("res://world/entities/plain_patch.tscn")
 @onready var object_mode_tools: PanelContainer = $ToolBar/ObjectModeTools
 @onready var edit_mode_tools: PanelContainer = $ToolBar/EditModeTools
 @onready var start_menu: Control = $StartMenu
-@onready var world: Node3D = $MainViewport/MainRender/World
+@onready var world: Node3D = $Viewport/Render/World
 
 
 func _ready():
-	#AlertBus.create_side_alert("AAHHHH", Enum.SideAlertType.ERROR)
-	#await get_tree().create_timer(3).timeout
-	#AlertBus.create_side_alert("jk mothing is wrong", Enum.SideAlertType.LOG)
-	#await get_tree().create_timer(3).timeout
-	#AlertBus.create_side_alert("SIKE Watch out!", Enum.SideAlertType.WARNING)
-	#await get_tree().create_timer(3).timeout
-	#AlertBus.create_side_alert("ERROR: GUAH GUAH GUAH GUAH", Enum.SideAlertType.ERROR)
-	
-	# Enable back if not interesting in seeing the alerts above for testing.
 	#start_menu.activate()
 	pass
 

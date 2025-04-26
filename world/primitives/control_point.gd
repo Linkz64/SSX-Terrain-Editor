@@ -15,7 +15,7 @@ var aligned: bool = true
 
 
 func _init(p_position, p_patch_object):
-	self.position = p_position
+	self.local_position = p_position
 	self.patch_object = p_patch_object
 
 

@@ -1,6 +1,6 @@
 [gd_scene load_steps=12 format=3 uid="uid://ds2dgteaeean1"]
 
-[ext_resource type="Script" uid="uid://d0xptvmvusqtx" path="res://gui/axis_helper/axis_helper.gd" id="1_aj4wc"]
+[ext_resource type="Script" uid="uid://d0xptvmvusqtx" path="res://gui/viewport_overlay/axis_helper/axis_helper.gd" id="1_aj4wc"]
 [ext_resource type="Texture2D" uid="uid://csam46wcqiqdn" path="res://assets/ui/axis_helper_circle.svg" id="1_kdi0t"]
 [ext_resource type="Texture2D" uid="uid://c16hsyh3l7gdi" path="res://assets/ui/axis_helper_circle_outlined.svg" id="2_aj4wc"]
 

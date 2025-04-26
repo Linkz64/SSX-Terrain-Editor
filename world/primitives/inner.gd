@@ -5,6 +5,9 @@ class_name Inner
 ## retrieve the patch segment by selecting this inner.
 
 
+## The segment this inner is part of.
+var shared_segment: PatchSegment = null
+
 ## The corner diagonal to this inner.
 var corner: ControlPoint
 
