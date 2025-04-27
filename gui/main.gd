@@ -1,7 +1,6 @@
 extends Control
 
 
-const PLAIN_PATCH = preload("res://world/entities/plain_patch.tscn")
 
 @export var tree: Tree
 @onready var object_mode_tools: PanelContainer = $ViewportOverlay/ToolBar/ObjectModeTools
@@ -12,7 +11,6 @@ const PLAIN_PATCH = preload("res://world/entities/plain_patch.tscn")
 
 func _ready():
 	start_menu.activate()
-	pass
 
 
 func _unhandled_input(_event: InputEvent) -> void:
@@ -28,14 +26,14 @@ func _on_import_json_dir_selected(dir: String) -> void:
 		print("Failed to create tree from json, There are duplicate patch names.")
 		return
 	
-	for patch in patches:
-		var plain_inst = PLAIN_PATCH.instantiate()
-		$MainViewport/MainRender/World.add_child(plain_inst)
-		plain_inst.name = patch.patch_name
-		plain_inst.set_points(patch.points, patch.uv_points)
-		plain_inst.set_texture(patch.texture)
-		plain_inst.scale /= 100
-	
+	#for patch in patches:
+		#var plain_inst = PLAIN_PATCH.instantiate()
+		#$MainViewport/MainRender/World.add_child(plain_inst)
+		#plain_inst.name = patch.patch_name
+		#plain_inst.set_points(patch.points, patch.uv_points)
+		#plain_inst.set_texture(patch.texture)
+		#plain_inst.scale /= 100
+
 
 func _on_mode_switch_toggled(toggled_on: bool) -> void:
 	if toggled_on:
@@ -44,3 +42,7 @@ func _on_mode_switch_toggled(toggled_on: bool) -> void:
 	else:
 		object_mode_tools.visible = true
 		edit_mode_tools.visible = false
+
+
+func _on_start_menu_new_terrain_created(terrain_path: String, _import_json: bool, _grouping_index: Enum.GroupingIndex) -> void:
+	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))

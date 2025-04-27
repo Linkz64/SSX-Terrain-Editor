@@ -14,7 +14,6 @@ constant, and the rest are default values in the segment class.
 """
 
 const ICON_GODOT = preload("res://assets/icon_godot.svg")
-const BEZIER_SURFACE_SHADER = preload("res://world/bezier_surface_shader.tres")
 const DEFAULT_SIZE = 10 # 10x10
 
 
@@ -39,25 +38,22 @@ func create_default():
 			control_points[control_points_id] = ControlPoint.new(Vector3(new_x, new_y, 0), self)
 			control_points_id += 1
 
+	#control_points[5].local_position += Vector3(0, 0, 3)
+
+	var cp_array: Array[Vector3] = []
+	for cp in 16:
+		cp_array.append(control_points[cp].local_position)
+		
+	var grid := ControlGrid.new(cp_array, Color.GREEN, Color.GREEN)
+	add_child(grid)
+	
 	# Set the ids for the segment
 	for i in 16:
 		main_segment.control_point_ids.append(i)
 	main_segment.patch_object = self
 	
-	control_points[5].local_position += Vector3(0, 0, 10)
 	
-	var default_mesh_instance := MeshInstance3D.new()
-	self.add_child(default_mesh_instance)
-	default_mesh_instance.mesh = get_default_plane_mesh()
-	default_mesh_instance.mesh.surface_set_material(0, ShaderMaterial.new())
-	var mesh_mat := default_mesh_instance.mesh.surface_get_material(0) as ShaderMaterial
-	mesh_mat.shader = BEZIER_SURFACE_SHADER
-	mesh_mat.set_shader_parameter("image", ICON_GODOT)
 	
-	var cp_array = []
-	for cp in 16:
-		cp_array.append(control_points[cp].local_position)
-	mesh_mat.set_shader_parameter("control_points", cp_array)
 
 
 func create_copy():

@@ -95,14 +95,13 @@ offset_top = -0.400002
 offset_right = 0.639893
 grow_horizontal = 2
 grow_vertical = 2
-stretch = true
 script = ExtResource("2_6eus7")
 metadata/_edit_lock_ = true
 
 [node name="Render" type="SubViewport" parent="Viewport"]
 transparent_bg = true
 handle_input_locally = false
-size = Vector2i(1599, 1048)
+size = Vector2i(1600, 1048)
 render_target_update_mode = 4
 
 [node name="World" parent="Viewport/Render" instance=ExtResource("2_iqv6a")]
@@ -453,6 +452,7 @@ anchor_right = 0.833333
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 metadata/_edit_use_anchors_ = true
 
 [node name="ToolBar" type="Control" parent="ViewportOverlay"]
@@ -741,6 +741,7 @@ anchor_bottom = 1.0
 offset_top = -471.0
 offset_right = 992.0
 grow_vertical = 0
+mouse_filter = 2
 script = ExtResource("14_y34gh")
 
 [node name="EditingMode" type="Control" parent="ViewportOverlay"]
@@ -870,6 +871,7 @@ grow_vertical = 2
 text = "Loading..."
 
 [node name="StartMenu" type="Control" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -1080,6 +1082,7 @@ text_overrun_behavior = 3
 [connection signal="mouse_exited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_exited"]
 [connection signal="toggled" from="ViewportOverlay/EditingMode/ModeSwitch" to="." method="_on_mode_switch_toggled"]
 [connection signal="toggled" from="ViewportOverlay/EditingMode/ModeSwitch" to="ViewportOverlay/EditingMode" method="_on_mode_switch_toggled"]
+[connection signal="new_terrain_created" from="StartMenu" to="." method="_on_start_menu_new_terrain_created"]
 [connection signal="clicked_bg" from="StartMenu/BG" to="StartMenu" method="_on_start_menu_bg_clicked_bg"]
 [connection signal="file_selected" from="StartMenu/PathSelectWindow" to="StartMenu" method="_on_path_select_window_file_selected"]
 [connection signal="file_selected" from="StartMenu/OpenTerrainWindow" to="StartMenu" method="_on_open_terrain_window_file_selected"]

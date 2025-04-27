@@ -57,3 +57,4 @@ camera = NodePath("../MainCamera")
 
 [node name="Gizmo" type="Node3D" parent="."]
 script = ExtResource("6_fn3g3")
+show_selection_box = false

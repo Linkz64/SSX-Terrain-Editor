@@ -16,7 +16,6 @@ static func open_extracted_patch_data(multitool_dir: String) -> Array[JsonPatch]
 	# Returns an empty array if the json failed to load
 	
 	var json_path: String = multitool_dir.path_join("Patches.json")
-	var texture_dir: String = multitool_dir.path_join("Textures")
 	var _lightmaps_dir: String = multitool_dir.path_join("Lightmaps")
 	
 	var json_file: FileAccess = FileAccess.open(json_path, FileAccess.READ)
@@ -61,20 +60,8 @@ static func open_extracted_patch_data(multitool_dir: String) -> Array[JsonPatch]
 		# Trick only patch
 		final_patches.back().tricky_only_patch = json_patch["TrickOnlyPatch"]
 		
-		# Texture
-		var texture_path = texture_dir.path_join(json_patch["TexturePath"])
-		var texture_file = FileAccess.open(texture_path, FileAccess.READ)
-		if not texture_file:
-			print("Texture could not be found for patch %s " % json_patch["PatchName"])
-			final_patches.back().texture = load(MISSING_TEXTURE_PATH)
-		else:
-			var buffer = texture_file.get_buffer(texture_file.get_length())
-			var image := Image.new()
-			var error = image.load_png_from_buffer(buffer)
-			if error == OK:
-				final_patches.back().texture = ImageTexture.create_from_image(image)
-			else:
-				print("Texture file is invalid. Only png is supported.")
+		# Texture path
+		final_patches.back().texture_path = json_patch["TexturePath"]
 	
 		# Lightmap ID
 		final_patches.back().lightmap_id = json_patch["LightmapID"]

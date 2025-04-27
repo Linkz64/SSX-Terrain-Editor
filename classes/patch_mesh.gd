@@ -1,4 +1,16 @@
-extends MeshInstance3D
+extends ImmediateMesh
+class_name PatchMesh
+
+
+
+
+
+
+func set_texture(texture: Texture2D):
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = texture
+	surface_set_material(0, mat)
+	
 
 
 func uv_point(UVs: Array[Vector2], pos: Vector2) -> Vector2:
@@ -35,7 +47,7 @@ func set_points(control_points: Array[Vector3], UVs: Array[Vector2]):
 			surface.add_vertex(_evaluate_bezier_surface(control_points, p.x, p.y))
 			
 	surface.generate_normals()
-	mesh = surface.commit()
+	#surface.commit()
 
 
 func _evaluate_bezier_surface(control_points: Array[Vector3], u:float, v:float) -> Vector3:
@@ -55,6 +67,4 @@ func _evaluate_bezier_surface(control_points: Array[Vector3], u:float, v:float) 
 	return u_points[0].bezier_interpolate(u_points[1], u_points[2], u_points[3], v)
 
 
-func set_texture(texture: Texture2D):
-	self.material_override.albedo_texture = texture
 	
