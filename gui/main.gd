@@ -4,14 +4,14 @@ extends Control
 const PLAIN_PATCH = preload("res://world/entities/plain_patch.tscn")
 
 @export var tree: Tree
-@onready var object_mode_tools: PanelContainer = $ToolBar/ObjectModeTools
-@onready var edit_mode_tools: PanelContainer = $ToolBar/EditModeTools
+@onready var object_mode_tools: PanelContainer = $ViewportOverlay/ToolBar/ObjectModeTools
+@onready var edit_mode_tools: PanelContainer = $ViewportOverlay/ToolBar/EditModeTools
 @onready var start_menu: Control = $StartMenu
 @onready var world: Node3D = $Viewport/Render/World
 
 
 func _ready():
-	#start_menu.activate()
+	start_menu.activate()
 	pass
 
 

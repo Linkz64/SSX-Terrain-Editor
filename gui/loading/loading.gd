@@ -9,6 +9,9 @@ var _count: float = 0
 
 
 func _process(delta: float) -> void:
+	if not visible:
+		return
+	
 	loading_icon.rotation += 1 * delta
 	_count += delta
 	

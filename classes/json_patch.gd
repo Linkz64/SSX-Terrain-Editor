@@ -1,5 +1,7 @@
 extends RefCounted
 class_name JsonPatch
+## Data held by a patch on the json file but in godot format.
+
 
 var patch_name: String = ""
 var lightmap_point: Rect2

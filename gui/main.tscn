@@ -870,7 +870,6 @@ grow_vertical = 2
 text = "Loading..."
 
 [node name="StartMenu" type="Control" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5

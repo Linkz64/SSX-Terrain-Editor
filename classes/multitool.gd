@@ -1,5 +1,7 @@
 extends RefCounted
 class_name Multitool
+## Helper and utility functions for interacting with Multitool formats
+## https://github.com/GlitcherOG/SSX-Collection-Multitool
 
 
 const MISSING_TEXTURE_PATH = "res://assets/world/missing_texture.tres"

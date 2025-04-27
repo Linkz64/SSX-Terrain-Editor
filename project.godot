@@ -18,10 +18,11 @@ config/icon="uid://bgxaivprkhk63"
 
 [autoload]
 
-AlertBus="*res://globals/alert_bus/alert_bus.tscn"
-ObjectManager="*res://globals/object_manager/object_manager.tscn"
-ColorCollision="*res://globals/color_collision/color_collision.tscn"
-UserState="*res://globals/user_state.gd"
+AlertBus="*res://singletons/alert_bus.gd"
+ColorCollision="*res://singletons/color_collision.gd"
+ObjectManager="*res://singletons/object_manager.gd"
+TextureManager="*res://singletons/texture_manager.gd"
+UserState="*res://singletons/user_state.gd"
 
 [display]
 

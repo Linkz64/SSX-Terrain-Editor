@@ -1,7 +1,7 @@
 extends Node
+## Handles the state of the user.
+## Like edit mode or gizmo orientation.
 
-## Handles the state of th user.
-## Like edit mode, camera orientation.
 
 enum GizmoOrientation {
 	GLOBAL,

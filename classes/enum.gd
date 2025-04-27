@@ -1,5 +1,6 @@
 extends RefCounted
 class_name Enum
+## Public enums used throughout the project
 
 
 enum GroupingIndex {

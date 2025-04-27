@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dgf66js4cb6s2"]
-
-[ext_resource type="Script" uid="uid://cyib4kxtj01d1" path="res://globals/color_collision/color_collision.gd" id="1_8f68n"]
-
-[node name="ColorCollision" type="Node3D"]
-script = ExtResource("1_8f68n")
