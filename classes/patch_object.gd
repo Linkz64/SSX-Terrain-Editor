@@ -37,21 +37,35 @@ func create_default():
 			var new_y = y * DEFAULT_SIZE/3.0
 			control_points[control_points_id] = ControlPoint.new(Vector3(new_x, new_y, 0), self)
 			control_points_id += 1
-
-	#control_points[5].local_position += Vector3(0, 0, 3)
-
-	var cp_array: Array[Vector3] = []
-	for cp in 16:
-		cp_array.append(control_points[cp].local_position)
-		
-	var grid := ControlGrid.new(cp_array, Color.GREEN, Color.GREEN)
-	add_child(grid)
-	
+			
 	# Set the ids for the segment
 	for i in 16:
 		main_segment.control_point_ids.append(i)
 	main_segment.patch_object = self
+
+
+	control_points[0].local_position += Vector3(0, 0, 5)
+	control_points[1].local_position += Vector3(0, 0, 5)
+	control_points[4].local_position += Vector3(0, 0, 5)
+	control_points[5].local_position += Vector3(0, 0, 5)
+
+	var cp_array: Array[Vector3] = []
+	for cp in 16:
+		cp_array.append(control_points[cp].local_position)
 	
+	# Test control grid
+	var grid := ControlGrid.new(cp_array, Color.GREEN, Color.GREEN)
+	add_child(grid)
+	
+	# Test tesselated mesh
+	var uv_points: Dictionary = {
+		"top-left": Vector2.ZERO,
+		"top-right": Vector2(1, 0),
+		"bottom-left": Vector2(0, 1),
+		"bottom-right": Vector2(1, 1),
+	}
+	var surface := Tessellatedmesh.new(cp_array, "0001.png", uv_points)
+	add_child(surface)
 	
 	
 

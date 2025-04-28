@@ -8,7 +8,7 @@ var _control_points: Array[Vector3] # Bus to transfer to _ready. clear after use
 
 
 func _init(control_points: Array[Vector3], h_color: Color, v_color: Color):
-	_control_points = control_points
+	_control_points = control_points.duplicate()
 	colors.append(h_color)
 	colors.append(v_color)
 	mesh = ImmediateMesh.new()
@@ -40,22 +40,6 @@ func update(control_points: Array[Vector3]):
 	for y in 4:
 		for i in v_line_indices:
 			(mesh as ImmediateMesh).surface_add_vertex(control_points[y + i])
-	
-	# Duplicate
-	#for i in control_points.size():
-		#const OFFSET = 0.01
-		#control_points[i] += Vector3(OFFSET, OFFSET, OFFSET)
-	#
-	#for y in 4:
-		#for i in h_line_indices:
-			#(mesh as ImmediateMesh).surface_add_vertex(control_points[4 * y + i])
-			#
-	#for y in 4:
-		#for i in v_line_indices:
-			#(mesh as ImmediateMesh).surface_add_vertex(control_points[y + i])
-	
-			
-			
-	
+
 	(mesh as ImmediateMesh).surface_end()
 	
