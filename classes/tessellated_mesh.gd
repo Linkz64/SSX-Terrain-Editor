@@ -3,6 +3,20 @@ class_name Tessellatedmesh
 ## The Bezier surface with the texture and lighting normals.
 ## 8x8 vertices, 7x7 faces
 
+## Vertex Indices
+const CORNERS = {
+	"top-left": 0,
+	"top-right": 7,
+	"bottom-left": 56,
+	"bottom-right": 63,
+}
+const EDGES = {
+	"top": [1, 2, 3, 4, 5, 6],
+	"right": [15, 23, 31, 39, 47, 55], 
+	"left": [8, 16, 24, 32, 40, 48],
+	"bottom": [57, 58, 59, 60, 61, 62],
+}
+const DELTA_DISTANCE = 0.142857
 
 var _control_points: Array[Vector3] # Bus to transfer to _ready. clear after use.
 var _texture: Texture2D
@@ -27,10 +41,84 @@ func _ready() -> void:
 
 func update(control_points: Array[Vector3]):
 	var vertices: Array[Vector3] = []
+	var normals: Array[Vector3] = []
+	vertices.resize(64)
+	normals.resize(64)
+	
+	# Populate vertices
 	for y in 8:
 		for x in 8:
-			vertices.append(_evaluate_bezier_surface(control_points, x/7.0, y/7.0))
+			vertices[y * 8 + x] = _evaluate_bezier_surface(control_points, x/7.0, y/7.0)
 
+	# Set the default normals
+	# Checks the 4 neighbouring vertices next to the vertex being iterated on.
+	# It gets the cross product of the 4 combinations between it's neighbours,
+	# and then gets the average normal of all the available combinations.
+	for i in vertices.size():
+		var top = null
+		var left = null
+		var bottom = null
+		var right = null
+		
+		if i - 8 > 0:
+			top = (vertices[i - 8] - vertices[i]).normalized()
+		if i - 1 > 0 and i % 8 != 0:
+			left = (vertices[i - 1] - vertices[i]).normalized()
+		if i + 8 < vertices.size():
+			bottom = (vertices[i + 8] - vertices[i]).normalized()
+		if i + 1 < vertices.size() and i % 8 != 7:
+			right = (vertices[i + 1] - vertices[i]).normalized()
+		
+		var neighbouring_normals: Array[Vector3] = []
+		if top and left:
+			neighbouring_normals.append(top.cross(left))
+		if left and bottom:
+			neighbouring_normals.append(left.cross(bottom))
+		if bottom and right:
+			neighbouring_normals.append(bottom.cross(right))
+		if right and top:
+			neighbouring_normals.append(right.cross(top))
+		
+		# Average algo by summing and then normalizing.
+		var sum = func(accum: Vector3, vec: Vector3):
+			return accum + vec
+		var average: Vector3 = neighbouring_normals.reduce(sum).normalized()
+		normals[i] = average
+	
+	# Override the corner normals
+	var corner_cross = func(main_cp: int, cp_a: int, cp_b: int):
+		var a = (control_points[cp_a] - control_points[main_cp]).normalized()
+		var b = (control_points[cp_b] - control_points[main_cp]).normalized()
+		var cross = a.cross(b)
+		return cross
+		
+	normals[CORNERS["top-left"]] = corner_cross.call(0, 1, 4)
+	normals[CORNERS["top-right"]] = corner_cross.call(3, 7, 2)
+	normals[CORNERS["bottom-left"]] = corner_cross.call(12, 8, 13)
+	normals[CORNERS["bottom-right"]] = corner_cross.call(15, 14, 11)
+
+	# Override the edge normals
+	var p0 = control_points[0]
+	var p1 = control_points[1]
+	var p2 = control_points[2]
+	var p3 = control_points[3]
+	
+	# Top
+	for i in 6:
+		var delta := i/6.0
+		var tangent = p0.bezier_derivative(p1, p2, p3, delta)
+		tangent = tangent.normalized()
+		
+		var n = normals[CORNERS["top-left"]].slerp(normals[CORNERS["top-right"]], delta)
+		n = n.normalized()
+		
+		
+		var normal
+		normals[EDGES["top"][i]] = normal
+	
+	return
+
+	# Make lollipops
 	for i in 8*8:
 		var inst = MeshInstance3D.new()
 		inst.mesh = SphereMesh.new()
@@ -44,6 +132,7 @@ func update(control_points: Array[Vector3]):
 		(arrow.mesh as CylinderMesh).height = 3
 		(arrow.mesh as CylinderMesh).top_radius = 0.1
 		(arrow.mesh as CylinderMesh).bottom_radius = 0.1
+		(arrow.mesh as CylinderMesh).radial_segments = 8
 		arrow.material_override = StandardMaterial3D.new()
 		(arrow.material_override as StandardMaterial3D).albedo_color = Color.RED
 		(arrow.material_override as StandardMaterial3D).shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -52,54 +141,8 @@ func update(control_points: Array[Vector3]):
 		arrow.rotate_x(TAU/4)
 		inst.scale = Vector3.ONE * 0.4
 		
-		# top
-		var top = null
-		if i - 8 > 0:
-			top = (vertices[i - 8] - vertices[i]).normalized()
-		# left
-		var left = null
-		if i - 1 > 0 and i % 8 != 0:
-			left = (vertices[i - 1] - vertices[i]).normalized()
-		# bottom
-		var bottom = null
-		if i + 8 < vertices.size():
-			bottom = (vertices[i + 8] - vertices[i]).normalized()
-		# right
-		var right = null
-		if i + 1 < vertices.size() and i % 8 != 7:
-			right = (vertices[i + 1] - vertices[i]).normalized()
-		
-		var normals: Array[Vector3] = []
-		if top and left:
-			normals.append(top.cross(left))
-		if left and bottom:
-			normals.append(left.cross(bottom))
-		if bottom and right:
-			normals.append(bottom.cross(right))
-		if right and top:
-			normals.append(right.cross(top))
-		
-		var sum = func(accum: Vector3, vec: Vector3):
-			return accum + vec
-		
-		var average: Vector3 = normals.reduce(sum).normalized()
-		inst.look_at(inst.global_position - average, Vector3(0, 0, 1))
-		
-	
-	var corner_0 = get_child(0)
-	var point0 = (control_points[1] - control_points[0]).normalized()
-	var point1 = (control_points[4] - control_points[0]).normalized()
-	var cross = point0.cross(point1)
-	corner_0.look_at(corner_0.global_position + cross, Vector3(0, 0, 1))
-		
-		
-		
-		
-		
-	#(mesh as ImmediateMesh).clear_surfaces()
-	#(mesh as ImmediateMesh).surface_begin(Mesh.PRIMITIVE_TRIANGLES)
 
-
+# TODO: Turn into a lambda
 func uv_point(UVs: Array[Vector2], pos: Vector2) -> Vector2:
 	var a = UVs[0].lerp(UVs[2], pos.x)
 	var b = UVs[1].lerp(UVs[3], pos.x)
@@ -107,6 +150,7 @@ func uv_point(UVs: Array[Vector2], pos: Vector2) -> Vector2:
 	return c
 
 
+# TODO: Translate to ImmediateMesh
 func _set_points(control_points: Array[Vector3], UVs: Array[Vector2]):
 	# Generate tesselated mesh
 	var surface := SurfaceTool.new()
@@ -138,6 +182,7 @@ func _set_points(control_points: Array[Vector3], UVs: Array[Vector2]):
 
 
 func _evaluate_bezier_surface(control_points: Array[Vector3], u:float, v:float) -> Vector3:
+	# De casteljau's algorithm.
 	# Compute 4 control points along the u direction
 	var u_points: Array[Vector3] = []
 	for i in 4:

@@ -5,7 +5,7 @@ const ROTATION_SENSITIVITY = Vector2(0.003, 0.003)
 const SPEED_RANGE = {"min": 1, "max": 200}
 const SPEED_RANGE_CHANGE = 4
 var movable: bool = false
-var speed: float = 30
+var speed: float = 10
 var _rotation: Vector2 = Vector2.ZERO
 
 

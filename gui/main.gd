@@ -25,14 +25,6 @@ func _on_import_json_dir_selected(dir: String) -> void:
 	if error:
 		print("Failed to create tree from json, There are duplicate patch names.")
 		return
-	
-	#for patch in patches:
-		#var plain_inst = PLAIN_PATCH.instantiate()
-		#$MainViewport/MainRender/World.add_child(plain_inst)
-		#plain_inst.name = patch.patch_name
-		#plain_inst.set_points(patch.points, patch.uv_points)
-		#plain_inst.set_texture(patch.texture)
-		#plain_inst.scale /= 100
 
 
 func _on_mode_switch_toggled(toggled_on: bool) -> void:
