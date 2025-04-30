@@ -90,7 +90,7 @@ func update(control_points: Array[Vector3]):
 		var a = (control_points[cp_a] - control_points[main_cp]).normalized()
 		var b = (control_points[cp_b] - control_points[main_cp]).normalized()
 		var cross = a.cross(b)
-		return cross
+		return -cross
 		
 	normals[CORNERS["top-left"]] = corner_cross.call(0, 1, 4)
 	normals[CORNERS["top-right"]] = corner_cross.call(3, 7, 2)
@@ -98,25 +98,72 @@ func update(control_points: Array[Vector3]):
 	normals[CORNERS["bottom-right"]] = corner_cross.call(15, 14, 11)
 
 	# Override the edge normals
-	var p0 = control_points[0]
-	var p1 = control_points[1]
-	var p2 = control_points[2]
-	var p3 = control_points[3]
-	
 	# Top
 	for i in 6:
-		var delta := i/6.0
+		var p0 = control_points[0]
+		var p1 = control_points[1]
+		var p2 = control_points[2]
+		var p3 = control_points[3]
+		var delta := DELTA_DISTANCE + (i * DELTA_DISTANCE)
 		var tangent = p0.bezier_derivative(p1, p2, p3, delta)
 		tangent = tangent.normalized()
 		
 		var n = normals[CORNERS["top-left"]].slerp(normals[CORNERS["top-right"]], delta)
 		n = n.normalized()
 		
-		
-		var normal
+		var normal = n.slide(tangent).normalized()
 		normals[EDGES["top"][i]] = normal
 	
-	return
+	# Left
+	for i in 6:
+		var p0 = control_points[0]
+		var p1 = control_points[4]
+		var p2 = control_points[8]
+		var p3 = control_points[12]
+		var delta := DELTA_DISTANCE + (i * DELTA_DISTANCE)
+		var tangent = p0.bezier_derivative(p1, p2, p3, delta)
+		tangent = tangent.normalized()
+		
+		var n = normals[CORNERS["top-left"]].slerp(normals[CORNERS["bottom-left"]], delta)
+		n = n.normalized()
+		
+		var normal = n.slide(tangent).normalized()
+		normals[EDGES["left"][i]] = normal
+	
+	# Bottom
+	for i in 6:
+		var p0 = control_points[12]
+		var p1 = control_points[13]
+		var p2 = control_points[14]
+		var p3 = control_points[15]
+		var delta := DELTA_DISTANCE + (i * DELTA_DISTANCE)
+		var tangent = p0.bezier_derivative(p1, p2, p3, delta)
+		tangent = tangent.normalized()
+		
+		var n = normals[CORNERS["bottom-left"]].slerp(normals[CORNERS["bottom-right"]], delta)
+		n = n.normalized()
+		
+		var normal = n.slide(tangent).normalized()
+		normals[EDGES["bottom"][i]] = normal
+	
+	# Right
+	for i in 6:
+		var p0 = control_points[3]
+		var p1 = control_points[7]
+		var p2 = control_points[11]
+		var p3 = control_points[15]
+		var delta := DELTA_DISTANCE + (i * DELTA_DISTANCE)
+		var tangent = p0.bezier_derivative(p1, p2, p3, delta)
+		tangent = tangent.normalized()
+		
+		var n = normals[CORNERS["top-right"]].slerp(normals[CORNERS["bottom-right"]], delta)
+		n = n.normalized()
+		
+		var normal = n.slide(tangent).normalized()
+		normals[EDGES["right"][i]] = normal
+	
+	
+	
 
 	# Make lollipops
 	for i in 8*8:
@@ -140,7 +187,14 @@ func update(control_points: Array[Vector3]):
 		arrow.position = Vector3(0, 0, 1.5)
 		arrow.rotate_x(TAU/4)
 		inst.scale = Vector3.ONE * 0.4
-		
+		inst.look_at(inst.global_position - normals[i], Vector3(0, 0, 1))
+
+
+#func get_bezier_normal_at(control_points: Array, ) -> Vector3:
+	#return Vector3.ZERO
+
+
+
 
 # TODO: Turn into a lambda
 func uv_point(UVs: Array[Vector2], pos: Vector2) -> Vector2:

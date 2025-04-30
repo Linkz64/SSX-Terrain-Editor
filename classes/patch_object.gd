@@ -43,15 +43,28 @@ func create_default():
 		main_segment.control_point_ids.append(i)
 	main_segment.patch_object = self
 
+
+
 	control_points[0].local_position += Vector3(0, 0, 10)
 	control_points[1].local_position += Vector3(0, 0, 10)
-	control_points[4].local_position += Vector3(0, 0, 10)
-	control_points[5].local_position += Vector3(0, 0, 10)
+	control_points[2].local_position += Vector3(0, 0, 10)
+	control_points[3].local_position += Vector3(0, 0, 10)
+
+	control_points[4].local_position += Vector3(0, 4, 4)
+	control_points[5].local_position += Vector3(0, 4, 4)
+	control_points[6].local_position += Vector3(0, 4, 4)
+	control_points[7].local_position += Vector3(0, 4, 4)
 	
-	control_points[2].local_position += Vector3(0, 0, 5)
-	control_points[3].local_position += Vector3(0, 0, 5)
-	control_points[6].local_position += Vector3(0, 0, 5)
-	control_points[7].local_position += Vector3(0, 0, 5)
+
+	#control_points[0].local_position += Vector3(0, 0, 5)
+	#control_points[1].local_position += Vector3(0, 0, 10)
+	#control_points[4].local_position += Vector3(0, 0, 10)
+	#control_points[5].local_position += Vector3(0, 0, 10)
+	#
+	#control_points[2].local_position += Vector3(0, 0, 5)
+	#control_points[3].local_position += Vector3(0, 0, 5)
+	#control_points[6].local_position += Vector3(0, 0, 5)
+	#control_points[7].local_position += Vector3(0, 0, 5)
 
 	var cp_array: Array[Vector3] = []
 	for cp in 16:
