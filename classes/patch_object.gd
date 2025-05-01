@@ -88,7 +88,7 @@ func create_default():
 		Vector2(0, 1),
 		Vector2(1, 1),
 	]
-	var surface := Tessellatedmesh.new(cp_array, "0001.png", uv_points)
+	var surface := Tessellatedmesh.new(cp_array, "0001.png", uv_points, true)
 	add_child(surface)
 	
 	

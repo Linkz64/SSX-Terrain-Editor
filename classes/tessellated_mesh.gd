@@ -22,9 +22,10 @@ const BLEND_DISTANCE = 0.142857
 var _control_points: PackedVector3Array # Bus to transfer to _ready. clear after use.
 var _texture: Texture2D
 var _uv_points: PackedVector2Array
+var _is_wireframe = false
 
-
-func _init(control_points: PackedVector3Array, texture_name: String, p_uv_points: PackedVector2Array ):
+func _init(control_points: PackedVector3Array, texture_name: String, \
+		p_uv_points: PackedVector2Array, wireframe: bool = false ):
 	_control_points = control_points.duplicate()
 	_texture = TextureManager.get_texture(texture_name)
 	_uv_points = p_uv_points
@@ -33,14 +34,20 @@ func _init(control_points: PackedVector3Array, texture_name: String, p_uv_points
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.albedo_texture = _texture
 	material_override = mat
+	_is_wireframe = wireframe
 
 
 func _ready() -> void:
 	update(_control_points)
 	_control_points.clear()
+	_uv_points.clear()
 
 
 func update(control_points: PackedVector3Array, uv_points: PackedVector2Array = []):
+	if _is_wireframe:
+		_update_wireframe(control_points)
+		return
+	
 	var vertices: Array[Vector3] = []
 	var normals: Array[Vector3] = []
 	var uvs: Array[Vector2] = []
@@ -261,6 +268,34 @@ func update(control_points: PackedVector3Array, uv_points: PackedVector2Array = 
 			add_vertex.call(3)
 	(mesh as ImmediateMesh).surface_end()
 	
+
+
+func _update_wireframe(control_points: PackedVector3Array):
+	var vertices: Array[Vector3] = []
+	vertices.resize(64)
+	
+	# Populate Vertices and UV points
+	for y in 8:
+		for x in 8:
+			var blend = Vector2(x/7.0, y/7.0)
+			vertices[y * 8 + x] = _evaluate_bezier_surface(control_points, blend.x, blend.y)
+
+	# Make wireframe grid
+	(mesh as ImmediateMesh).clear_surfaces()
+	(mesh as ImmediateMesh).surface_begin(Mesh.PRIMITIVE_LINES)
+	
+	# Vertical
+	for y in 7:
+		for x in 8:
+			(mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x])
+			(mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x + 8])
+	# Horizontal
+	for y in 8:
+		for x in 7:
+			(mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x])
+			(mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x + 1])
+	(mesh as ImmediateMesh).surface_end()
+
 
 static func _uv_point(UVs: PackedVector2Array, x: float, y: float) -> Vector2:
 	# Quadrilateral interpolation
