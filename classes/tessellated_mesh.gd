@@ -18,23 +18,29 @@ const EDGES = {
 }
 # Blend distance between the 7 vertices. Multiplied by 7 should give ~1.
 const BLEND_DISTANCE = 0.142857 
+const WIREFRAME_COLOR = Color.WHITE
 
 var _control_points: PackedVector3Array # Bus to transfer to _ready. clear after use.
 var _texture: Texture2D
 var _uv_points: PackedVector2Array
 var _is_wireframe = false
 
+
 func _init(control_points: PackedVector3Array, texture_name: String, \
 		p_uv_points: PackedVector2Array, wireframe: bool = false ):
 	_control_points = control_points.duplicate()
 	_texture = TextureManager.get_texture(texture_name)
 	_uv_points = p_uv_points
+	_is_wireframe = wireframe
 	mesh = ImmediateMesh.new()
 	var mat := StandardMaterial3D.new()
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mat.albedo_texture = _texture
+	if wireframe:
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.vertex_color_use_as_albedo = true
+	else:
+		mat.albedo_texture = _texture
 	material_override = mat
-	_is_wireframe = wireframe
 
 
 func _ready() -> void:
@@ -47,6 +53,9 @@ func update(control_points: PackedVector3Array, uv_points: PackedVector2Array = 
 	if _is_wireframe:
 		_update_wireframe(control_points)
 		return
+	
+	if not uv_points.is_empty():
+		_uv_points = uv_points.duplicate()
 	
 	var vertices: Array[Vector3] = []
 	var normals: Array[Vector3] = []
@@ -217,7 +226,8 @@ func update(control_points: PackedVector3Array, uv_points: PackedVector2Array = 
 		
 		normals[EDGES["right"][i]] = normal
 	
-	# Make lollipops
+	# Make lollipops.
+	# Keep in commented in case further debug is needed.
 	"""
 	for i in 8*8:
 		var inst = MeshInstance3D.new()
@@ -241,7 +251,7 @@ func update(control_points: PackedVector3Array, uv_points: PackedVector2Array = 
 		arrow.rotate_x(TAU/4)
 		inst.scale = Vector3.ONE * 0.4
 		inst.look_at(inst.global_position - normals[i], Vector3(0, 0, 1))
-		"""
+	"""
 
 	# Make grid
 	(mesh as ImmediateMesh).clear_surfaces()
@@ -267,7 +277,6 @@ func update(control_points: PackedVector3Array, uv_points: PackedVector2Array = 
 			add_vertex.call(2)
 			add_vertex.call(3)
 	(mesh as ImmediateMesh).surface_end()
-	
 
 
 func _update_wireframe(control_points: PackedVector3Array):
@@ -287,12 +296,16 @@ func _update_wireframe(control_points: PackedVector3Array):
 	# Vertical
 	for y in 7:
 		for x in 8:
+			(mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
 			(mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x])
+			(mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
 			(mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x + 8])
 	# Horizontal
 	for y in 8:
 		for x in 7:
+			(mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
 			(mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x])
+			(mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
 			(mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x + 1])
 	(mesh as ImmediateMesh).surface_end()
 
