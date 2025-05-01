@@ -16,14 +16,15 @@ const EDGES = {
 	"left": [8, 16, 24, 32, 40, 48],
 	"bottom": [57, 58, 59, 60, 61, 62],
 }
-const DELTA_DISTANCE = 0.142857
+# Blend distance between the 7 vertices. Multiplied by 7 should give ~1.
+const BLEND_DISTANCE = 0.142857 
 
-var _control_points: Array[Vector3] # Bus to transfer to _ready. clear after use.
+var _control_points: PackedVector3Array # Bus to transfer to _ready. clear after use.
 var _texture: Texture2D
-var _uv_points: Dictionary
+var _uv_points: PackedVector2Array
 
 
-func _init(control_points: Array[Vector3], texture_name: String, p_uv_points: Dictionary):
+func _init(control_points: PackedVector3Array, texture_name: String, p_uv_points: PackedVector2Array ):
 	_control_points = control_points.duplicate()
 	_texture = TextureManager.get_texture(texture_name)
 	_uv_points = p_uv_points
@@ -39,22 +40,36 @@ func _ready() -> void:
 	_control_points.clear()
 
 
-func update(control_points: Array[Vector3]):
+func update(control_points: PackedVector3Array, uv_points: PackedVector2Array = []):
 	var vertices: Array[Vector3] = []
 	var normals: Array[Vector3] = []
+	var uvs: Array[Vector2] = []
 	vertices.resize(64)
 	normals.resize(64)
+	uvs.resize(64)
 	
-	# Populate vertices
+	# Populate Vertices and UV points
 	for y in 8:
 		for x in 8:
-			vertices[y * 8 + x] = _evaluate_bezier_surface(control_points, x/7.0, y/7.0)
+			var index = y * 8 + x
+			var blend = Vector2(x/7.0, y/7.0)
+			vertices[index] = _evaluate_bezier_surface(control_points, blend.x, blend.y)
+			uvs[index] = _uv_point(_uv_points, blend.x, blend.y)
 
-	# Set the default normals
+	# Generate default normals
 	# Checks the 4 neighbouring vertices next to the vertex being iterated on.
 	# It gets the cross product of the 4 combinations between it's neighbours,
 	# and then gets the average normal of all the available combinations.
-	for i in vertices.size():
+	for i in 64:
+		# Skip if its a corner or edge
+		var is_edge = false
+		for edge in EDGES.values():
+			if i in edge:
+				is_edge = true
+				break
+		if is_edge or i in CORNERS.values():
+			continue
+		
 		var top = null
 		var left = null
 		var bottom = null
@@ -82,10 +97,9 @@ func update(control_points: Array[Vector3]):
 		# Average algo by summing and then normalizing.
 		var sum = func(accum: Vector3, vec: Vector3):
 			return accum + vec
-		var average: Vector3 = neighbouring_normals.reduce(sum).normalized()
-		normals[i] = average
+		normals[i] = neighbouring_normals.reduce(sum).normalized() # average
 	
-	# Override the corner normals
+	# Generate corner normals
 	var corner_cross = func(main_cp: int, cp_a: int, cp_b: int):
 		var a = (control_points[cp_a] - control_points[main_cp]).normalized()
 		var b = (control_points[cp_b] - control_points[main_cp]).normalized()
@@ -97,21 +111,34 @@ func update(control_points: Array[Vector3]):
 	normals[CORNERS["bottom-left"]] = corner_cross.call(12, 8, 13)
 	normals[CORNERS["bottom-right"]] = corner_cross.call(15, 14, 11)
 
-	# Override the edge normals
+	# Generate edge normals
+	
+	# The tangent at the beginning and end of the edge curves.
+	# For local use in the loops below.
+	var start_tangent: Vector3
+	var end_tangent: Vector3
+	
 	# Top
 	for i in 6:
 		var p0 = control_points[0]
 		var p1 = control_points[1]
 		var p2 = control_points[2]
 		var p3 = control_points[3]
-		var delta := DELTA_DISTANCE + (i * DELTA_DISTANCE)
-		var tangent = p0.bezier_derivative(p1, p2, p3, delta)
+		var blend_factor := BLEND_DISTANCE + (i * BLEND_DISTANCE)
+		var tangent = p0.bezier_derivative(p1, p2, p3, blend_factor)
 		tangent = tangent.normalized()
 		
-		var n = normals[CORNERS["top-left"]].slerp(normals[CORNERS["top-right"]], delta)
+		var n = normals[CORNERS["top-left"]].slerp(normals[CORNERS["top-right"]], blend_factor)
 		n = n.normalized()
-		
 		var normal = n.slide(tangent).normalized()
+		
+		start_tangent = p0.bezier_derivative(p1, p2, p3, 0).normalized()
+		end_tangent = p0.bezier_derivative(p1, p2, p3, 1).normalized()
+		var t = start_tangent.slerp(end_tangent, blend_factor)
+		t = t.normalized()
+		if t.dot(tangent) < 0:
+			normal = -normal
+		
 		normals[EDGES["top"][i]] = normal
 	
 	# Left
@@ -120,14 +147,21 @@ func update(control_points: Array[Vector3]):
 		var p1 = control_points[4]
 		var p2 = control_points[8]
 		var p3 = control_points[12]
-		var delta := DELTA_DISTANCE + (i * DELTA_DISTANCE)
-		var tangent = p0.bezier_derivative(p1, p2, p3, delta)
+		var blend_factor := BLEND_DISTANCE + (i * BLEND_DISTANCE)
+		var tangent = p0.bezier_derivative(p1, p2, p3, blend_factor)
 		tangent = tangent.normalized()
 		
-		var n = normals[CORNERS["top-left"]].slerp(normals[CORNERS["bottom-left"]], delta)
+		var n = normals[CORNERS["top-left"]].slerp(normals[CORNERS["bottom-left"]], blend_factor)
 		n = n.normalized()
-		
 		var normal = n.slide(tangent).normalized()
+		
+		start_tangent = p0.bezier_derivative(p1, p2, p3, 0).normalized()
+		end_tangent = p0.bezier_derivative(p1, p2, p3, 1).normalized()
+		var t = start_tangent.slerp(end_tangent, blend_factor)
+		t = t.normalized()
+		if t.dot(tangent) < 0:
+			normal = -normal
+		
 		normals[EDGES["left"][i]] = normal
 	
 	# Bottom
@@ -136,14 +170,21 @@ func update(control_points: Array[Vector3]):
 		var p1 = control_points[13]
 		var p2 = control_points[14]
 		var p3 = control_points[15]
-		var delta := DELTA_DISTANCE + (i * DELTA_DISTANCE)
-		var tangent = p0.bezier_derivative(p1, p2, p3, delta)
+		var blend_factor := BLEND_DISTANCE + (i * BLEND_DISTANCE)
+		var tangent = p0.bezier_derivative(p1, p2, p3, blend_factor)
 		tangent = tangent.normalized()
 		
-		var n = normals[CORNERS["bottom-left"]].slerp(normals[CORNERS["bottom-right"]], delta)
+		var n = normals[CORNERS["bottom-left"]].slerp(normals[CORNERS["bottom-right"]], blend_factor)
 		n = n.normalized()
-		
 		var normal = n.slide(tangent).normalized()
+		
+		start_tangent = p0.bezier_derivative(p1, p2, p3, 0).normalized()
+		end_tangent = p0.bezier_derivative(p1, p2, p3, 1).normalized()
+		var t = start_tangent.slerp(end_tangent, blend_factor)
+		t = t.normalized()
+		if t.dot(tangent) < 0:
+			normal = -normal
+		
 		normals[EDGES["bottom"][i]] = normal
 	
 	# Right
@@ -152,20 +193,25 @@ func update(control_points: Array[Vector3]):
 		var p1 = control_points[7]
 		var p2 = control_points[11]
 		var p3 = control_points[15]
-		var delta := DELTA_DISTANCE + (i * DELTA_DISTANCE)
-		var tangent = p0.bezier_derivative(p1, p2, p3, delta)
+		var blend_factor := BLEND_DISTANCE + (i * BLEND_DISTANCE)
+		var tangent = p0.bezier_derivative(p1, p2, p3, blend_factor)
 		tangent = tangent.normalized()
 		
-		var n = normals[CORNERS["top-right"]].slerp(normals[CORNERS["bottom-right"]], delta)
+		var n = normals[CORNERS["top-right"]].slerp(normals[CORNERS["bottom-right"]], blend_factor)
 		n = n.normalized()
-		
 		var normal = n.slide(tangent).normalized()
+		
+		start_tangent = p0.bezier_derivative(p1, p2, p3, 0).normalized()
+		end_tangent = p0.bezier_derivative(p1, p2, p3, 1).normalized()
+		var t = start_tangent.slerp(end_tangent, blend_factor)
+		t = t.normalized()
+		if t.dot(tangent) < 0:
+			normal = -normal
+		
 		normals[EDGES["right"][i]] = normal
 	
-	
-	
-
 	# Make lollipops
+	"""
 	for i in 8*8:
 		var inst = MeshInstance3D.new()
 		inst.mesh = SphereMesh.new()
@@ -188,69 +234,55 @@ func update(control_points: Array[Vector3]):
 		arrow.rotate_x(TAU/4)
 		inst.scale = Vector3.ONE * 0.4
 		inst.look_at(inst.global_position - normals[i], Vector3(0, 0, 1))
+		"""
 
+	# Make grid
+	(mesh as ImmediateMesh).clear_surfaces()
+	(mesh as ImmediateMesh).surface_begin(Mesh.PRIMITIVE_TRIANGLES)
+	for y in 7:
+		for x in 7:
+			var indexes = [
+				y * 8 + x, # top-left
+				y * 8 + x + 1, # top-right
+				y * 8 + x + 9, # bottom-right
+				y * 8 + x + 8, # bottom-left
+			]
+			
+			var add_vertex = func(index):
+				(mesh as ImmediateMesh).surface_set_uv(uvs[indexes[index]])
+				(mesh as ImmediateMesh).surface_set_normal(normals[indexes[index]])
+				(mesh as ImmediateMesh).surface_add_vertex(vertices[indexes[index]])
+			
+			add_vertex.call(0)
+			add_vertex.call(1)
+			add_vertex.call(2)
+			add_vertex.call(0)
+			add_vertex.call(2)
+			add_vertex.call(3)
+	(mesh as ImmediateMesh).surface_end()
+	
 
-#func get_bezier_normal_at(control_points: Array, ) -> Vector3:
-	#return Vector3.ZERO
-
-
-
-
-# TODO: Turn into a lambda
-func uv_point(UVs: Array[Vector2], pos: Vector2) -> Vector2:
-	var a = UVs[0].lerp(UVs[2], pos.x)
-	var b = UVs[1].lerp(UVs[3], pos.x)
-	var c = a.lerp(b, pos.y)
+static func _uv_point(UVs: PackedVector2Array, x: float, y: float) -> Vector2:
+	# Quadrilateral interpolation
+	var a = UVs[0].lerp(UVs[2], x)
+	var b = UVs[1].lerp(UVs[3], x)
+	var c = a.lerp(b, y)
 	return c
 
 
-# TODO: Translate to ImmediateMesh
-func _set_points(control_points: Array[Vector3], UVs: Array[Vector2]):
-	# Generate tesselated mesh
-	var surface := SurfaceTool.new()
-	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for z in 7:
-		for x in 7:
-			var p = Vector2(x/7.0, z/7.0)
-			surface.set_smooth_group(-1) # Smoothness
-			surface.set_uv(uv_point(UVs, p))
-			surface.add_vertex(_evaluate_bezier_surface(control_points, p.x, p.y))
-			p = Vector2((x+1)/7.0, z/7.0)
-			surface.set_uv(uv_point(UVs, p))
-			surface.add_vertex(_evaluate_bezier_surface(control_points, p.x, p.y))
-			p = Vector2((x+1)/7.0, (z+1)/7.0)
-			surface.set_uv(uv_point(UVs, p))
-			surface.add_vertex(_evaluate_bezier_surface(control_points, p.x, p.y))
-			p = Vector2(x/7.0, z/7.0)
-			surface.set_uv(uv_point(UVs, p))
-			surface.add_vertex(_evaluate_bezier_surface(control_points, p.x, p.y))
-			p = Vector2((x+1)/7.0, (z+1)/7.0)
-			surface.set_uv(uv_point(UVs, p))
-			surface.add_vertex(_evaluate_bezier_surface(control_points, p.x, p.y))
-			p = Vector2(x/7.0, (z+1)/7.0)
-			surface.set_uv(uv_point(UVs, p))
-			surface.add_vertex(_evaluate_bezier_surface(control_points, p.x, p.y))
-			
-	surface.generate_normals()
-	#surface.commit()
-
-
-func _evaluate_bezier_surface(control_points: Array[Vector3], u:float, v:float) -> Vector3:
+static func _evaluate_bezier_surface(control_points: PackedVector3Array, u:float, v:float) -> Vector3:
 	# De casteljau's algorithm.
 	# Compute 4 control points along the u direction
-	var u_points: Array[Vector3] = []
+	var u_points: PackedVector3Array = []
+	u_points.resize(4)
 	for i in 4:
-		var curve_points: Array[Vector3] = []
-		curve_points.resize(4)
-		curve_points[0] = control_points[i*4]
-		curve_points[1] = control_points[i*4 + 1]
-		curve_points[2] = control_points[i*4 + 2]
-		curve_points[3] = control_points[i*4 + 3]
-		var point = curve_points[0].bezier_interpolate(curve_points[1], curve_points[2], curve_points[3], u)
-		u_points.append(point)
-	
+		var row = i * 4
+		var p0 = control_points[row]
+		var p1 = control_points[row + 1]
+		var p2 = control_points[row + 2]
+		var p3 = control_points[row + 3]
+		u_points[i] = p0.bezier_interpolate(p1, p2, p3, u)
 	# Compute the final position on the surface using v
 	return u_points[0].bezier_interpolate(u_points[1], u_points[2], u_points[3], v)
-
 
 	
