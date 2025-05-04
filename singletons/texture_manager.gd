@@ -29,7 +29,7 @@ func load_textures(textures_directory: String):
 
 
 func get_texture(filename: String) -> Texture2D:
-	# If the texture is not found then it will put the missing texture.
+	# If the texture is not found then it will return the missing texture.
 	if filename not in _textures:
 		return MISSING_TEXTURE
 	else:

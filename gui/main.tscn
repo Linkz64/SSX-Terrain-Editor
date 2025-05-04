@@ -454,6 +454,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 metadata/_edit_use_anchors_ = true
+metadata/_edit_lock_ = true
 
 [node name="ToolBar" type="Control" parent="ViewportOverlay"]
 anchors_preset = 0
@@ -743,6 +744,7 @@ offset_right = 992.0
 grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("14_y34gh")
+metadata/_edit_lock_ = true
 
 [node name="EditingMode" type="Control" parent="ViewportOverlay"]
 anchors_preset = 0

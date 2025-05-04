@@ -1,7 +1,18 @@
 extends MeshInstance3D
-class_name Tessellatedmesh
+class_name TessellatedMesh
 ## The Bezier surface with the texture and lighting normals.
 ## 8x8 vertices, 7x7 faces
+
+## When created, they require the control points, the texture, and the UV map. 
+## As an optional it takes a bool telling it if it should render the wireframe overlay.
+## If true - it'll render The textured mesh, and the wireframe overlay.
+## If false - it'll only render the textured mesh.
+## In both cases the wireframe is created, but hidden if  false.
+
+## I dont want to store control point or uv point references here,
+## I just want it to create the mesh and forget about it with no strings attached.
+## Lets the creator handle its data. 
+
 
 ## Vertex Indices
 const CORNERS = {
@@ -19,43 +30,66 @@ const EDGES = {
 # Blend distance between the 7 vertices. Multiplied by 7 should give ~1.
 const BLEND_DISTANCE = 0.142857 
 const WIREFRAME_COLOR = Color.WHITE
+# Distance to offset from the textured vertices, towards the vertex normal.
+const WIREFRAME_MARGIN = 0.01
 
-var _control_points: PackedVector3Array # Bus to transfer to _ready. clear after use.
-var _texture: Texture2D
-var _uv_points: PackedVector2Array
-var _is_wireframe = false
+# Initial parameters used to create the meshes. 
+# Also used to propagate arguments from _init() to _ready().
+# Overriden by _init() and update methods.
+var _init_control_points: PackedVector3Array
+var _init_uv_points: PackedVector2Array
+var _init_texture_name: String
+var _init_wireframe_overlay: bool
+var _is_ready: bool = false
+var _wireframe_instance: MeshInstance3D
 
 
 func _init(control_points: PackedVector3Array, texture_name: String, \
-		p_uv_points: PackedVector2Array, wireframe: bool = false ):
-	_control_points = control_points.duplicate()
-	_texture = TextureManager.get_texture(texture_name)
-	_uv_points = p_uv_points
-	_is_wireframe = wireframe
-	mesh = ImmediateMesh.new()
-	var mat := StandardMaterial3D.new()
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	if wireframe:
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		mat.vertex_color_use_as_albedo = true
-	else:
-		mat.albedo_texture = _texture
-	material_override = mat
+		uv_points: PackedVector2Array, wireframe_overlay: bool = false ):
+	_init_control_points = control_points
+	_init_uv_points = uv_points
+	_init_texture_name = texture_name
+	_init_wireframe_overlay = wireframe_overlay
 
 
 func _ready() -> void:
-	update(_control_points)
-	_control_points.clear()
-	_uv_points.clear()
-
-
-func update(control_points: PackedVector3Array, uv_points: PackedVector2Array = []):
-	if _is_wireframe:
-		_update_wireframe(control_points)
-		return
+	_is_ready = true
 	
-	if not uv_points.is_empty():
-		_uv_points = uv_points.duplicate()
+	# Create textured material
+	var texture := TextureManager.get_texture(_init_texture_name)
+	var textured_material := StandardMaterial3D.new()
+	textured_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	textured_material.albedo_texture = texture
+	
+	# Create wireframe overlay material
+	var wireframe_material := StandardMaterial3D.new()
+	wireframe_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	wireframe_material.vertex_color_use_as_albedo = true
+	
+	# Create Textured mesh
+	mesh = ImmediateMesh.new()
+	material_override = textured_material
+	 
+	# Create Wireframe overlay mesh instance and mesh
+	_wireframe_instance = MeshInstance3D.new()
+	add_child(_wireframe_instance)
+	_wireframe_instance.mesh = ImmediateMesh.new()
+	_wireframe_instance.material_override = wireframe_material
+	
+	update_all(_init_control_points, _init_texture_name, _init_uv_points, _init_wireframe_overlay)
+	
+
+func update_all(control_points: PackedVector3Array, texture_name: String, \
+		uv_points: PackedVector2Array, wireframe_overlay: bool = false ):
+	if not _is_ready:
+		push_error("Can't call update when _ready hasn't ran yet.")
+		return
+
+	# Override initial data
+	_init_control_points = control_points
+	_init_uv_points = uv_points
+	_init_texture_name = texture_name
+	_init_wireframe_overlay = wireframe_overlay
 	
 	var vertices: Array[Vector3] = []
 	var normals: Array[Vector3] = []
@@ -70,8 +104,8 @@ func update(control_points: PackedVector3Array, uv_points: PackedVector2Array = 
 			var index = y * 8 + x
 			var blend = Vector2(x/7.0, y/7.0)
 			vertices[index] = _evaluate_bezier_surface(control_points, blend.x, blend.y)
-			uvs[index] = _uv_point(_uv_points, blend.x, blend.y)
-
+			uvs[index] = _uv_point(uv_points, blend.x, blend.y)
+	
 	# Generate default normals
 	# Checks the 4 neighbouring vertices next to the vertex being iterated on.
 	# It gets the cross product of the 4 combinations between it's neighbours,
@@ -225,35 +259,8 @@ func update(control_points: PackedVector3Array, uv_points: PackedVector2Array = 
 			normal = -normal
 		
 		normals[EDGES["right"][i]] = normal
-	
-	# Make lollipops.
-	# Keep in commented in case further debug is needed.
-	"""
-	for i in 8*8:
-		var inst = MeshInstance3D.new()
-		inst.mesh = SphereMesh.new()
-		inst.mesh.radial_segments = 16
-		inst.mesh.rings = 8
-		add_child(inst)
-		inst.position = vertices[i]
 		
-		var arrow = MeshInstance3D.new()
-		arrow.mesh = CylinderMesh.new()
-		(arrow.mesh as CylinderMesh).height = 3
-		(arrow.mesh as CylinderMesh).top_radius = 0.1
-		(arrow.mesh as CylinderMesh).bottom_radius = 0.1
-		(arrow.mesh as CylinderMesh).radial_segments = 8
-		arrow.material_override = StandardMaterial3D.new()
-		(arrow.material_override as StandardMaterial3D).albedo_color = Color.RED
-		(arrow.material_override as StandardMaterial3D).shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		inst.add_child(arrow)
-		arrow.position = Vector3(0, 0, 1.5)
-		arrow.rotate_x(TAU/4)
-		inst.scale = Vector3.ONE * 0.4
-		inst.look_at(inst.global_position - normals[i], Vector3(0, 0, 1))
-	"""
-
-	# Make grid
+	# Update textured grid mesh
 	(mesh as ImmediateMesh).clear_surfaces()
 	(mesh as ImmediateMesh).surface_begin(Mesh.PRIMITIVE_TRIANGLES)
 	for y in 7:
@@ -276,38 +283,89 @@ func update(control_points: PackedVector3Array, uv_points: PackedVector2Array = 
 			add_vertex.call(0)
 			add_vertex.call(2)
 			add_vertex.call(3)
-	(mesh as ImmediateMesh).surface_end()
+	(mesh as ImmediateMesh).surface_end()	
 
+	# Update wireframe mesh
+	_update_wireframe_with_normals(control_points, normals)
+	_wireframe_instance.visible = wireframe_overlay
+	
 
-func _update_wireframe(control_points: PackedVector3Array):
+#region TODO later
+func update_control_points():
+	pass
+	
+func update_uv_points():
+	pass
+
+func update_texture():
+	pass
+
+func enable_wireframe_overlay():
+	pass
+
+func disable_wireframe_overlay():
+	pass
+#endregion
+
+func _update_wireframe_with_normals(control_points: PackedVector3Array,
+		normals: PackedVector3Array):
 	var vertices: Array[Vector3] = []
 	vertices.resize(64)
 	
-	# Populate Vertices and UV points
+	# Populate Vertices
 	for y in 8:
 		for x in 8:
 			var blend = Vector2(x/7.0, y/7.0)
 			vertices[y * 8 + x] = _evaluate_bezier_surface(control_points, blend.x, blend.y)
 
 	# Make wireframe grid
-	(mesh as ImmediateMesh).clear_surfaces()
-	(mesh as ImmediateMesh).surface_begin(Mesh.PRIMITIVE_LINES)
+	(_wireframe_instance.mesh as ImmediateMesh).clear_surfaces()
+	(_wireframe_instance.mesh as ImmediateMesh).surface_begin(Mesh.PRIMITIVE_LINES)
 	
-	# Vertical
-	for y in 7:
-		for x in 8:
-			(mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
-			(mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x])
-			(mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
-			(mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x + 8])
-	# Horizontal
-	for y in 8:
-		for x in 7:
-			(mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
-			(mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x])
-			(mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
-			(mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x + 1])
-	(mesh as ImmediateMesh).surface_end()
+	# Wireframe overlays have two sides, offseted by the normal of a vertex. This is so it doesn't
+	# overlay the textured mesh and create uneven lines.
+	
+	var side = ["front", "back"]
+	for i in 2:
+		# Vertical
+		for y in 7:
+			for x in 8:
+				var normal_a = normals[y * 8 + x]
+				#normal_a += normal_a * WIREFRAME_MARGIN
+				normal_a *= WIREFRAME_MARGIN
+				if side[i] == "front":
+					normal_a *= -1
+				(_wireframe_instance.mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
+				(_wireframe_instance.mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x] + normal_a)
+				
+				var normal_b = normals[y * 8 + x + 8]
+				normal_b *= WIREFRAME_MARGIN
+				#normal_b += normal_b * WIREFRAME_MARGIN
+				if side[i] == "front":
+					normal_b *= -1
+				(_wireframe_instance.mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
+				(_wireframe_instance.mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x + 8] + normal_b)
+		# Horizontal
+		for y in 8:
+			for x in 7:
+				var normal_a = normals[y * 8 + x]
+				#normal_a += normal_a * WIREFRAME_MARGIN
+				normal_a *= WIREFRAME_MARGIN
+				if side[i] == "front":
+					normal_a *= -1
+				(_wireframe_instance.mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
+				(_wireframe_instance.mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x] + normal_a)
+				
+				var normal_b = normals[y * 8 + x + 1]
+				normal_b *= WIREFRAME_MARGIN
+				#normal_b += normal_b * WIREFRAME_MARGIN
+				if side[i] == "front":
+					normal_b *= -1
+				(_wireframe_instance.mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
+				(_wireframe_instance.mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x + 1] + normal_b)
+			
+	
+	(_wireframe_instance.mesh as ImmediateMesh).surface_end()
 
 
 static func _uv_point(UVs: PackedVector2Array, x: float, y: float) -> Vector2:
@@ -319,7 +377,6 @@ static func _uv_point(UVs: PackedVector2Array, x: float, y: float) -> Vector2:
 
 
 static func _evaluate_bezier_surface(control_points: PackedVector3Array, u:float, v:float) -> Vector3:
-	# De casteljau's algorithm.
 	# Compute 4 control points along the u direction
 	var u_points: PackedVector3Array = []
 	u_points.resize(4)

@@ -35,7 +35,8 @@ func create_default():
 		for x in 4:
 			var new_x = x * DEFAULT_SIZE/3.0
 			var new_y = y * DEFAULT_SIZE/3.0
-			control_points[control_points_id] = ControlPoint.new(Vector3(new_x, new_y, 0), self)
+			control_points[control_points_id] = ControlPoint.new(ControlPoint.Type.CORNER, self, Vector3(new_x, new_y, 0))
+			#control_points[control_points_id] = ControlPoint.new(Vector3(new_x, new_y, 0), self)
 			control_points_id += 1
 			
 	# Set the ids for the segment
@@ -43,23 +44,23 @@ func create_default():
 		main_segment.control_point_ids.append(i)
 	main_segment.patch_object = self
 
-	control_points[0].local_position += Vector3(0, -10, -10)
-	control_points[1].local_position += Vector3(0, -10, -10)
-	control_points[2].local_position += Vector3(0, -10, -10)
-	control_points[3].local_position += Vector3(0, -10, -10)
-	control_points[4].local_position += Vector3(0, 4, -8)
-	control_points[5].local_position += Vector3(0, 4, -8)
-	control_points[6].local_position += Vector3(0, 4, -8)
-	control_points[7].local_position += Vector3(0, 4, -8)
-	
-	#control_points[0].local_position += Vector3(0, -15, -10)
-	#control_points[1].local_position += Vector3(0, -15, -10)
-	#control_points[2].local_position += Vector3(0, -15, -10)
-	#control_points[3].local_position += Vector3(0, -15, -10)
-	#control_points[4].local_position += Vector3(0, -16, -5)
-	#control_points[5].local_position += Vector3(0, -16, -5)
-	#control_points[6].local_position += Vector3(0, -16, -5)
-	#control_points[7].local_position += Vector3(0, -16, -5)
+	control_points[0].position += Vector3(0, -10, -10)
+	control_points[1].position += Vector3(0, -10, -10)
+	control_points[2].position += Vector3(0, -10, -10)
+	control_points[3].position += Vector3(0, -10, -10)
+	control_points[4].position += Vector3(0, 4, -8)
+	control_points[5].position += Vector3(0, 4, -8)
+	control_points[6].position += Vector3(0, 4, -8)
+	control_points[7].position += Vector3(0, 4, -8)
+	#
+	#control_points[0].position += Vector3(0, -15, -10)
+	#control_points[1].position += Vector3(0, -15, -10)
+	#control_points[2].position += Vector3(0, -15, -10)
+	#control_points[3].position += Vector3(0, -15, -10)
+	#control_points[4].position += Vector3(0, -16, -5)
+	#control_points[5].position += Vector3(0, -16, -5)
+	#control_points[6].position += Vector3(0, -16, -5)
+	#control_points[7].position += Vector3(0, -16, -5)
 	
 	
 	#control_points[0].local_position += Vector3(0, 0, 5)
@@ -74,7 +75,7 @@ func create_default():
 
 	var cp_array: Array[Vector3] = []
 	for cp in 16:
-		cp_array.append(control_points[cp].local_position)
+		cp_array.append(control_points[cp].position)
 	
 	# Test control grid
 	var grid := ControlGrid.new(cp_array, Color.GREEN, Color.GREEN)
@@ -87,8 +88,10 @@ func create_default():
 		Vector2(0, 1),
 		Vector2(1, 1),
 	]
-	var surface := Tessellatedmesh.new(cp_array, "0001.png", uv_points, true)
-	add_child(surface)
+	var wireframe := TessellatedMesh.new(cp_array, "0001.png", uv_points, true)
+	#var surface := TessellatedMesh.new(cp_array, "0001.png", uv_points, false)
+	add_child(wireframe)
+	#add_child(surface)
 
 
 func create_copy():
