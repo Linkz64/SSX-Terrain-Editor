@@ -1,18 +1,12 @@
 extends Control
 
 
-signal new_terrain_created(
-		terrain_path: String, 
-		import_json: bool, 
-		grouping_index: Enum.GroupingIndex
-		)
-signal terrain_opened(terrain_path: String)
-
 const RECENT_BUTTON = preload("res://gui/start_menu/recent_button.tscn")
 
 var _new_ssxt_path: String
 var _opened_once: bool = false
 
+@onready var version: Label = $Version
 @onready var new_path_choice_text: TextEdit = $New/NewPathChoice/NewPathChoiceText
 @onready var path_select_window: FileDialog = $PathSelectWindow
 @onready var import_patches_check_box: CheckBox = $New/ImportPatchesCheckBox
@@ -23,16 +17,18 @@ var _opened_once: bool = false
 
 
 func _ready() -> void:
+	version.text = ProjectSettings.get_setting("application/config/version")
 	grouping_menu_button.get_popup().connect("index_pressed", grouping_choice_pressed)
 	reload_recents()
+	activate()
 
 
 func activate():
 	reload_recents()
 	new_path_choice_text.text = ""
 	import_patches_check_box.button_pressed = false
-	grouping_menu_button.text = "Batch"
-	grouping_menu_button.set_meta("index", 1)
+	grouping_menu_button.text = "None"
+	grouping_menu_button.set_meta("index", 0)
 	show()
 
 
@@ -74,7 +70,7 @@ func recent_button_pressed(button: Button):
 	if not FileAccess.file_exists(path):
 		info_label.text = "Terrain file no longer exists"
 		return
-	terrain_opened.emit(path)
+	_open_terrain(path)
 	disactivate()
 
 
@@ -89,6 +85,14 @@ func grouping_choice_pressed(index: int):
 		2:
 			grouping_menu_button.text = "Surface Type"
 			grouping_menu_button.set_meta("index", Enum.GroupingIndex.SURFACE_TYPE)
+
+
+func _create_terrain(terrain_path: String, _import_json: bool, _grouping_index: Enum.GroupingIndex):
+	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
+
+
+func _open_terrain(path: String):
+	TextureManager.load_textures(path.get_base_dir().path_join("Textures"))
 
 
 func _on_new_path_choice_button_pressed() -> void:
@@ -150,7 +154,7 @@ func _on_button_new_pressed() -> void:
 	# This script only takes care of creating the terrain file, and
 	# recents file.
 	var grouping: int = grouping_menu_button.get_meta("index")
-	new_terrain_created.emit(_new_ssxt_path, import_json, grouping)
+	_create_terrain(_new_ssxt_path, import_json, grouping)
 	disactivate()
 	
 
@@ -177,7 +181,7 @@ func _on_open_terrain_window_file_selected(path: String) -> void:
 		var write_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.WRITE)
 		write_file.store_var([])
 	
-	terrain_opened.emit(path)
+	_open_terrain(path)
 	disactivate()
 
 

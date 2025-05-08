@@ -1,17 +1,17 @@
 extends MeshInstance3D
 class_name TessellatedMesh
-## The Bezier surface with the texture and lighting normals.
-## 8x8 vertices, 7x7 faces
+"""
+The Bezier surface with the texture, uv, and lighting normals.
+8x8 vertices, 7x7 faces
 
-## When created, they require the control points, the texture, and the UV map. 
-## As an optional it takes a bool telling it if it should render the wireframe overlay.
-## If true - it'll render The textured mesh, and the wireframe overlay.
-## If false - it'll only render the textured mesh.
-## In both cases the wireframe is created, but hidden if  false.
-
-## I dont want to store control point or uv point references here,
-## I just want it to create the mesh and forget about it with no strings attached.
-## Lets the creator handle its data. 
+When created, they require the control points, the texture, and the UV map.
+As an optional it takes a bool telling it if it should render the wireframe overlay.
+If true - It'll render The textured mesh, and the wireframe overlay.
+If false - It'll only render the textured mesh.
+In both cases the wireframe is created in memory, just not rendered if false. 
+This is so its faster to enable/disable overlay at runtime with no lag, in exchange for 
+memory usage.
+"""
 
 
 ## Vertex Indices
@@ -27,19 +27,22 @@ const EDGES = {
 	"left": [8, 16, 24, 32, 40, 48],
 	"bottom": [57, 58, 59, 60, 61, 62],
 }
+
 # Blend distance between the 7 vertices. Multiplied by 7 should give ~1.
 const BLEND_DISTANCE = 0.142857 
-const WIREFRAME_COLOR = Color.WHITE
+
 # Distance to offset from the textured vertices, towards the vertex normal.
 const WIREFRAME_MARGIN = 0.01
+const WIREFRAME_COLOR = Color.BLACK
 
 # Initial parameters used to create the meshes. 
 # Also used to propagate arguments from _init() to _ready().
-# Overriden by _init() and update methods.
+# Overriten by _init() and update methods.
 var _init_control_points: PackedVector3Array
 var _init_uv_points: PackedVector2Array
 var _init_texture_name: String
 var _init_wireframe_overlay: bool
+
 var _is_ready: bool = false
 var _wireframe_instance: MeshInstance3D
 
@@ -77,12 +80,12 @@ func _ready() -> void:
 	_wireframe_instance.material_override = wireframe_material
 	
 	update_all(_init_control_points, _init_texture_name, _init_uv_points, _init_wireframe_overlay)
-	
+
 
 func update_all(control_points: PackedVector3Array, texture_name: String, \
 		uv_points: PackedVector2Array, wireframe_overlay: bool = false ):
 	if not _is_ready:
-		push_error("Can't call update when _ready hasn't ran yet.")
+		push_warning("Can't update when _ready hasn't ran yet. Changes will not take effect immediatly")
 		return
 
 	# Override initial data
@@ -290,22 +293,39 @@ func update_all(control_points: PackedVector3Array, texture_name: String, \
 	_wireframe_instance.visible = wireframe_overlay
 	
 
-#region TODO later
-func update_control_points():
-	pass
+func update_control_points(control_points: PackedVector3Array):
+	_init_control_points = control_points
+	update_all(control_points, _init_texture_name, _init_uv_points, _init_wireframe_overlay)
 	
-func update_uv_points():
-	pass
+	
+func update_uv_points(uv_points: PackedVector2Array):
+	_init_uv_points = uv_points
+	update_all(_init_control_points, _init_texture_name, uv_points, _init_wireframe_overlay)
 
-func update_texture():
-	pass
+
+func update_texture(texture_name: String):
+	_init_texture_name = texture_name
+	if not _is_ready:
+		push_warning("Can't update when _ready hasn't ran yet. Changes will not take effect immediatly")
+		return
+	material_override.albedo_texture = TextureManager.get_texture(texture_name)
+
 
 func enable_wireframe_overlay():
-	pass
+	_init_wireframe_overlay = true
+	if not _is_ready:
+		push_warning("Can't update when _ready hasn't ran yet. Changes will not take effect immediatly")
+		return
+	_wireframe_instance.show()
+	
 
 func disable_wireframe_overlay():
-	pass
-#endregion
+	_init_wireframe_overlay = false
+	if not _is_ready:
+		push_warning("Can't update when _ready hasn't ran yet. Changes will not take effect immediatly")
+		return
+	_wireframe_instance.hide()
+
 
 func _update_wireframe_with_normals(control_points: PackedVector3Array,
 		normals: PackedVector3Array):
@@ -364,7 +384,6 @@ func _update_wireframe_with_normals(control_points: PackedVector3Array,
 				(_wireframe_instance.mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
 				(_wireframe_instance.mesh as ImmediateMesh).surface_add_vertex(vertices[y * 8 + x + 1] + normal_b)
 			
-	
 	(_wireframe_instance.mesh as ImmediateMesh).surface_end()
 
 

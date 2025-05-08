@@ -2,7 +2,6 @@ extends Node
 ## Handles the state of the user.
 ## Like edit mode or gizmo orientation.
 
-
 enum GizmoOrientation {
 	GLOBAL,
 	LOCAL,
@@ -15,5 +14,5 @@ enum SACmode {
 	FREE,
 }
 
-var gizmo_orientation :=  GizmoOrientation.GLOBAL
-var sac_mode := SACmode.OBJECT
+var gizmo_orientation: GizmoOrientation =  GizmoOrientation.GLOBAL
+var sac_mode: SACmode = SACmode.OBJECT

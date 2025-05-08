@@ -1,4 +1,6 @@
 extends Node
+## All textures are loaded when a terrain file is opened or created.
+## Texture requests should be asked from here.
 
 
 signal loaded_textures

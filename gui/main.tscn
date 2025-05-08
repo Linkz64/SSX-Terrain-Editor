@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://e3mf5oewrsw3"]
+[gd_scene load_steps=23 format=3 uid="uid://e3mf5oewrsw3"]
 
 [ext_resource type="Script" uid="uid://cc2fe8opu3qij" path="res://gui/main.gd" id="1_7ykw0"]
 [ext_resource type="Script" uid="uid://ds5elcpcvw0nj" path="res://gui/viewport.gd" id="2_6eus7"]
@@ -10,13 +10,12 @@
 [ext_resource type="Theme" uid="uid://btd276sukesp4" path="res://assets/themes/main.theme" id="6_3yo8h"]
 [ext_resource type="Script" uid="uid://knltk8gqw0nw" path="res://gui/right_panel/tree.gd" id="7_86xpt"]
 [ext_resource type="Script" uid="uid://clad0n2qh36je" path="res://gui/right_panel/properties_panel.gd" id="8_x08x8"]
-[ext_resource type="Script" uid="uid://cfl5qs2rnowfq" path="res://gui/viewport_overlay/editing_mode_switch.gd" id="10_iauxb"]
+[ext_resource type="Script" uid="uid://dpeco3b1q5qth" path="res://gui/viewport_overlay/viewport_overlay.gd" id="10_3yo8h"]
 [ext_resource type="Script" uid="uid://dfdpcnuv85ifc" path="res://gui/start_menu/start_menu_bg.gd" id="13_2lfdd"]
-[ext_resource type="Script" uid="uid://duxhs1byju36g" path="res://gui/side_alert/side_alerts_handler.gd" id="14_y34gh"]
 [ext_resource type="Script" uid="uid://bafvrqoif76eo" path="res://gui/start_menu/start_menu.gd" id="15_c4ive"]
 [ext_resource type="Texture2D" uid="uid://d30ldj3dik5kk" path="res://assets/ui/splash_art.svg" id="15_y34gh"]
 [ext_resource type="Texture2D" uid="uid://b4x88756crr86" path="res://assets/ui/folder_file_choice.svg" id="16_2lfdd"]
-[ext_resource type="Script" uid="uid://dq1j5d7mhplgp" path="res://gui/loading/loading.gd" id="17_ykfrj"]
+[ext_resource type="Script" uid="uid://dq1j5d7mhplgp" path="res://gui/viewport_overlay/loading/loading.gd" id="17_ykfrj"]
 [ext_resource type="Texture2D" uid="uid://bgxaivprkhk63" path="res://assets/icon_editor.svg" id="18_3yo8h"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ew3qc"]
@@ -453,6 +452,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+script = ExtResource("10_3yo8h")
 metadata/_edit_use_anchors_ = true
 metadata/_edit_lock_ = true
 
@@ -743,7 +743,6 @@ offset_top = -471.0
 offset_right = 992.0
 grow_vertical = 0
 mouse_filter = 2
-script = ExtResource("14_y34gh")
 metadata/_edit_lock_ = true
 
 [node name="EditingMode" type="Control" parent="ViewportOverlay"]
@@ -753,7 +752,6 @@ offset_top = 8.0
 offset_right = 140.0
 offset_bottom = 36.0
 mouse_filter = 2
-script = ExtResource("10_iauxb")
 
 [node name="ModeSwitch" type="Button" parent="ViewportOverlay/EditingMode"]
 layout_mode = 0
@@ -873,7 +871,6 @@ grow_vertical = 2
 text = "Loading..."
 
 [node name="StartMenu" type="Control" parent="."]
-visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -900,6 +897,7 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.533333)
 script = ExtResource("13_2lfdd")
 metadata/_edit_use_anchors_ = true
+metadata/_edit_lock_ = true
 
 [node name="PathSelectWindow" type="FileDialog" parent="StartMenu"]
 size = Vector2i(1380, 360)
@@ -936,7 +934,7 @@ texture = ExtResource("15_y34gh")
 expand_mode = 2
 stretch_mode = 2
 
-[node name="LabelEditorName" type="Label" parent="StartMenu"]
+[node name="EditorName" type="Label" parent="StartMenu"]
 layout_mode = 0
 offset_left = 4.0
 offset_right = 572.0
@@ -944,14 +942,14 @@ offset_bottom = 50.0
 theme_override_font_sizes/font_size = 28
 text = "SSX Terrain Editor"
 
-[node name="LabelVersion" type="Label" parent="StartMenu"]
+[node name="Version" type="Label" parent="StartMenu"]
 layout_mode = 0
 offset_left = 480.0
 offset_top = 2.0
 offset_right = 572.0
 offset_bottom = 20.0
 theme_override_font_sizes/font_size = 12
-text = "v0.1"
+text = "Version"
 horizontal_alignment = 2
 
 [node name="New" type="VBoxContainer" parent="StartMenu"]
@@ -999,7 +997,7 @@ vertical_alignment = 1
 [node name="GroupingMenuButton" type="MenuButton" parent="StartMenu/New/GroupingChoice"]
 custom_minimum_size = Vector2(164, 0)
 layout_mode = 2
-text = "Batch"
+text = "None"
 flat = false
 item_count = 3
 popup/item_0/text = "None"
@@ -1082,9 +1080,7 @@ text_overrun_behavior = 3
 [connection signal="item_edited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_item_edited"]
 [connection signal="mouse_entered" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_exited"]
-[connection signal="toggled" from="ViewportOverlay/EditingMode/ModeSwitch" to="." method="_on_mode_switch_toggled"]
-[connection signal="toggled" from="ViewportOverlay/EditingMode/ModeSwitch" to="ViewportOverlay/EditingMode" method="_on_mode_switch_toggled"]
-[connection signal="new_terrain_created" from="StartMenu" to="." method="_on_start_menu_new_terrain_created"]
+[connection signal="toggled" from="ViewportOverlay/EditingMode/ModeSwitch" to="ViewportOverlay" method="_on_mode_switch_toggled"]
 [connection signal="clicked_bg" from="StartMenu/BG" to="StartMenu" method="_on_start_menu_bg_clicked_bg"]
 [connection signal="file_selected" from="StartMenu/PathSelectWindow" to="StartMenu" method="_on_path_select_window_file_selected"]
 [connection signal="file_selected" from="StartMenu/OpenTerrainWindow" to="StartMenu" method="_on_open_terrain_window_file_selected"]

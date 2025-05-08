@@ -49,7 +49,6 @@ script = ExtResource("3_4717r")
 
 [node name="start_gates_reference" parent="." instance=ExtResource("4_h5o24")]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
-visible = false
 
 [node name="ObjectHandler" type="Node" parent="." node_paths=PackedStringArray("camera")]
 script = ExtResource("5_mmdvd")

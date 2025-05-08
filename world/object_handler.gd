@@ -1,23 +1,21 @@
 extends Node
 
+"""
+Spawn, delete, and modify objects on the 3D world.
+"""
 
+
+# Distance from the camera to spawn an object
 const DISTANCE_FROM_CAMERA = 10
 
 @export var camera: Camera3D
-@onready var gizmo: Gizmo3D = $"../Gizmo"
 
 
 func _ready() -> void:
 	ObjectManager.patch_object_creation_requested.connect(_on_create_object_request)
 
 
-func _on_create_object_request(_object_to_copy: PatchObject):
-	var inst := PatchObject.new()
+func _on_create_object_request(init_type: PatchObject.InitType, object_to_copy: PatchObject):
+	var inst := PatchObject.new(init_type, object_to_copy)
 	add_child(inst)
 	inst.position = camera.position + camera.basis.z * -DISTANCE_FROM_CAMERA
-	if _object_to_copy:
-		inst.create_copy()
-	else:	
-		inst.create_default()
-	gizmo.select(inst)
-	gizmo.use_local_space = true
