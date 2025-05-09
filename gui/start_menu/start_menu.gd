@@ -14,21 +14,22 @@ var _opened_once: bool = false
 @onready var info_label: Label = $InfoLabel
 @onready var open_terrain_window: FileDialog = $OpenTerrainWindow
 @onready var recents_box: VBoxContainer = $RecentsBox
+@export var loading: Control
 
 
 func _ready() -> void:
 	version.text = ProjectSettings.get_setting("application/config/version")
-	grouping_menu_button.get_popup().connect("index_pressed", grouping_choice_pressed)
-	reload_recents()
+	grouping_menu_button.get_popup().connect("index_pressed", _grouping_choice_pressed)
+	_reload_recents()
 	activate()
 
 
 func activate():
-	reload_recents()
+	_reload_recents()
 	new_path_choice_text.text = ""
 	import_patches_check_box.button_pressed = false
 	grouping_menu_button.text = "None"
-	grouping_menu_button.set_meta("index", 0)
+	grouping_menu_button.set_meta("index", Enum.GroupingIndex.NONE)
 	show()
 
 
@@ -37,7 +38,7 @@ func disactivate():
 	hide()
 
 
-func reload_recents():
+func _reload_recents():
 	if not FileAccess.file_exists("user://recents.dat"):
 		return
 
@@ -62,19 +63,20 @@ func reload_recents():
 		button.text = "../" + splited_path[-2].path_join(splited_path[-1])
 		button.set_meta("path", path)
 		recents_box.add_child(button)
-		button.connect("pressed", recent_button_pressed.bind(button))
+		button.connect("pressed", _recent_button_pressed.bind(button))
 
 
-func recent_button_pressed(button: Button):
+func _recent_button_pressed(button: Button):
 	var path = button.get_meta("path")
 	if not FileAccess.file_exists(path):
 		info_label.text = "Terrain file no longer exists"
 		return
 	_open_terrain(path)
 	disactivate()
+	loading.show()
 
 
-func grouping_choice_pressed(index: int):
+func _grouping_choice_pressed(index: int):
 	match index:
 		0:
 			grouping_menu_button.text = "None"
@@ -87,8 +89,8 @@ func grouping_choice_pressed(index: int):
 			grouping_menu_button.set_meta("index", Enum.GroupingIndex.SURFACE_TYPE)
 
 
-func _create_terrain(terrain_path: String, _import_json: bool, _grouping_index: Enum.GroupingIndex):
-	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
+func _create_terrain(terrain_path: String, import_json: bool, grouping: Enum.GroupingIndex):
+	SaveHandler.new_terrain(terrain_path, import_json, grouping)
 
 
 func _open_terrain(path: String):
@@ -125,10 +127,6 @@ func _on_button_new_pressed() -> void:
 			info_label.text = "Patches.json does not exist."
 			return
 		
-	# Create ssxt file
-	var ssxt_file: FileAccess = FileAccess.open(_new_ssxt_path, FileAccess.WRITE)
-	ssxt_file.store_string("ssxt")
-	
 	# Update Recents file
 	if FileAccess.file_exists("user://recents.dat"):
 		var read_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.READ)
@@ -156,8 +154,9 @@ func _on_button_new_pressed() -> void:
 	var grouping: int = grouping_menu_button.get_meta("index")
 	_create_terrain(_new_ssxt_path, import_json, grouping)
 	disactivate()
+	loading.show()
 	
-
+	
 func _on_button_open_pressed() -> void:
 	open_terrain_window.show()
 
@@ -183,7 +182,8 @@ func _on_open_terrain_window_file_selected(path: String) -> void:
 	
 	_open_terrain(path)
 	disactivate()
-
+	loading.show()
+	
 
 func _on_start_menu_bg_clicked_bg() -> void:
 	if _opened_once:

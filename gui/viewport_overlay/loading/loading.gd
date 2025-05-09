@@ -4,7 +4,6 @@ extends Control
 @onready var loading_icon: TextureRect = $Icon
 @onready var label: Label = $Label
 
-
 var _count: float = 0
 
 

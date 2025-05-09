@@ -7,14 +7,8 @@ class_name Multitool
 const MISSING_TEXTURE_PATH = "res://assets/world/missing_texture.tres"
 
 
+## Returns an array of JsonPatch objects - based on the patch.json.
 static func open_extracted_patch_data(multitool_dir: String) -> Array[JsonPatch]:
-	# 	Returns an array of JsonPatch objects. Similar to the json but
-	# the points are Vector3, UVs are Vector2, the lightmaps are a Rect2,
-	# and the texture path is replaced with the loaded texture resource.
-	#
-	# 	Set the texture to missing_texture if the texture is not found. 
-	# Returns an empty array if the json failed to load
-	
 	var json_path: String = multitool_dir.path_join("Patches.json")
 	var _lightmaps_dir: String = multitool_dir.path_join("Lightmaps")
 	

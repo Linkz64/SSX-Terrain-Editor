@@ -20,9 +20,10 @@ config/icon="uid://bgxaivprkhk63"
 [autoload]
 
 AlertBus="*res://singletons/alert_bus.gd"
-ObjectManager="*res://singletons/object_manager.gd"
+ObjectDB="*res://singletons/object_db.gd"
 TextureManager="*res://singletons/texture_manager.gd"
 UserState="*res://singletons/user_state.gd"
+SaveHandler="*res://singletons/save_handler.gd"
 
 [display]
 

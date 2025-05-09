@@ -870,7 +870,7 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Loading..."
 
-[node name="StartMenu" type="Control" parent="."]
+[node name="StartMenu" type="Control" parent="." node_paths=PackedStringArray("loading")]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -884,6 +884,7 @@ offset_bottom = 186.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("15_c4ive")
+loading = NodePath("../Loading")
 
 [node name="BG" type="ColorRect" parent="StartMenu"]
 layout_mode = 1
