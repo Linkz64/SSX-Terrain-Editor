@@ -7,6 +7,10 @@ extends Control
 var _count: float = 0
 
 
+func _ready():
+	SaveHandler.new_terrain_created.connect(_on_new_terrain_created)
+	
+
 func _process(delta: float) -> void:
 	if not visible:
 		return
@@ -23,3 +27,5 @@ func _process(delta: float) -> void:
 		_count = 0
 		
 		
+func _on_new_terrain_created():
+	hide()

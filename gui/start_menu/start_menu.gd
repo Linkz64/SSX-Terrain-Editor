@@ -71,9 +71,9 @@ func _recent_button_pressed(button: Button):
 	if not FileAccess.file_exists(path):
 		info_label.text = "Terrain file no longer exists"
 		return
-	_open_terrain(path)
-	disactivate()
 	loading.show()
+	disactivate()
+	_open_terrain(path)
 
 
 func _grouping_choice_pressed(index: int):
@@ -94,7 +94,7 @@ func _create_terrain(terrain_path: String, import_json: bool, grouping: Enum.Gro
 
 
 func _open_terrain(path: String):
-	TextureManager.load_textures(path.get_base_dir().path_join("Textures"))
+	pass
 
 
 func _on_new_path_choice_button_pressed() -> void:
@@ -152,9 +152,9 @@ func _on_button_new_pressed() -> void:
 	# This script only takes care of creating the terrain file, and
 	# recents file.
 	var grouping: int = grouping_menu_button.get_meta("index")
-	_create_terrain(_new_ssxt_path, import_json, grouping)
-	disactivate()
 	loading.show()
+	disactivate()
+	_create_terrain(_new_ssxt_path, import_json, grouping)
 	
 	
 func _on_button_open_pressed() -> void:
@@ -180,9 +180,9 @@ func _on_open_terrain_window_file_selected(path: String) -> void:
 		var write_file: FileAccess = FileAccess.open("user://recents.dat", FileAccess.WRITE)
 		write_file.store_var([])
 	
-	_open_terrain(path)
-	disactivate()
 	loading.show()
+	disactivate()
+	_open_terrain(path)
 	
 
 func _on_start_menu_bg_clicked_bg() -> void:

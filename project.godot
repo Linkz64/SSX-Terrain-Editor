@@ -15,6 +15,7 @@ config/version="v0.1.0"
 config/tags=PackedStringArray("v0.1")
 run/main_scene="uid://e3mf5oewrsw3"
 config/features=PackedStringArray("4.4", "Forward Plus")
+run/max_fps=60
 config/icon="uid://bgxaivprkhk63"
 
 [autoload]

@@ -2,14 +2,32 @@ extends Node
 
 signal new_terrain_created
 
+var thread: Thread
+var start = 0
+
+
+func _ready():
+	thread = Thread.new()
+	get_tree().process_frame.connect(_check_thread_finished)
+
+
+func _check_thread_finished() -> void:
+	if thread.is_started() and not thread.is_alive():
+		thread.wait_to_finish()
+		print("Finished thread with ", Time.get_ticks_msec() - start)
+		new_terrain_created.emit()
+		
 
 func new_terrain(terrain_path: String, import_json: bool, grouping: Enum.GroupingIndex):
 	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
 
 	if import_json:
-		_create_ssxt_from_json(terrain_path, grouping)
+		start = Time.get_ticks_msec()
+		thread.start(_create_ssxt_from_json.bind(terrain_path, grouping))
+		#_create_ssxt_from_json(terrain_path, grouping)
 	else:
 		pass
+	
 
 
 func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
@@ -21,78 +39,99 @@ func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 	var version_str: String = ProjectSettings.get_setting("application/config/version")
 	var version_str_array = version_str.substr(1).split(".")
 	var editor_version: Array[int] = []
-	for char in version_str_array:
-		editor_version.append(int(char))
+	for digit in version_str_array:
+		editor_version.append(int(digit))
 	ssxt_struct.editor_version = editor_version
 	
 	ssxt_struct.date_time_created = Time.get_datetime_string_from_system()
 	
 	ssxt_struct.camera_xform = Transform3D().rotated(Vector3.RIGHT, TAU/4)
 
-#region Grouping types
-	if grouping == Enum.GroupingIndex.NONE:
-		ssxt_struct.group_count = 1
+	match grouping:
+		Enum.GroupingIndex.NONE:
+			_grouping_none_edit(ssxt_struct, json_data)
+		Enum.GroupingIndex.BATCH:
+			pass
+		Enum.GroupingIndex.SURFACE_TYPE:
+			pass
 		
-		var group_entry := GroupEntry.new()
-		group_entry.group_name = "Group0"
-		group_entry.group_name_size = group_entry.group_name.length()
-		group_entry.group_visible = true
-		group_entry.object_count = json_data.size()
-		
-		for patch in json_data:
-			var object_entry := ObjectEntry.new()
-			object_entry.object_name = patch.patch_name
-			object_entry.object_name_size = patch.patch_name.length()
-			object_entry.object_xform = Transform3D(Basis.IDENTITY, patch.points[0])
-			object_entry.greatest_control_point_id = 16
-			object_entry.control_point_count = 16
-			
-			for cp in 16:
-				var control_point_entry := ControlPointEntry.new()
-				control_point_entry.type = _get_control_point_type(cp)
-				control_point_entry.id = cp
-				control_point_entry. aligned = false
-				control_point_entry.position = patch.points[0] - object_entry.object_xform.origin
-				
-				var north = _get_neighbour(cp, "north")
-				var west = _get_neighbour(cp, "west")
-				var south = _get_neighbour(cp, "south")
-				var east = _get_neighbour(cp, "east")
-				control_point_entry.has_north_ref = north != null
-				control_point_entry.ref_north_id = north if north else 0
-				control_point_entry.has_west_ref = west != null
-				control_point_entry.ref_west_id = west if west else 0
-				control_point_entry.has_south_ref = south != null
-				control_point_entry.ref_south_id = south if south else 0
-				control_point_entry.has_east_ref = east != null
-				control_point_entry.ref_east_id = east if east else 0
-				object_entry.control_points.append(control_point_entry)
-			
-			object_entry.greatest_segment_id = 1
-			var segment := SegmentEntry.new()
-			segment.id = 0
-			for i in 16:
-				segment.control_point_ids.append(i)
-			segment.lightmap_rect = Rect2(0, 0, 0.0625, 0.0625)
-			segment.lightmap_id = 0
-			segment.uv_points = [
-				Vector2.ZERO,
-				Vector2(1, 0),
-				Vector2(0, 1),
-				Vector2(1, 1),
-			]
-			segment.patch_style = patch.patch_style
-			segment.tricky_only_patch = patch.tricky_only_patch
-			segment.texture_path = patch.texture_path
-			segment.texture_path_size = patch.texture_path.length()
-			object_entry.segments.append(segment)
-			group_entry.objects.append(object_entry)
-		ssxt_struct.groups.append(group_entry)
-		
-#endregion
+	_write_struct_to_disk(terrain_path, ssxt_struct)
 
-	# Write ssxt file
-#region Write ssxt file
+
+## Edits the struct if the grouping flag is None.
+## Edits the Group count and after.
+func _grouping_none_edit(ssxt_struct: SsxtFileStructure, json_data: Array[JsonPatch]):
+	ssxt_struct.group_count = 1
+	var group_entry := GroupEntry.new()
+	group_entry.group_name = "Group0"
+	group_entry.group_name_size = group_entry.group_name.length()
+	group_entry.group_visible = true
+	group_entry.object_count = json_data.size()
+	
+	for patch in json_data:
+		var object_entry := ObjectEntry.new()
+		object_entry.object_name = patch.patch_name
+		object_entry.object_name_size = patch.patch_name.length()
+		object_entry.object_xform = Transform3D(Basis.IDENTITY, patch.points[0])
+		object_entry.greatest_control_point_id = 16
+		object_entry.control_point_count = 16
+		
+		for cp in 16:
+			var control_point_entry := ControlPointEntry.new()
+			control_point_entry.type = _get_control_point_type(cp)
+			control_point_entry.id = cp
+			control_point_entry. aligned = false
+			control_point_entry.position = patch.points[0] - object_entry.object_xform.origin
+			
+			var north = _get_neighbour(cp, "north")
+			var west = _get_neighbour(cp, "west")
+			var south = _get_neighbour(cp, "south")
+			var east = _get_neighbour(cp, "east")
+			control_point_entry.has_north_ref = north != null
+			control_point_entry.ref_north_id = north if north else 0
+			control_point_entry.has_west_ref = west != null
+			control_point_entry.ref_west_id = west if west else 0
+			control_point_entry.has_south_ref = south != null
+			control_point_entry.ref_south_id = south if south else 0
+			control_point_entry.has_east_ref = east != null
+			control_point_entry.ref_east_id = east if east else 0
+			object_entry.control_points.append(control_point_entry)
+		
+		object_entry.greatest_segment_id = 1
+		var segment := SegmentEntry.new()
+		segment.id = 0
+		for i in 16:
+			segment.control_point_ids.append(i)
+		segment.lightmap_rect = Rect2(0, 0, 0.0625, 0.0625)
+		segment.lightmap_id = 0
+		segment.uv_points = [
+			Vector2.ZERO,
+			Vector2(1, 0),
+			Vector2(0, 1),
+			Vector2(1, 1),
+		]
+		segment.patch_style = patch.patch_style
+		segment.tricky_only_patch = patch.tricky_only_patch
+		segment.texture_path = patch.texture_path
+		segment.texture_path_size = patch.texture_path.length()
+		object_entry.segments.append(segment)
+		group_entry.objects.append(object_entry)
+	ssxt_struct.groups.append(group_entry)
+	
+	
+## Edits the struct if the grouping flag is Batch.
+## Edits the Group count and after.
+func _grouping_batch_edit():
+	pass
+	
+	
+## Edits the struct if the grouping flag is Surface Type.
+## Edits the Group count and after.
+func _grouping_surface_type_edit():
+	pass
+	
+	
+static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStructure):
 	var ssxt_file := FileAccess.open(terrain_path, FileAccess.WRITE)
 	ssxt_file.store_string(ssxt_struct.signature)
 	ssxt_file.store_8(ssxt_struct.file_structure_version[0])
@@ -183,14 +222,15 @@ func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 				ssxt_file.store_32(segment.texture_path_size)
 				ssxt_file.store_string(segment.texture_path)
 
-#endregion
-
 
 ## Get the neighbour of a cp from all 4 sides, returns null if its not valid,
-## returns the neighbour index if is valid, this is only used for json importing.
+## returns the neighbour index if is valid. 
+## This is only used for json importing - where objects only have one segment.
 static func _get_neighbour(index: int, side: String) -> Variant:
 	if side == "north":
-		return null if (index - 4) < 0 else (index - 4)
+		if (index - 4) >= 0:
+			return (index - 4)
+		return null
 	elif side == "west":
 		var neighbour = index - 1
 		if neighbour > 0 and neighbour % 4 != 3:
@@ -198,7 +238,9 @@ static func _get_neighbour(index: int, side: String) -> Variant:
 		else:
 			return null
 	elif side == "south":
-		return null if (index + 4) < 0 else (index + 4)
+		if (index + 4) < 16:
+			return (index + 4)
+		return null
 	elif side == "east":
 		var neighbour = index + 1
 		if neighbour > 0 and neighbour % 4 != 0:
@@ -206,7 +248,7 @@ static func _get_neighbour(index: int, side: String) -> Variant:
 		else:
 			return null
 	else:
-		assert(null)
+		push_error("Invalid control point side ", side)
 		return null
 
 
@@ -221,7 +263,7 @@ static func _get_control_point_type(index: int) -> int:
 	elif index in INNERS:
 		return 2 # inner
 	else:
-		assert(null)
+		push_error("Invalid control point index ", index)
 		return 0
 		
 
