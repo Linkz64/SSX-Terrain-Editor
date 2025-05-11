@@ -18,5 +18,5 @@ var object_naming_index: int = 0
 
 
 
-func create_terrain(terrain_path: String, _import_json: bool, _grouping_index: Enum.GroupingIndex):
-	pass
+#func create_terrain(terrain_path: String, _import_json: bool, _grouping_index: Enum.GroupingIndex):
+	#pass

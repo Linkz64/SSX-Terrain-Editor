@@ -3,7 +3,6 @@ extends Node
 signal new_terrain_created
 
 var thread: Thread
-var start = 0
 
 
 func _ready():
@@ -14,20 +13,15 @@ func _ready():
 func _check_thread_finished() -> void:
 	if thread.is_started() and not thread.is_alive():
 		thread.wait_to_finish()
-		print("Finished thread with ", Time.get_ticks_msec() - start)
 		new_terrain_created.emit()
 		
 
 func new_terrain(terrain_path: String, import_json: bool, grouping: Enum.GroupingIndex):
 	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
-
 	if import_json:
-		start = Time.get_ticks_msec()
 		thread.start(_create_ssxt_from_json.bind(terrain_path, grouping))
-		#_create_ssxt_from_json(terrain_path, grouping)
 	else:
-		pass
-	
+		thread.start(_create_ssxt_default.bind(terrain_path))
 
 
 func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
@@ -51,10 +45,86 @@ func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 		Enum.GroupingIndex.NONE:
 			_grouping_none_edit(ssxt_struct, json_data)
 		Enum.GroupingIndex.BATCH:
-			pass
+			_grouping_batch_edit(ssxt_struct, json_data)
 		Enum.GroupingIndex.SURFACE_TYPE:
-			pass
+			_grouping_surface_type_edit(ssxt_struct, json_data)
 		
+	_write_struct_to_disk(terrain_path, ssxt_struct)
+
+
+func _create_ssxt_default(terrain_path: String):
+	# create the ssxt with a predefined structure
+	var ssxt_struct := SsxtFileStructure.new()
+	
+	var version_str: String = ProjectSettings.get_setting("application/config/version")
+	var version_str_array = version_str.substr(1).split(".")
+	var editor_version: Array[int] = []
+	for digit in version_str_array:
+		editor_version.append(int(digit))
+	ssxt_struct.editor_version = editor_version
+	
+	ssxt_struct.date_time_created = Time.get_datetime_string_from_system()
+	
+	ssxt_struct.camera_xform = Transform3D().rotated(Vector3.RIGHT, TAU/4)
+	
+	ssxt_struct.group_count = 1
+	var group_entry := GroupEntry.new()
+	group_entry.group_name = "Group.0"
+	group_entry.group_name_size = group_entry.group_name.length()
+	group_entry.group_visible = true
+	group_entry.object_count = 1
+	
+	var object_entry := ObjectEntry.new()
+	object_entry.object_name = "Object.0"
+	object_entry.object_name_size = object_entry.object_name.length()
+	object_entry.object_xform = Transform3D()
+	object_entry.greatest_control_point_id = 16
+	object_entry.control_point_count = 16
+	
+	for y in range(3, -1, -1):
+		for x in 4: 
+			var cp_index = y * 4 + x
+			var control_point_entry := ControlPointEntry.new()
+			control_point_entry.type = _get_control_point_type(cp_index)
+			control_point_entry.id = cp_index
+			control_point_entry. aligned = true
+			control_point_entry.position = Vector3(x, y, 0) - object_entry.object_xform.origin
+			
+			var north = _get_neighbour(cp_index, "north")
+			var west = _get_neighbour(cp_index, "west")
+			var south = _get_neighbour(cp_index, "south")
+			var east = _get_neighbour(cp_index, "east")
+			control_point_entry.has_north_ref = north != null
+			control_point_entry.ref_north_id = north if north else 0
+			control_point_entry.has_west_ref = west != null
+			control_point_entry.ref_west_id = west if west else 0
+			control_point_entry.has_south_ref = south != null
+			control_point_entry.ref_south_id = south if south else 0
+			control_point_entry.has_east_ref = east != null
+			control_point_entry.ref_east_id = east if east else 0
+			object_entry.control_points.append(control_point_entry)
+	
+	object_entry.greatest_segment_id = 1
+	var segment := SegmentEntry.new()
+	segment.id = 0
+	for i in 16:
+		segment.control_point_ids.append(i)
+	segment.lightmap_rect = Rect2(0, 0, 0.0625, 0.0625)
+	segment.lightmap_id = 0
+	segment.uv_points = [
+		Vector2.ZERO,
+		Vector2(1, 0),
+		Vector2(0, 1),
+		Vector2(1, 1),
+	]
+	segment.patch_style = Enum.SurfaceType.SNOW_MAIN
+	segment.tricky_only_patch = false
+	segment.texture_path = "0001.png"
+	segment.texture_path_size = segment.texture_path.length()
+	object_entry.segments.append(segment)
+	group_entry.objects.append(object_entry)
+	ssxt_struct.groups.append(group_entry)
+	
 	_write_struct_to_disk(terrain_path, ssxt_struct)
 
 
@@ -63,7 +133,7 @@ func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 func _grouping_none_edit(ssxt_struct: SsxtFileStructure, json_data: Array[JsonPatch]):
 	ssxt_struct.group_count = 1
 	var group_entry := GroupEntry.new()
-	group_entry.group_name = "Group0"
+	group_entry.group_name = "Group.0"
 	group_entry.group_name_size = group_entry.group_name.length()
 	group_entry.group_visible = true
 	group_entry.object_count = json_data.size()
@@ -121,13 +191,77 @@ func _grouping_none_edit(ssxt_struct: SsxtFileStructure, json_data: Array[JsonPa
 	
 ## Edits the struct if the grouping flag is Batch.
 ## Edits the Group count and after.
-func _grouping_batch_edit():
-	pass
+func _grouping_batch_edit(ssxt_struct: SsxtFileStructure, json_data: Array[JsonPatch]):
+	var batch_counter: int = 700 # 0 - 700
+	var current_group: GroupEntry
 	
+	for patch in json_data:
+		if batch_counter == 700:
+			# Create new group
+			batch_counter = 0
+			var group_entry := GroupEntry.new()
+			group_entry.group_name = "Batch." + str(ssxt_struct.group_count)
+			group_entry.group_name_size = group_entry.group_name.length()
+			group_entry.group_visible = true
+			ssxt_struct.group_count += 1
+			ssxt_struct.groups.append(group_entry)
+			current_group = group_entry
+		batch_counter += 1
+		
+		# Create objects on current group
+		var object_entry := ObjectEntry.new()
+		object_entry.object_name = patch.patch_name
+		object_entry.object_name_size = patch.patch_name.length()
+		object_entry.object_xform = Transform3D(Basis.IDENTITY, patch.points[0])
+		object_entry.greatest_control_point_id = 16
+		object_entry.control_point_count = 16
+		
+		for cp in 16:
+			var control_point_entry := ControlPointEntry.new()
+			control_point_entry.type = _get_control_point_type(cp)
+			control_point_entry.id = cp
+			control_point_entry. aligned = false
+			control_point_entry.position = patch.points[0] - object_entry.object_xform.origin
+			
+			var north = _get_neighbour(cp, "north")
+			var west = _get_neighbour(cp, "west")
+			var south = _get_neighbour(cp, "south")
+			var east = _get_neighbour(cp, "east")
+			control_point_entry.has_north_ref = north != null
+			control_point_entry.ref_north_id = north if north else 0
+			control_point_entry.has_west_ref = west != null
+			control_point_entry.ref_west_id = west if west else 0
+			control_point_entry.has_south_ref = south != null
+			control_point_entry.ref_south_id = south if south else 0
+			control_point_entry.has_east_ref = east != null
+			control_point_entry.ref_east_id = east if east else 0
+			object_entry.control_points.append(control_point_entry)
+		
+		object_entry.greatest_segment_id = 1
+		var segment := SegmentEntry.new()
+		segment.id = 0
+		for k in 16:
+			segment.control_point_ids.append(k)
+		segment.lightmap_rect = Rect2(0, 0, 0.0625, 0.0625)
+		segment.lightmap_id = 0
+		segment.uv_points = [
+			Vector2.ZERO,
+			Vector2(1, 0),
+			Vector2(0, 1),
+			Vector2(1, 1),
+		]
+		segment.patch_style = patch.patch_style
+		segment.tricky_only_patch = patch.tricky_only_patch
+		segment.texture_path = patch.texture_path
+		segment.texture_path_size = patch.texture_path.length()
+		object_entry.segments.append(segment)
+		current_group.objects.append(object_entry)
+		current_group.object_count += 1
+
 	
 ## Edits the struct if the grouping flag is Surface Type.
 ## Edits the Group count and after.
-func _grouping_surface_type_edit():
+func _grouping_surface_type_edit(_ssxt_struct: SsxtFileStructure, _json_data: Array[JsonPatch]):
 	pass
 	
 	

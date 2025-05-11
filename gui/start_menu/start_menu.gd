@@ -93,7 +93,7 @@ func _create_terrain(terrain_path: String, import_json: bool, grouping: Enum.Gro
 	SaveHandler.new_terrain(terrain_path, import_json, grouping)
 
 
-func _open_terrain(path: String):
+func _open_terrain(_path: String):
 	pass
 
 
