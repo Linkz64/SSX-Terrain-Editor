@@ -4,5 +4,4 @@
 
 [node name="MainCamera" type="Camera3D"]
 current = true
-far = 20000.0
 script = ExtResource("1_ietp1")

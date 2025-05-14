@@ -1,10 +1,10 @@
 extends Node3D
 
+const BIG = 0xBBBBB
 
-
-#func _unhandled_input(_event: InputEvent) -> void:
-	#if Input.is_action_just_pressed("AddObject"):
-		#ObjectManager.request_patch_object_creation(PatchObject.InitType.DEFAULT)
+func _ready():
+	SaveHandler.dep_world = self
+	$DirectionalLight3D.directional_shadow_max_distance = BIG
 
 
 func get_camera() -> Camera3D:

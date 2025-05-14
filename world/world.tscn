@@ -1,10 +1,9 @@
-[gd_scene load_steps=11 format=3 uid="uid://u05bpkyyiist"]
+[gd_scene load_steps=10 format=3 uid="uid://u05bpkyyiist"]
 
 [ext_resource type="Script" uid="uid://b36brfw6yyoya" path="res://world/world.gd" id="1_tcf2h"]
 [ext_resource type="PackedScene" uid="uid://cb0osf8ki8tco" path="res://world/main_camera.tscn" id="2_4717r"]
 [ext_resource type="Script" uid="uid://b1dy4istah4oo" path="res://world/axis_lines.gd" id="3_4717r"]
 [ext_resource type="PackedScene" uid="uid://b1jsuu0erff0w" path="res://assets/world/start_gates_reference.glb" id="4_h5o24"]
-[ext_resource type="Script" uid="uid://bd62fto71vd47" path="res://world/object_handler.gd" id="5_mmdvd"]
 [ext_resource type="Script" uid="uid://e3f1ox6y6cvg" path="res://addons/Gizmo3DScript/gizmo3D.gd" id="6_fn3g3"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_fn3g3"]
@@ -40,6 +39,7 @@ fov = 70.0
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.891981, 0.404468, -0.201936, -0.39382, 0.475872, -0.786415, -0.221983, 0.780994, 0.583757, 0, 0, 0)
 shadow_enabled = true
+directional_shadow_mode = 0
 directional_shadow_max_distance = 1000.0
 
 [node name="AxisLines" type="MeshInstance3D" parent="."]
@@ -50,10 +50,6 @@ script = ExtResource("3_4717r")
 [node name="start_gates_reference" parent="." instance=ExtResource("4_h5o24")]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 visible = false
-
-[node name="ObjectHandler" type="Node" parent="." node_paths=PackedStringArray("camera")]
-script = ExtResource("5_mmdvd")
-camera = NodePath("../MainCamera")
 
 [node name="Gizmo" type="Node3D" parent="."]
 script = ExtResource("6_fn3g3")

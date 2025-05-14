@@ -32,7 +32,7 @@ const EDGES = {
 const BLEND_DISTANCE = 0.142857 
 
 # Distance to offset from the textured vertices, towards the vertex normal.
-const WIREFRAME_MARGIN = 0.01
+const WIREFRAME_MARGIN = 0.5
 const WIREFRAME_COLOR = Color.BLACK
 
 # Initial parameters used to create the meshes. 
@@ -83,7 +83,7 @@ func _ready() -> void:
 
 
 func update_all(control_points: PackedVector3Array, texture_name: String, \
-		uv_points: PackedVector2Array, wireframe_overlay: bool = false ):
+		uv_points: PackedVector2Array, wireframe_overlay: bool = false):
 	if not _is_ready:
 		push_warning("Can't update when _ready hasn't ran yet. Changes will not take effect immediatly")
 		return
@@ -150,7 +150,7 @@ func update_all(control_points: PackedVector3Array, texture_name: String, \
 		# Average algo by summing and then normalizing.
 		var sum = func(accum: Vector3, vec: Vector3):
 			return accum + vec
-		normals[i] = neighbouring_normals.reduce(sum).normalized() # average
+		normals[i] = neighbouring_normals.reduce(sum, Vector3.ZERO).normalized() # average
 	
 	# Generate corner normals
 	var corner_cross = func(main_cp: int, cp_a: int, cp_b: int):

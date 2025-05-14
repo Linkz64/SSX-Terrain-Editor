@@ -13,7 +13,7 @@ enum SideAlertType {
 	WARNING,
 	ERROR,
 }
-enum SurfaceType {
+enum SurfaceType { # 20 types
 	#Resets the player position back to the nearest path point
 	RESET,
 	

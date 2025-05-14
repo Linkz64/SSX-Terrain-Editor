@@ -40,8 +40,6 @@ func _init(init_type: InitType = InitType.DEFAULT, object_to_copy: PatchObject =
 func _ready():
 	_is_ready = true
 	match _init_type:
-		InitType.EMPTY:
-			_create_empty()
 		InitType.DEFAULT:
 			_create_default()
 		InitType.COPY:
@@ -55,6 +53,34 @@ func set_wireframe_overlay(value: bool):
 				c.enable_wireframe_overlay()
 			else:
 				c.disable_wireframe_overlay()
+
+
+
+func update_surface():
+	for child in get_children():
+		child.queue_free()
+	
+	for segment:PatchSegment in segments.values():
+		var cp_array: PackedVector3Array = []
+		for cp in 16:
+			var id = segment.control_point_ids[cp]
+			cp_array.append(control_points[id].position)
+			
+		var uvs: PackedVector2Array = [
+			segment.uv_points["top-left"],
+			segment.uv_points["top-right"],
+			segment.uv_points["bottom-left"],
+			segment.uv_points["bottom-right"],
+		]
+		var surface := TessellatedMesh.new(cp_array, segment.texture_filename, uvs, true)
+		
+		for i in cp_array.size():
+			if i != 0 and cp_array[i] == Vector3.ZERO:
+				print(cp_array)
+				print("\n")
+				break
+		
+		add_child(surface)
 
 
 func _create_default():
@@ -90,10 +116,6 @@ func _create_default():
 	]
 	var surface := TessellatedMesh.new(cp_array, "0025.png", uv_points, true)
 	add_child(surface)
-
-
-func _create_empty():
-	pass
 
 
 func _create_copy():

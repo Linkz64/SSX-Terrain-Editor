@@ -2,27 +2,40 @@ extends Node
 
 signal new_terrain_created
 
-var thread: Thread
 
+# The terrain path that was opened or created. i.e the terrain currently
+# active in the editor.
+var current_working_terrain_path: String
+# Dependancy injection of the 3D world root node.
+var dep_world: Node
+# Dependancy injection of the Tree node.
+var dep_tree: Node
 
+var _thread: Thread
+
+#--------Override methods--------
 func _ready():
-	thread = Thread.new()
+	_thread = Thread.new()
 	get_tree().process_frame.connect(_check_thread_finished)
 
 
-func _check_thread_finished() -> void:
-	if thread.is_started() and not thread.is_alive():
-		thread.wait_to_finish()
-		new_terrain_created.emit()
-		
-
+#---------Public methods--------
 func new_terrain(terrain_path: String, import_json: bool, grouping: Enum.GroupingIndex):
+	current_working_terrain_path = terrain_path
 	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
 	if import_json:
-		thread.start(_create_ssxt_from_json.bind(terrain_path, grouping))
+		_thread.start(_create_ssxt_from_json.bind(terrain_path, grouping))
 	else:
-		thread.start(_create_ssxt_default.bind(terrain_path))
+		_thread.start(_create_ssxt_default.bind(terrain_path))
 
+
+#----------Private methods-------
+func _check_thread_finished() -> void:
+	if _thread.is_started() and not _thread.is_alive():
+		var node = _thread.wait_to_finish()
+		dep_world.add_child(node)
+		new_terrain_created.emit()
+		
 
 func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 	# Read the json and turn it into a Godot ssxt structured class
@@ -48,8 +61,9 @@ func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 			_grouping_batch_edit(ssxt_struct, json_data)
 		Enum.GroupingIndex.SURFACE_TYPE:
 			_grouping_surface_type_edit(ssxt_struct, json_data)
-		
+	
 	_write_struct_to_disk(terrain_path, ssxt_struct)
+	return _ssxt_struct_to_nodes(ssxt_struct)
 
 
 func _create_ssxt_default(terrain_path: String):
@@ -119,13 +133,14 @@ func _create_ssxt_default(terrain_path: String):
 	]
 	segment.patch_style = Enum.SurfaceType.SNOW_MAIN
 	segment.tricky_only_patch = false
-	segment.texture_path = "0001.png"
+	segment.texture_path = "0000.png"
 	segment.texture_path_size = segment.texture_path.length()
 	object_entry.segments.append(segment)
 	group_entry.objects.append(object_entry)
 	ssxt_struct.groups.append(group_entry)
 	
 	_write_struct_to_disk(terrain_path, ssxt_struct)
+	return _ssxt_struct_to_nodes(ssxt_struct)
 
 
 ## Edits the struct if the grouping flag is None.
@@ -137,6 +152,7 @@ func _grouping_none_edit(ssxt_struct: SsxtFileStructure, json_data: Array[JsonPa
 	group_entry.group_name_size = group_entry.group_name.length()
 	group_entry.group_visible = true
 	group_entry.object_count = json_data.size()
+	ssxt_struct.groups.append(group_entry)
 	
 	for patch in json_data:
 		var object_entry := ObjectEntry.new()
@@ -145,13 +161,14 @@ func _grouping_none_edit(ssxt_struct: SsxtFileStructure, json_data: Array[JsonPa
 		object_entry.object_xform = Transform3D(Basis.IDENTITY, patch.points[0])
 		object_entry.greatest_control_point_id = 16
 		object_entry.control_point_count = 16
+		group_entry.objects.append(object_entry)
 		
 		for cp in 16:
 			var control_point_entry := ControlPointEntry.new()
 			control_point_entry.type = _get_control_point_type(cp)
 			control_point_entry.id = cp
 			control_point_entry. aligned = false
-			control_point_entry.position = patch.points[0] - object_entry.object_xform.origin
+			control_point_entry.position = patch.points[cp] - object_entry.object_xform.origin
 			
 			var north = _get_neighbour(cp, "north")
 			var west = _get_neighbour(cp, "west")
@@ -185,9 +202,7 @@ func _grouping_none_edit(ssxt_struct: SsxtFileStructure, json_data: Array[JsonPa
 		segment.texture_path = patch.texture_path
 		segment.texture_path_size = patch.texture_path.length()
 		object_entry.segments.append(segment)
-		group_entry.objects.append(object_entry)
-	ssxt_struct.groups.append(group_entry)
-	
+		
 	
 ## Edits the struct if the grouping flag is Batch.
 ## Edits the Group count and after.
@@ -221,7 +236,7 @@ func _grouping_batch_edit(ssxt_struct: SsxtFileStructure, json_data: Array[JsonP
 			control_point_entry.type = _get_control_point_type(cp)
 			control_point_entry.id = cp
 			control_point_entry. aligned = false
-			control_point_entry.position = patch.points[0] - object_entry.object_xform.origin
+			control_point_entry.position = patch.points[cp] - object_entry.object_xform.origin
 			
 			var north = _get_neighbour(cp, "north")
 			var west = _get_neighbour(cp, "west")
@@ -261,9 +276,146 @@ func _grouping_batch_edit(ssxt_struct: SsxtFileStructure, json_data: Array[JsonP
 	
 ## Edits the struct if the grouping flag is Surface Type.
 ## Edits the Group count and after.
-func _grouping_surface_type_edit(_ssxt_struct: SsxtFileStructure, _json_data: Array[JsonPatch]):
-	pass
+func _grouping_surface_type_edit(ssxt_struct: SsxtFileStructure, json_data: Array[JsonPatch]):
+	"""
+	Create a group for every type
 	
+	for every patch:
+		create the object entry and check its surface type
+	"""
+	const SURFACE_TYPE_NAMES: Array[String]= [
+		"Reset",
+		"Snow Main",
+		"Snow Side",
+		"Snow Powder",
+		"Snow Powder Heavy",
+		"Ice",
+		"Rebound",
+		"Ice Water",
+		"Snow_5",
+		"Rock",
+		"Rebound Rock",
+		"Unknown",
+		"Wood",
+		"Metal",
+		"Unknown_2",
+		"Snow_6",
+		"Sand",
+		"No Collision",
+		"Metal Ramp",
+		"Metal Ramp_2",
+	]
+	
+	# Create groups
+	ssxt_struct.group_count = 20
+	for i in 20:
+		var group_entry := GroupEntry.new()
+		group_entry.group_name = SURFACE_TYPE_NAMES[i]
+		group_entry.group_name_size = group_entry.group_name.length()
+		group_entry.group_visible = true
+		ssxt_struct.groups.append(group_entry)
+	
+	# Create objects and palce them in their corresponding surface type group 
+	for patch in json_data:
+		var object_entry := ObjectEntry.new()
+		object_entry.object_name = patch.patch_name
+		object_entry.object_name_size = patch.patch_name.length()
+		object_entry.object_xform = Transform3D(Basis.IDENTITY, patch.points[0])
+		object_entry.greatest_control_point_id = 16
+		object_entry.control_point_count = 16
+		
+		for cp in 16:
+			var control_point_entry := ControlPointEntry.new()
+			control_point_entry.type = _get_control_point_type(cp)
+			control_point_entry.id = cp
+			control_point_entry. aligned = false
+			control_point_entry.position = patch.points[cp] - object_entry.object_xform.origin
+			
+			var north = _get_neighbour(cp, "north")
+			var west = _get_neighbour(cp, "west")
+			var south = _get_neighbour(cp, "south")
+			var east = _get_neighbour(cp, "east")
+			control_point_entry.has_north_ref = north != null
+			control_point_entry.ref_north_id = north if north else 0
+			control_point_entry.has_west_ref = west != null
+			control_point_entry.ref_west_id = west if west else 0
+			control_point_entry.has_south_ref = south != null
+			control_point_entry.ref_south_id = south if south else 0
+			control_point_entry.has_east_ref = east != null
+			control_point_entry.ref_east_id = east if east else 0
+			object_entry.control_points.append(control_point_entry)
+		
+		object_entry.greatest_segment_id = 1
+		var segment := SegmentEntry.new()
+		segment.id = 0
+		for k in 16:
+			segment.control_point_ids.append(k)
+		segment.lightmap_rect = Rect2(0, 0, 0.0625, 0.0625)
+		segment.lightmap_id = 0
+		segment.uv_points = [
+			Vector2.ZERO,
+			Vector2(1, 0),
+			Vector2(0, 1),
+			Vector2(1, 1),
+		]
+		segment.patch_style = patch.patch_style
+		segment.tricky_only_patch = patch.tricky_only_patch
+		segment.texture_path = patch.texture_path
+		segment.texture_path_size = patch.texture_path.length()
+		object_entry.segments.append(segment)
+		ssxt_struct.groups[patch.patch_style].objects.append(object_entry)
+
+
+
+func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> Node:
+	assert(dep_world, "World node dependancy was not set.")
+	
+	var root := Node.new()
+	root.name = "ObjectHandler"
+	for group: GroupEntry in ssxt_struct.groups:
+		var group_node := Node3D.new()
+		group_node.name = group.group_name
+		group_node.visible = group.group_visible
+		root.add_child(group_node)
+		
+		for object: ObjectEntry in group.objects:
+			var object_node := PatchObject.new(PatchObject.InitType.EMPTY)
+			object_node.name = object.object_name
+			object_node.transform = object.object_xform
+			group_node.add_child(object_node)
+			
+			var cp_id := 0
+			for cp_entry:ControlPointEntry in object.control_points:
+				var control_point = ControlPoint.new(cp_entry.type, object_node, cp_entry.position)
+				control_point.aligned = cp_entry.aligned
+				object_node.control_points[cp_id] = control_point
+				cp_id += 1
+			object_node.control_points_id = cp_id
+			
+			var segment_id := 0
+			for segment_entry:SegmentEntry in object.segments:
+				var segment := PatchSegment.new(segment_entry.control_point_ids, object_node)
+				segment.surface_type = segment_entry.patch_style as Enum.SurfaceType
+				segment.texture_filename = segment_entry.texture_path
+				segment.showoff_only = segment_entry.tricky_only_patch
+				segment.uv_points["top-left"] = segment_entry.uv_points[0]
+				segment.uv_points["top-right"] = segment_entry.uv_points[1]
+				segment.uv_points["bottom-left"] = segment_entry.uv_points[2]
+				segment.uv_points["bottom-right"] = segment_entry.uv_points[3]
+				segment.lightmap_id = segment_entry.lightmap_id
+				segment.lightmap_point = segment_entry.lightmap_rect
+				object_node.segments[segment_id] = segment
+				segment_id += 1
+			object_node.segment_id = segment_id
+			object_node.update_surface()
+				
+			# Do this later
+			#if cp.has_north_ref:
+			#control_point.neighbours["north"] = cp.ref_north_id
+
+	return root
+	
+
 	
 static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStructure):
 	var ssxt_file := FileAccess.open(terrain_path, FileAccess.WRITE)
@@ -399,8 +551,9 @@ static func _get_control_point_type(index: int) -> int:
 	else:
 		push_error("Invalid control point index ", index)
 		return 0
-		
 
+
+#--------Inner classes---------
 class SsxtFileStructure:
 	var signature: String = "ssxt"
 	var file_structure_version: Array[int] = [0, 1, 0] # Bytes. Major, Minor, Patch

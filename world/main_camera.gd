@@ -1,15 +1,16 @@
 extends Camera3D
 
-
+const BIG = 0xBBBBB
 const ROTATION_SENSITIVITY = Vector2(0.003, 0.003)
-const SPEED_RANGE = {"min": 1, "max": 200}
-const SPEED_RANGE_CHANGE = 4
+const SPEED_RANGE = {"min": 1000, "max": 100_000}
+const SPEED_RANGE_CHANGE = 1500
 var movable: bool = false
-var speed: float = 10
+var speed: float = 25_000
 var _rotation: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
+	far = BIG
 	# Initial rotation. Set _rotation to a custom initial rotation
 	_rotation.y = 0
 	_rotation.x = 0
