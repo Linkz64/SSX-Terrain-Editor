@@ -55,7 +55,6 @@ func set_wireframe_overlay(value: bool):
 				c.disable_wireframe_overlay()
 
 
-
 func update_surface():
 	for child in get_children():
 		child.queue_free()
@@ -73,14 +72,8 @@ func update_surface():
 			segment.uv_points["bottom-right"],
 		]
 		var surface := TessellatedMesh.new(cp_array, segment.texture_filename, uvs, true)
-		
-		for i in cp_array.size():
-			if i != 0 and cp_array[i] == Vector3.ZERO:
-				print(cp_array)
-				print("\n")
-				break
-		
 		add_child(surface)
+		
 
 
 func _create_default():

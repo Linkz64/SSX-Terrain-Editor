@@ -2,7 +2,7 @@ extends Camera3D
 
 const BIG = 0xBBBBB
 const ROTATION_SENSITIVITY = Vector2(0.003, 0.003)
-const SPEED_RANGE = {"min": 1000, "max": 100_000}
+const SPEED_RANGE = {"min": 10, "max": 100_000}
 const SPEED_RANGE_CHANGE = 1500
 var movable: bool = false
 var speed: float = 25_000

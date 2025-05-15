@@ -14,7 +14,7 @@ static func open_extracted_patch_data(multitool_dir: String) -> Array[JsonPatch]
 	
 	var json_file: FileAccess = FileAccess.open(json_path, FileAccess.READ)
 	if not json_file:
-		print("Json path %s does not exist" % json_path)
+		push_error("Json path %s does not exist" % json_path)
 		return []
 	
 	var json_data = JSON.parse_string(json_file.get_as_text())

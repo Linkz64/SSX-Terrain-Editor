@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://u05bpkyyiist"]
+[gd_scene load_steps=13 format=3 uid="uid://u05bpkyyiist"]
 
 [ext_resource type="Script" uid="uid://b36brfw6yyoya" path="res://world/world.gd" id="1_tcf2h"]
 [ext_resource type="PackedScene" uid="uid://cb0osf8ki8tco" path="res://world/main_camera.tscn" id="2_4717r"]
@@ -6,16 +6,16 @@
 [ext_resource type="PackedScene" uid="uid://b1jsuu0erff0w" path="res://assets/world/start_gates_reference.glb" id="4_h5o24"]
 [ext_resource type="Script" uid="uid://e3f1ox6y6cvg" path="res://addons/Gizmo3DScript/gizmo3D.gd" id="6_fn3g3"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_fn3g3"]
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_mmdvd"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
 ground_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
 
-[sub_resource type="Sky" id="Sky_sc4t8"]
-sky_material = SubResource("ProceduralSkyMaterial_fn3g3")
+[sub_resource type="Sky" id="Sky_fn3g3"]
+sky_material = SubResource("ProceduralSkyMaterial_mmdvd")
 
-[sub_resource type="Environment" id="Environment_ai45w"]
+[sub_resource type="Environment" id="Environment_sc4t8"]
 background_mode = 2
-sky = SubResource("Sky_sc4t8")
+sky = SubResource("Sky_fn3g3")
 tonemap_mode = 2
 glow_enabled = true
 
@@ -26,31 +26,45 @@ disable_fog = true
 vertex_color_use_as_albedo = true
 disable_receive_shadows = true
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mmdvd"]
+transparency = 1
+shading_mode = 0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fn3g3"]
+albedo_color = Color(1, 0, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mmdvd"]
+
 [node name="World" type="Node3D"]
 script = ExtResource("1_tcf2h")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_ai45w")
+environment = SubResource("Environment_sc4t8")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.779903, -0.314398, 0.541208, 0.414344, 0.907429, -0.0699446, -0.469117, 0.278796, 0.837975, 0, 0, 0.0203843)
+shadow_enabled = true
+directional_shadow_mode = 0
 
 [node name="MainCamera" parent="." instance=ExtResource("2_4717r")]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -2.38999, 1.7569)
 fov = 70.0
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.891981, 0.404468, -0.201936, -0.39382, 0.475872, -0.786415, -0.221983, 0.780994, 0.583757, 0, 0, 0)
-shadow_enabled = true
-directional_shadow_mode = 0
-directional_shadow_max_distance = 1000.0
 
 [node name="AxisLines" type="MeshInstance3D" parent="."]
 material_override = SubResource("StandardMaterial3D_4717r")
 cast_shadow = 0
 script = ExtResource("3_4717r")
 
+[node name="Gizmo" type="Node3D" parent="."]
+script = ExtResource("6_fn3g3")
+show_selection_box = false
+
 [node name="start_gates_reference" parent="." instance=ExtResource("4_h5o24")]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 visible = false
 
-[node name="Gizmo" type="Node3D" parent="."]
-script = ExtResource("6_fn3g3")
-show_selection_box = false
+[node name="Cube" type="MeshInstance3D" parent="."]
+visible = false
+material_override = SubResource("StandardMaterial3D_mmdvd")
+material_overlay = SubResource("StandardMaterial3D_fn3g3")
+mesh = SubResource("BoxMesh_mmdvd")

@@ -63,6 +63,7 @@ func _ready() -> void:
 	var textured_material := StandardMaterial3D.new()
 	textured_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	textured_material.albedo_texture = texture
+	#textured_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	
 	# Create wireframe overlay material
 	var wireframe_material := StandardMaterial3D.new()
@@ -76,6 +77,9 @@ func _ready() -> void:
 	# Create Wireframe overlay mesh instance and mesh
 	_wireframe_instance = MeshInstance3D.new()
 	add_child(_wireframe_instance)
+	_wireframe_instance.visibility_range_end = 100_000
+	_wireframe_instance.visibility_range_end_margin = 10000
+	_wireframe_instance.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 	_wireframe_instance.mesh = ImmediateMesh.new()
 	_wireframe_instance.material_override = wireframe_material
 	
@@ -165,7 +169,6 @@ func update_all(control_points: PackedVector3Array, texture_name: String, \
 	normals[CORNERS["bottom-right"]] = corner_cross.call(15, 14, 11)
 
 	# Generate edge normals
-	
 	# The tangent at the beginning and end of the edge curves.
 	# For local use in the loops below.
 	var start_tangent: Vector3
@@ -180,6 +183,10 @@ func update_all(control_points: PackedVector3Array, texture_name: String, \
 		var blend_factor := BLEND_DISTANCE + (i * BLEND_DISTANCE)
 		var tangent = p0.bezier_derivative(p1, p2, p3, blend_factor)
 		tangent = tangent.normalized()
+		if tangent == Vector3.ZERO:
+			#normals[EDGES["top"][i]] = Vector3.UP
+			normals[EDGES["top"][i]] = normals[CORNERS["top-left"]]
+			continue
 		
 		var n = normals[CORNERS["top-left"]].slerp(normals[CORNERS["top-right"]], blend_factor)
 		n = n.normalized()
@@ -204,6 +211,11 @@ func update_all(control_points: PackedVector3Array, texture_name: String, \
 		var tangent = p0.bezier_derivative(p1, p2, p3, blend_factor)
 		tangent = tangent.normalized()
 		
+		if tangent == Vector3.ZERO:
+			#normals[EDGES["left"][i]] = Vector3.UP
+			normals[EDGES["left"][i]] = normals[CORNERS["top-left"]]
+			continue
+		
 		var n = normals[CORNERS["top-left"]].slerp(normals[CORNERS["bottom-left"]], blend_factor)
 		n = n.normalized()
 		var normal = n.slide(tangent).normalized()
@@ -226,6 +238,11 @@ func update_all(control_points: PackedVector3Array, texture_name: String, \
 		var blend_factor := BLEND_DISTANCE + (i * BLEND_DISTANCE)
 		var tangent = p0.bezier_derivative(p1, p2, p3, blend_factor)
 		tangent = tangent.normalized()
+				
+		if tangent == Vector3.ZERO:
+			#normals[EDGES["bottom"][i]] = Vector3.UP
+			normals[EDGES["bottom"][i]] = normals[CORNERS["bottom-right"]]
+			continue
 		
 		var n = normals[CORNERS["bottom-left"]].slerp(normals[CORNERS["bottom-right"]], blend_factor)
 		n = n.normalized()
@@ -249,6 +266,11 @@ func update_all(control_points: PackedVector3Array, texture_name: String, \
 		var blend_factor := BLEND_DISTANCE + (i * BLEND_DISTANCE)
 		var tangent = p0.bezier_derivative(p1, p2, p3, blend_factor)
 		tangent = tangent.normalized()
+				
+		if tangent == Vector3.ZERO:
+			#normals[EDGES["right"][i]] = Vector3.UP
+			normals[EDGES["right"][i]] = normals[CORNERS["bottom-right"]]
+			continue
 		
 		var n = normals[CORNERS["top-right"]].slerp(normals[CORNERS["bottom-right"]], blend_factor)
 		n = n.normalized()

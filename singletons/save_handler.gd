@@ -191,12 +191,7 @@ func _grouping_none_edit(ssxt_struct: SsxtFileStructure, json_data: Array[JsonPa
 			segment.control_point_ids.append(i)
 		segment.lightmap_rect = Rect2(0, 0, 0.0625, 0.0625)
 		segment.lightmap_id = 0
-		segment.uv_points = [
-			Vector2.ZERO,
-			Vector2(1, 0),
-			Vector2(0, 1),
-			Vector2(1, 1),
-		]
+		segment.uv_points = patch.uv_points
 		segment.patch_style = patch.patch_style
 		segment.tricky_only_patch = patch.tricky_only_patch
 		segment.texture_path = patch.texture_path
@@ -259,12 +254,7 @@ func _grouping_batch_edit(ssxt_struct: SsxtFileStructure, json_data: Array[JsonP
 			segment.control_point_ids.append(k)
 		segment.lightmap_rect = Rect2(0, 0, 0.0625, 0.0625)
 		segment.lightmap_id = 0
-		segment.uv_points = [
-			Vector2.ZERO,
-			Vector2(1, 0),
-			Vector2(0, 1),
-			Vector2(1, 1),
-		]
+		segment.uv_points = patch.uv_points
 		segment.patch_style = patch.patch_style
 		segment.tricky_only_patch = patch.tricky_only_patch
 		segment.texture_path = patch.texture_path
@@ -352,19 +342,13 @@ func _grouping_surface_type_edit(ssxt_struct: SsxtFileStructure, json_data: Arra
 			segment.control_point_ids.append(k)
 		segment.lightmap_rect = Rect2(0, 0, 0.0625, 0.0625)
 		segment.lightmap_id = 0
-		segment.uv_points = [
-			Vector2.ZERO,
-			Vector2(1, 0),
-			Vector2(0, 1),
-			Vector2(1, 1),
-		]
+		segment.uv_points = patch.uv_points
 		segment.patch_style = patch.patch_style
 		segment.tricky_only_patch = patch.tricky_only_patch
 		segment.texture_path = patch.texture_path
 		segment.texture_path_size = patch.texture_path.length()
 		object_entry.segments.append(segment)
 		ssxt_struct.groups[patch.patch_style].objects.append(object_entry)
-
 
 
 func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> Node:
@@ -415,7 +399,6 @@ func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> Node:
 
 	return root
 	
-
 	
 static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStructure):
 	var ssxt_file := FileAccess.open(terrain_path, FileAccess.WRITE)
