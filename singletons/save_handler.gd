@@ -7,16 +7,10 @@ signal new_terrain_created
 # active in the editor.
 var current_working_terrain_path: String
 # Dependancy injection of the 3D world root node.
-var dep_world: Node
+var dep_world: Node3D
 # Dependancy injection of the Tree node.
 var dep_tree: Node
-
 var _thread: Thread
-
-#--------Override methods--------
-func _ready():
-	_thread = Thread.new()
-	get_tree().process_frame.connect(_check_thread_finished)
 
 
 #---------Public methods--------
@@ -29,16 +23,36 @@ func new_terrain(terrain_path: String, import_json: bool, grouping: Enum.Groupin
 		_thread.start(_create_ssxt_default.bind(terrain_path))
 
 
+func open_terrain(terrain_path: String):
+	current_working_terrain_path = terrain_path
+	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
+	_thread.start(func(): return _ssxt_struct_to_nodes(_read_struct_from_disk(terrain_path)))
+
+
 #----------Private methods-------
+func _ready():
+	_thread = Thread.new()
+	get_tree().process_frame.connect(_check_thread_finished)
+
+
+func _exit_tree() -> void:
+	_thread.wait_to_finish()
+
+
 func _check_thread_finished() -> void:
 	if _thread.is_started() and not _thread.is_alive():
-		var node = _thread.wait_to_finish()
+		var node: Node = _thread.wait_to_finish()
 		dep_world.add_child(node)
 		new_terrain_created.emit()
-		
+
+
+func _update_camera(xform: Transform3D):
+	dep_world.get_camera().transform = xform
+
 
 func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 	# Read the json and turn it into a Godot ssxt structured class
+	#var start = Time.get_ticks_msec()
 	var json_data: Array[JsonPatch] = Multitool.open_extracted_patch_data( \
 			terrain_path.get_base_dir())
 	var ssxt_struct := SsxtFileStructure.new()
@@ -53,7 +67,6 @@ func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 	ssxt_struct.date_time_created = Time.get_datetime_string_from_system()
 	
 	ssxt_struct.camera_xform = Transform3D().rotated(Vector3.RIGHT, TAU/4)
-
 	match grouping:
 		Enum.GroupingIndex.NONE:
 			_grouping_none_edit(ssxt_struct, json_data)
@@ -62,8 +75,12 @@ func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 		Enum.GroupingIndex.SURFACE_TYPE:
 			_grouping_surface_type_edit(ssxt_struct, json_data)
 	
-	_write_struct_to_disk(terrain_path, ssxt_struct)
-	return _ssxt_struct_to_nodes(ssxt_struct)
+	var write_thread := Thread.new()
+	write_thread.start(_write_struct_to_disk.bind(terrain_path, ssxt_struct))
+	
+	var nodes = _ssxt_struct_to_nodes(ssxt_struct)
+	write_thread.wait_to_finish()
+	return nodes
 
 
 func _create_ssxt_default(terrain_path: String):
@@ -353,6 +370,7 @@ func _grouping_surface_type_edit(ssxt_struct: SsxtFileStructure, json_data: Arra
 
 func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> Node:
 	assert(dep_world, "World node dependancy was not set.")
+	call_thread_safe("_update_camera", ssxt_struct.camera_xform)
 	
 	var root := Node.new()
 	root.name = "ObjectHandler"
@@ -398,7 +416,110 @@ func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> Node:
 			#control_point.neighbours["north"] = cp.ref_north_id
 
 	return root
+
+
+static func _read_struct_from_disk(terrain_path: String) -> SsxtFileStructure:
+	var ssxt_file := FileAccess.open(terrain_path, FileAccess.READ)
+	var ssxt_struct := SsxtFileStructure.new()
+	ssxt_struct.signature = ssxt_file.get_buffer(4).get_string_from_utf8()
+	ssxt_struct.file_structure_version[0] = ssxt_file.get_8()
+	ssxt_struct.file_structure_version[1] = ssxt_file.get_8()
+	ssxt_struct.file_structure_version[2] = ssxt_file.get_8()
+	ssxt_struct.editor_version[0] = ssxt_file.get_8()
+	ssxt_struct.editor_version[1] = ssxt_file.get_8()
+	ssxt_struct.editor_version[2] = ssxt_file.get_8()
 	
+	ssxt_struct.date_time_created = ssxt_file.get_buffer(19).get_string_from_utf8()
+	
+	ssxt_struct.camera_xform.origin.x = ssxt_file.get_float()
+	ssxt_struct.camera_xform.origin.y = ssxt_file.get_float()
+	ssxt_struct.camera_xform.origin.z = ssxt_file.get_float()
+	ssxt_struct.camera_xform.basis.x.x = ssxt_file.get_float()
+	ssxt_struct.camera_xform.basis.x.y = ssxt_file.get_float()
+	ssxt_struct.camera_xform.basis.x.z = ssxt_file.get_float()
+	ssxt_struct.camera_xform.basis.y.x = ssxt_file.get_float()
+	ssxt_struct.camera_xform.basis.y.y = ssxt_file.get_float()
+	ssxt_struct.camera_xform.basis.y.z = ssxt_file.get_float()
+	ssxt_struct.camera_xform.basis.z.x = ssxt_file.get_float()
+	ssxt_struct.camera_xform.basis.z.y = ssxt_file.get_float()
+	ssxt_struct.camera_xform.basis.z.z = ssxt_file.get_float()
+	ssxt_struct.group_count = ssxt_file.get_32()
+	
+	for group_index in ssxt_struct.group_count:
+		var group := GroupEntry.new()
+		ssxt_struct.groups.append(group)
+		group.group_name_size = ssxt_file.get_8()
+		group.group_name = ssxt_file.get_buffer(group.group_name_size).get_string_from_utf8()
+		group.group_visible = ssxt_file.get_8()
+		group.object_count = ssxt_file.get_32()
+		
+		for object_index in group.object_count:
+			var object := ObjectEntry.new()
+			group.objects.append(object)
+			object.object_name_size = ssxt_file.get_8()
+			object.object_name = ssxt_file.get_buffer(object.object_name_size).get_string_from_utf8()
+			object.object_xform.origin.x = ssxt_file.get_float()
+			object.object_xform.origin.y = ssxt_file.get_float()
+			object.object_xform.origin.z = ssxt_file.get_float()
+			object.object_xform.basis.x.x = ssxt_file.get_float()
+			object.object_xform.basis.x.y = ssxt_file.get_float()
+			object.object_xform.basis.x.z = ssxt_file.get_float()
+			object.object_xform.basis.y.x = ssxt_file.get_float()
+			object.object_xform.basis.y.y = ssxt_file.get_float()
+			object.object_xform.basis.y.z = ssxt_file.get_float()
+			object.object_xform.basis.z.x = ssxt_file.get_float()
+			object.object_xform.basis.z.y = ssxt_file.get_float()
+			object.object_xform.basis.z.z = ssxt_file.get_float()
+			
+			object.greatest_control_point_id = ssxt_file.get_32()
+			object.control_point_count = ssxt_file.get_32()
+			for cp_index in object.control_point_count:
+				var control_point = ControlPointEntry.new()
+				object.control_points.append(control_point)
+				control_point.type = ssxt_file.get_8()
+				control_point.id = ssxt_file.get_32()
+				control_point.aligned = ssxt_file.get_8()
+				control_point.position.x = ssxt_file.get_float()
+				control_point.position.y = ssxt_file.get_float()
+				control_point.position.z = ssxt_file.get_float()
+				control_point.has_north_ref = ssxt_file.get_8()
+				control_point.ref_north_id = ssxt_file.get_32()
+				control_point.has_west_ref = ssxt_file.get_8()
+				control_point.ref_west_id = ssxt_file.get_32()
+				control_point.has_south_ref = ssxt_file.get_8()
+				control_point.ref_south_id = ssxt_file.get_32()
+				control_point.has_east_ref = ssxt_file.get_8()
+				control_point.ref_east_id = ssxt_file.get_32()
+			
+			object.greatest_segment_id = ssxt_file.get_32()
+			
+			for segment_index in object.greatest_segment_id:
+				var segment := SegmentEntry.new()
+				object.segments.append(segment)
+				segment.id = ssxt_file.get_32()
+				
+				for cp_id in 16:
+					segment.control_point_ids.append(ssxt_file.get_32())
+			
+				segment.lightmap_rect.position.x = ssxt_file.get_float()
+				segment.lightmap_rect.position.y = ssxt_file.get_float()
+				segment.lightmap_rect.size.x = ssxt_file.get_float()
+				segment.lightmap_rect.size.y = ssxt_file.get_float()
+				segment.lightmap_id = ssxt_file.get_32()
+			
+				for uv in 4:
+					var point: Vector2
+					point.x = ssxt_file.get_float() 
+					point.y = ssxt_file.get_float() 
+					segment.uv_points.append(point)
+			
+				segment.patch_style = ssxt_file.get_8()
+				segment.tricky_only_patch = ssxt_file.get_8()
+				segment.texture_path_size = ssxt_file.get_32()
+				segment.texture_path = ssxt_file.get_buffer(segment.texture_path_size).get_string_from_utf8()
+			
+	return ssxt_struct
+
 	
 static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStructure):
 	var ssxt_file := FileAccess.open(terrain_path, FileAccess.WRITE)

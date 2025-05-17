@@ -1,7 +1,10 @@
 extends MeshInstance3D
 
 
+
 const BIG = 0xBBBBB
+
+@export var main_camera: Camera3D
 
 
 func _ready() -> void:
@@ -20,4 +23,6 @@ func _ready() -> void:
 	lines.add_vertex(Vector3(0, 0, -BIG))
 	lines.add_vertex(Vector3(0, 0, BIG))
 	mesh = lines.commit()
-	
+
+func _process(_delta: float) -> void:
+	visible = main_camera.position != Vector3.ZERO
