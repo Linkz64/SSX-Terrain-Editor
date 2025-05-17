@@ -46,46 +46,7 @@ var _init_wireframe_overlay: bool
 var _is_ready: bool = false
 var _wireframe_instance: MeshInstance3D
 
-
-func _init(control_points: PackedVector3Array, texture_name: String, \
-		uv_points: PackedVector2Array, wireframe_overlay: bool = false ):
-	_init_control_points = control_points
-	_init_uv_points = uv_points
-	_init_texture_name = texture_name
-	_init_wireframe_overlay = wireframe_overlay
-
-
-func _ready() -> void:
-	_is_ready = true
-	
-	# Create textured material
-	var texture := TextureManager.get_texture(_init_texture_name)
-	var textured_material := StandardMaterial3D.new()
-	textured_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	textured_material.albedo_texture = texture
-	#textured_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	
-	# Create wireframe overlay material
-	var wireframe_material := StandardMaterial3D.new()
-	wireframe_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	wireframe_material.vertex_color_use_as_albedo = true
-	
-	# Create Textured mesh
-	mesh = ImmediateMesh.new()
-	material_override = textured_material
-	 
-	# Create Wireframe overlay mesh instance and mesh
-	_wireframe_instance = MeshInstance3D.new()
-	add_child(_wireframe_instance)
-	_wireframe_instance.visibility_range_end = 100_000
-	_wireframe_instance.visibility_range_end_margin = 10000
-	_wireframe_instance.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-	_wireframe_instance.mesh = ImmediateMesh.new()
-	_wireframe_instance.material_override = wireframe_material
-	
-	update_all(_init_control_points, _init_texture_name, _init_uv_points, _init_wireframe_overlay)
-
-
+#------Public-------
 func update_all(control_points: PackedVector3Array, texture_name: String, \
 		uv_points: PackedVector2Array, wireframe_overlay: bool = false):
 	if not _is_ready:
@@ -157,16 +118,28 @@ func update_all(control_points: PackedVector3Array, texture_name: String, \
 		normals[i] = neighbouring_normals.reduce(sum, Vector3.ZERO).normalized() # average
 	
 	# Generate corner normals
-	var corner_cross = func(main_cp: int, cp_a: int, cp_b: int):
+	var corner_cross = func(main_cp: int, cp_a: int, cp_b: int, cp_c: int):
 		var a = (control_points[cp_a] - control_points[main_cp]).normalized()
 		var b = (control_points[cp_b] - control_points[main_cp]).normalized()
-		var cross = a.cross(b)
+		var c = (control_points[cp_c] - control_points[main_cp]).normalized()
+		var cross = a.cross(b) if a.cross(b) != Vector3.ZERO else a.cross(c)
+		if cross == Vector3.ZERO:
+			# If the corner's triangle is degenerate, then set it to the diagonal vertex;s normal 
+			match main_cp:
+				0:
+					return normals[9]
+				3:
+					return normals[14]
+				12:
+					return normals[49]
+				15:
+					return normals[54]
 		return -cross
 		
-	normals[CORNERS["top-left"]] = corner_cross.call(0, 1, 4)
-	normals[CORNERS["top-right"]] = corner_cross.call(3, 7, 2)
-	normals[CORNERS["bottom-left"]] = corner_cross.call(12, 8, 13)
-	normals[CORNERS["bottom-right"]] = corner_cross.call(15, 14, 11)
+	normals[CORNERS["top-left"]] = corner_cross.call(0, 1, 4, 5)
+	normals[CORNERS["top-right"]] = corner_cross.call(3, 7, 2, 6)
+	normals[CORNERS["bottom-left"]] = corner_cross.call(12, 8, 13, 9)
+	normals[CORNERS["bottom-right"]] = corner_cross.call(15, 14, 11, 10)
 
 	# Generate edge normals
 	# The tangent at the beginning and end of the edge curves.
@@ -184,7 +157,6 @@ func update_all(control_points: PackedVector3Array, texture_name: String, \
 		var tangent = p0.bezier_derivative(p1, p2, p3, blend_factor)
 		tangent = tangent.normalized()
 		if tangent == Vector3.ZERO:
-			#normals[EDGES["top"][i]] = Vector3.UP
 			normals[EDGES["top"][i]] = normals[CORNERS["top-left"]]
 			continue
 		
@@ -212,8 +184,7 @@ func update_all(control_points: PackedVector3Array, texture_name: String, \
 		tangent = tangent.normalized()
 		
 		if tangent == Vector3.ZERO:
-			#normals[EDGES["left"][i]] = Vector3.UP
-			normals[EDGES["left"][i]] = normals[CORNERS["top-left"]]
+			normals[EDGES["left"][i]] = normals[CORNERS["top-right"]]
 			continue
 		
 		var n = normals[CORNERS["top-left"]].slerp(normals[CORNERS["bottom-left"]], blend_factor)
@@ -240,8 +211,7 @@ func update_all(control_points: PackedVector3Array, texture_name: String, \
 		tangent = tangent.normalized()
 				
 		if tangent == Vector3.ZERO:
-			#normals[EDGES["bottom"][i]] = Vector3.UP
-			normals[EDGES["bottom"][i]] = normals[CORNERS["bottom-right"]]
+			normals[EDGES["bottom"][i]] = normals[CORNERS["bottom-left"]]
 			continue
 		
 		var n = normals[CORNERS["bottom-left"]].slerp(normals[CORNERS["bottom-right"]], blend_factor)
@@ -268,7 +238,6 @@ func update_all(control_points: PackedVector3Array, texture_name: String, \
 		tangent = tangent.normalized()
 				
 		if tangent == Vector3.ZERO:
-			#normals[EDGES["right"][i]] = Vector3.UP
 			normals[EDGES["right"][i]] = normals[CORNERS["bottom-right"]]
 			continue
 		
@@ -347,6 +316,46 @@ func disable_wireframe_overlay():
 		push_warning("Can't update when _ready hasn't ran yet. Changes will not take effect immediatly")
 		return
 	_wireframe_instance.hide()
+
+
+#----------Private------------
+func _init(control_points: PackedVector3Array, texture_name: String, \
+		uv_points: PackedVector2Array, wireframe_overlay: bool = false ):
+	_init_control_points = control_points
+	_init_uv_points = uv_points
+	_init_texture_name = texture_name
+	_init_wireframe_overlay = wireframe_overlay
+
+
+func _ready() -> void:
+	_is_ready = true
+	
+	# Create textured material
+	var texture := TextureManager.get_texture(_init_texture_name)
+	var textured_material := StandardMaterial3D.new()
+	textured_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	textured_material.albedo_texture = texture
+	#textured_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	
+	# Create wireframe overlay material
+	var wireframe_material := StandardMaterial3D.new()
+	wireframe_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	wireframe_material.vertex_color_use_as_albedo = true
+	
+	# Create Textured mesh
+	mesh = ImmediateMesh.new()
+	material_override = textured_material
+	 
+	# Create Wireframe overlay mesh instance and mesh
+	_wireframe_instance = MeshInstance3D.new()
+	add_child(_wireframe_instance)
+	_wireframe_instance.visibility_range_end = 100_000
+	_wireframe_instance.visibility_range_end_margin = 10000
+	_wireframe_instance.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+	_wireframe_instance.mesh = ImmediateMesh.new()
+	_wireframe_instance.material_override = wireframe_material
+	
+	update_all(_init_control_points, _init_texture_name, _init_uv_points, _init_wireframe_overlay)
 
 
 func _update_wireframe_with_normals(control_points: PackedVector3Array,
