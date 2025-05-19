@@ -2,6 +2,8 @@ extends Node3D
 
 const BIG = 0xBBBBB
 
+var object_pool: Node
+
 
 func _ready():
 	SaveHandler.dep_world = self
@@ -10,3 +12,6 @@ func _ready():
 
 func get_camera() -> Camera3D:
 	return $MainCamera
+	
+	
+	

@@ -42,12 +42,17 @@ func _exit_tree() -> void:
 func _check_thread_finished() -> void:
 	if _thread.is_started() and not _thread.is_alive():
 		var node: Node = _thread.wait_to_finish()
+		var old_node = dep_world.object_pool
+		if old_node:
+			old_node.queue_free()
 		dep_world.add_child(node)
+		dep_world.object_pool = node
 		new_terrain_created.emit()
 
 
 func _update_camera(xform: Transform3D):
 	dep_world.get_camera().transform = xform
+	dep_world.get_camera().init_rotation = Vector2.ZERO
 
 
 func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
@@ -373,7 +378,7 @@ func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> Node:
 	call_thread_safe("_update_camera", ssxt_struct.camera_xform)
 	
 	var root := Node.new()
-	root.name = "ObjectHandler"
+	root.name = "ObjectPool"
 	for group: GroupEntry in ssxt_struct.groups:
 		var group_node := Node3D.new()
 		group_node.name = group.group_name
