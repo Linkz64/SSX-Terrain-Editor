@@ -47,7 +47,7 @@ shadow_enabled = true
 directional_shadow_mode = 0
 
 [node name="MainCamera" parent="." instance=ExtResource("2_4717r")]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -2.38999, 1.7569)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 fov = 70.0
 
 [node name="AxisLines" type="MeshInstance3D" parent="." node_paths=PackedStringArray("main_camera")]
@@ -58,11 +58,11 @@ main_camera = NodePath("../MainCamera")
 
 [node name="Gizmo" type="Node3D" parent="."]
 script = ExtResource("6_fn3g3")
+mode = 3
 show_selection_box = false
 
 [node name="start_gates_reference" parent="." instance=ExtResource("4_h5o24")]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
-visible = false
+transform = Transform3D(100, 0, 0, 0, -4.37114e-06, -100, 0, 100, -4.37114e-06, 437.385, -4.76837e-07, 0.00415158)
 
 [node name="Cube" type="MeshInstance3D" parent="."]
 visible = false

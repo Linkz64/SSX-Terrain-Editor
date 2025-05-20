@@ -17,7 +17,7 @@ enum InitType {
 	DEFAULT,
 	COPY,
 }
-const DEFAULT_SEGMENT_SIZE = 10 # 10x10
+const DEFAULT_SEGMENT_SIZE = 100000 # 10x10
 
 var control_points: Dictionary[int, ControlPoint] = {}
 var control_points_id: int = 0 # Increment when adding CP. Unique to this object
@@ -75,7 +75,6 @@ func update_surface():
 		add_child(surface)
 		
 
-
 func _create_default():
 	for y in range(3, -1, -1):
 		for x in 4:
@@ -107,7 +106,7 @@ func _create_default():
 		Vector2(0, 1),
 		Vector2(1, 1),
 	]
-	var surface := TessellatedMesh.new(cp_array, "0025.png", uv_points, true)
+	var surface := TessellatedMesh.new(cp_array, "0001.png", uv_points, true)
 	add_child(surface)
 
 

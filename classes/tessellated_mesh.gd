@@ -45,6 +45,9 @@ var _init_wireframe_overlay: bool
 
 var _is_ready: bool = false
 var _wireframe_instance: MeshInstance3D
+var _collision_shape: ConcavePolygonShape3D
+var _collision_body: StaticBody3D
+
 
 #------Public-------
 func update_all(control_points: PackedVector3Array, texture_name: String, \
@@ -282,6 +285,19 @@ func update_all(control_points: PackedVector3Array, texture_name: String, \
 	# Update wireframe mesh
 	_update_wireframe_with_normals(control_points, normals)
 	_wireframe_instance.visible = wireframe_overlay
+	
+	# Update collision body
+	if _collision_body:
+		_collision_body.queue_free()
+	
+	_collision_shape = ConcavePolygonShape3D.new()
+	_collision_shape.backface_collision = true
+	_collision_shape.set_faces(mesh.get_faces())
+	_collision_body = StaticBody3D.new()
+	var collision = CollisionShape3D.new()
+	collision.shape = _collision_shape
+	_collision_body.add_child(collision)
+	add_child(_collision_body)
 	
 
 func update_control_points(control_points: PackedVector3Array):

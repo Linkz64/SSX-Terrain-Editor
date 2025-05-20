@@ -15,10 +15,24 @@ func _gui_input(_event: InputEvent) -> void:
 		if is_mouse_inside_viewport:
 			world.get_camera().movable = true
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	elif Input.is_action_just_pressed("LeftClick"):
+		var space_state = world.get_world_3d().direct_space_state
+		var query = PhysicsRayQueryParameters3D.create(world.get_camera().position, \
+				-world.get_camera().transform.basis.z * 90000)
+		query.collide_with_areas = true
+		var result = space_state.intersect_ray(query)
+		if result:
+			print(result["collider"].get_parent().get_parent().name)
+			world.get_node("Gizmo").clear_selection()
+			world.get_node("Gizmo").select(result["collider"].get_parent().get_parent())
+		
+		
 		
 	if Input.is_action_just_released("RightClick"):
 			world.get_camera().movable = false
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			
+			
 
 func _on_mouse_entered() -> void:
 	is_mouse_inside_viewport = true

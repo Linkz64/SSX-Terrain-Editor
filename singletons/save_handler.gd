@@ -90,6 +90,7 @@ func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 
 func _create_ssxt_default(terrain_path: String):
 	# create the ssxt with a predefined structure
+	const SEGMENT_SIZE = 300
 	var ssxt_struct := SsxtFileStructure.new()
 	
 	var version_str: String = ProjectSettings.get_setting("application/config/version")
@@ -123,8 +124,8 @@ func _create_ssxt_default(terrain_path: String):
 			var control_point_entry := ControlPointEntry.new()
 			control_point_entry.type = _get_control_point_type(cp_index)
 			control_point_entry.id = cp_index
-			control_point_entry. aligned = true
-			control_point_entry.position = Vector3(x, y, 0) - object_entry.object_xform.origin
+			control_point_entry.aligned = true
+			control_point_entry.position = Vector3(x * SEGMENT_SIZE, y * SEGMENT_SIZE, 0) - object_entry.object_xform.origin
 			
 			var north = _get_neighbour(cp_index, "north")
 			var west = _get_neighbour(cp_index, "west")
