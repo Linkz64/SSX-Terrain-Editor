@@ -21,12 +21,26 @@ func _gui_input(_event: InputEvent) -> void:
 				-world.get_camera().transform.basis.z * 90000)
 		query.collide_with_areas = true
 		var result = space_state.intersect_ray(query)
+		
+		var mouse_screen_pos = get_viewport().get_mouse_position()
+		var inside_mouse = (get_child(0) as SubViewport).get_mouse_position()
+		var local_mouse_pos = get_global_transform_with_canvas().affine_inverse()
+		#print(local_mouse_pos)
+		#print(size)
+		#print(get_viewport_transform())
+		$"../ColorRect".position = inside_mouse
+		#print(inside_mouse)
+		print(size)
+		
+		
 		if result:
-			print(result["collider"].get_parent().get_parent().name)
+			for node in world.get_node("Gizmo")._selections:
+				node.get_child(0).material_overlay.albedo_color = Color(1, 1, 1, 0)
+				
 			world.get_node("Gizmo").clear_selection()
+			# Selecting PatchObject
 			world.get_node("Gizmo").select(result["collider"].get_parent().get_parent())
-		
-		
+			result["collider"].get_parent().material_overlay.albedo_color = Color.ORANGE * Color(1, 1, 1, 0.5)
 		
 	if Input.is_action_just_released("RightClick"):
 			world.get_camera().movable = false

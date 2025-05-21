@@ -351,7 +351,6 @@ func _ready() -> void:
 	var textured_material := StandardMaterial3D.new()
 	textured_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	textured_material.albedo_texture = texture
-	#textured_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	
 	# Create wireframe overlay material
 	var wireframe_material := StandardMaterial3D.new()
@@ -361,6 +360,13 @@ func _ready() -> void:
 	# Create Textured mesh
 	mesh = ImmediateMesh.new()
 	material_override = textured_material
+	
+	# Selected overlay
+	var selected_material := StandardMaterial3D.new()
+	selected_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	selected_material.albedo_color = Color(1, 1, 1, 0)
+	selected_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material_overlay = selected_material
 	 
 	# Create Wireframe overlay mesh instance and mesh
 	_wireframe_instance = MeshInstance3D.new()

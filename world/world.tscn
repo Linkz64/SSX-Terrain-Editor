@@ -31,6 +31,7 @@ transparency = 1
 shading_mode = 0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fn3g3"]
+transparency = 1
 albedo_color = Color(1, 0, 1, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_mmdvd"]
@@ -62,9 +63,11 @@ mode = 3
 show_selection_box = false
 
 [node name="start_gates_reference" parent="." instance=ExtResource("4_h5o24")]
-transform = Transform3D(100, 0, 0, 0, -4.37114e-06, -100, 0, 100, -4.37114e-06, 437.385, -4.76837e-07, 0.00415158)
+transform = Transform3D(100, 0, 0, 0, -4.37114e-06, -100, 0, 100, -4.37114e-06, 0, 0, 0)
+visible = false
 
 [node name="Cube" type="MeshInstance3D" parent="."]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
 visible = false
 material_override = SubResource("StandardMaterial3D_mmdvd")
 material_overlay = SubResource("StandardMaterial3D_fn3g3")
