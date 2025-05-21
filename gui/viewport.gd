@@ -1,5 +1,6 @@
 extends SubViewportContainer
 
+const RAY_DISTANCE = 100_000_000
 
 var is_mouse_inside_viewport: bool = false
 @onready var world: Node3D = $Render/World
@@ -15,37 +16,59 @@ func _gui_input(_event: InputEvent) -> void:
 		if is_mouse_inside_viewport:
 			world.get_camera().movable = true
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	elif Input.is_action_just_pressed("LeftClick"):
+	elif Input.is_action_just_released("RightClick"):
+			world.get_camera().movable = false
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			
+	
+	if Input.is_action_just_pressed("MultiSelect"):
 		var space_state = world.get_world_3d().direct_space_state
-		var query = PhysicsRayQueryParameters3D.create(world.get_camera().position, \
-				-world.get_camera().transform.basis.z * 90000)
-		query.collide_with_areas = true
+		var camera: Camera3D = world.get_camera()
+		
+		# wait one frame to see if the user clicked over the gizmo
+		await get_tree().process_frame
+		if world.get_node("Gizmo")._editing:
+			return
+			
+		var screen_position = get_viewport().get_mouse_position() + Vector2(0, 32)#position
+		var start = camera.project_ray_origin(screen_position)
+		var end = (camera.project_ray_normal(screen_position) * RAY_DISTANCE) + start
+		var query = PhysicsRayQueryParameters3D.create(start, end)
 		var result = space_state.intersect_ray(query)
 		
-		var mouse_screen_pos = get_viewport().get_mouse_position()
-		var inside_mouse = (get_child(0) as SubViewport).get_mouse_position()
-		var local_mouse_pos = get_global_transform_with_canvas().affine_inverse()
-		#print(local_mouse_pos)
-		#print(size)
-		#print(get_viewport_transform())
-		$"../ColorRect".position = inside_mouse
-		#print(inside_mouse)
-		print(size)
-		
-		
 		if result:
-			for node in world.get_node("Gizmo")._selections:
-				node.get_child(0).material_overlay.albedo_color = Color(1, 1, 1, 0)
-				
-			world.get_node("Gizmo").clear_selection()
 			# Selecting PatchObject
 			world.get_node("Gizmo").select(result["collider"].get_parent().get_parent())
 			result["collider"].get_parent().material_overlay.albedo_color = Color.ORANGE * Color(1, 1, 1, 0.5)
 		
-	if Input.is_action_just_released("RightClick"):
-			world.get_camera().movable = false
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 			
+	elif Input.is_action_just_pressed("LeftClick"):
+		var space_state = world.get_world_3d().direct_space_state
+		var camera: Camera3D = world.get_camera()
+		
+		# wait one frame to see if the user clicked over the gizmo
+		await get_tree().process_frame
+		if world.get_node("Gizmo")._editing:
+			return
+		
+		var screen_position = get_viewport().get_mouse_position() + Vector2(0, 32)#position
+		var start = camera.project_ray_origin(screen_position)
+		var end = (camera.project_ray_normal(screen_position) * RAY_DISTANCE) + start
+		var query = PhysicsRayQueryParameters3D.create(start, end)
+		var result = space_state.intersect_ray(query)
+		
+		for node in world.get_node("Gizmo")._selections:
+			node.get_child(0).material_overlay.albedo_color = Color(1, 1, 1, 0)
+		world.get_node("Gizmo").clear_selection()
+		
+		if result:
+			# Selecting PatchObject
+			world.get_node("Gizmo").select(result["collider"].get_parent().get_parent())
+			result["collider"].get_parent().material_overlay.albedo_color = Color.ORANGE * Color(1, 1, 1, 0.5)
+		
+		
+		
+	
 			
 
 func _on_mouse_entered() -> void:
