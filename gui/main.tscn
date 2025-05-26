@@ -88,15 +88,17 @@ layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.833
 anchor_bottom = 1.0
-offset_right = 0.639893
+offset_left = -6.10352e-05
+offset_right = 0.640015
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset = Vector2(6.385, 0)
 script = ExtResource("2_6eus7")
 
 [node name="Render" type="SubViewport" parent="Viewport"]
 transparent_bg = true
 handle_input_locally = false
-size = Vector2i(1600, 1048)
+size = Vector2i(1600, 1080)
 render_target_update_mode = 4
 
 [node name="World" parent="Viewport/Render" instance=ExtResource("2_iqv6a")]

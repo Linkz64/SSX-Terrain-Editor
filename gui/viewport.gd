@@ -1,6 +1,6 @@
 extends SubViewportContainer
 
-const RAY_DISTANCE = 100_000_000
+const RAY_DISTANCE = 1_000_000
 
 var is_mouse_inside_viewport: bool = false
 @onready var world: Node3D = $Render/World
@@ -40,7 +40,6 @@ func _gui_input(_event: InputEvent) -> void:
 			# Selecting PatchObject
 			world.get_node("Gizmo").select(result["collider"].get_parent().get_parent())
 			result["collider"].get_parent().material_overlay.albedo_color = Color.ORANGE * Color(1, 1, 1, 0.5)
-		
 			
 	elif Input.is_action_just_pressed("LeftClick"):
 		var space_state = world.get_world_3d().direct_space_state
@@ -56,6 +55,9 @@ func _gui_input(_event: InputEvent) -> void:
 		var end = (camera.project_ray_normal(screen_position) * RAY_DISTANCE) + start
 		var query = PhysicsRayQueryParameters3D.create(start, end)
 		var result = space_state.intersect_ray(query)
+
+		world.get_node("Cube").position = start
+		world.get_node("Cube2").position = end
 		
 		for node in world.get_node("Gizmo")._selections:
 			node.get_child(0).material_overlay.albedo_color = Color(1, 1, 1, 0)
@@ -65,11 +67,8 @@ func _gui_input(_event: InputEvent) -> void:
 			# Selecting PatchObject
 			world.get_node("Gizmo").select(result["collider"].get_parent().get_parent())
 			result["collider"].get_parent().material_overlay.albedo_color = Color.ORANGE * Color(1, 1, 1, 0.5)
-		
-		
-		
-	
-			
+			world.get_node("Cube3").position = result["position"]
+
 
 func _on_mouse_entered() -> void:
 	is_mouse_inside_viewport = true
