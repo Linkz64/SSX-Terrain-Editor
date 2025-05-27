@@ -31,7 +31,9 @@ transparency = 1
 shading_mode = 0
 albedo_color = Color(1, 0, 1, 1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_mmdvd"]
+[sub_resource type="SphereMesh" id="SphereMesh_mmdvd"]
+radial_segments = 32
+rings = 16
 
 [node name="World" type="Node3D"]
 script = ExtResource("1_tcf2h")
@@ -66,14 +68,14 @@ visible = false
 [node name="Cube" type="MeshInstance3D" parent="."]
 transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
 material_override = SubResource("StandardMaterial3D_mmdvd")
-mesh = SubResource("BoxMesh_mmdvd")
+mesh = SubResource("SphereMesh_mmdvd")
 
 [node name="Cube2" type="MeshInstance3D" parent="."]
 transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
 material_override = SubResource("StandardMaterial3D_mmdvd")
-mesh = SubResource("BoxMesh_mmdvd")
+mesh = SubResource("SphereMesh_mmdvd")
 
 [node name="Cube3" type="MeshInstance3D" parent="."]
 transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
 material_override = SubResource("StandardMaterial3D_mmdvd")
-mesh = SubResource("BoxMesh_mmdvd")
+mesh = SubResource("SphereMesh_mmdvd")

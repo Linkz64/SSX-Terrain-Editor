@@ -3,6 +3,7 @@ extends SubViewportContainer
 const RAY_DISTANCE = 1_000_000
 
 var is_mouse_inside_viewport: bool = false
+@onready var render: SubViewport = $Render
 @onready var world: Node3D = $Render/World
 
 
@@ -45,12 +46,12 @@ func _gui_input(_event: InputEvent) -> void:
 		var space_state = world.get_world_3d().direct_space_state
 		var camera: Camera3D = world.get_camera()
 		
-		# wait one frame to see if the user clicked over the gizmo
+		# Wait one frame to see if the user clicked over the gizmo
 		await get_tree().process_frame
 		if world.get_node("Gizmo")._editing:
 			return
-		
-		var screen_position = get_viewport().get_mouse_position() + Vector2(0, 32)#position
+			
+		var screen_position = render.get_mouse_position()
 		var start = camera.project_ray_origin(screen_position)
 		var end = (camera.project_ray_normal(screen_position) * RAY_DISTANCE) + start
 		var query = PhysicsRayQueryParameters3D.create(start, end)

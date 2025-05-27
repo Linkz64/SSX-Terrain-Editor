@@ -71,28 +71,25 @@ grow_vertical = 2
 script = ExtResource("1_7ykw0")
 
 [node name="ViewportBG" type="ColorRect" parent="."]
-layout_mode = 2
-anchor_top = 0.0296296
+layout_mode = 1
+anchors_preset = -1
 anchor_right = 0.833333
 anchor_bottom = 1.0
-offset_bottom = 0.00012207
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0.24938, 0.440319, 1)
 metadata/_edit_use_anchors_ = true
-metadata/_edit_lock_ = true
 
 [node name="Viewport" type="SubViewportContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.833
 anchor_bottom = 1.0
-offset_left = -6.10352e-05
-offset_right = 0.640015
+offset_left = 0.006
+offset_right = 0.646118
 grow_horizontal = 2
 grow_vertical = 2
-pivot_offset = Vector2(6.385, 0)
 script = ExtResource("2_6eus7")
 
 [node name="Render" type="SubViewport" parent="Viewport"]
@@ -869,6 +866,7 @@ grow_vertical = 2
 text = "Loading..."
 
 [node name="StartMenu" type="Control" parent="." node_paths=PackedStringArray("loading")]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
