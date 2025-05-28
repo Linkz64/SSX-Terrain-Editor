@@ -744,7 +744,7 @@ metadata/_edit_lock_ = true
 anchors_preset = 0
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 140.0
+offset_right = 104.0
 offset_bottom = 36.0
 mouse_filter = 2
 
@@ -808,12 +808,131 @@ layout_mode = 2
 text = "Camera"
 
 [node name="SAC" type="Label" parent="ViewportOverlay/EditingMode"]
+visible = false
 layout_mode = 0
 offset_left = 111.0
 offset_top = 4.0
 offset_right = 222.0
 offset_bottom = 22.0
 text = "SAC Mode: Object"
+
+[node name="SACMode" type="Control" parent="ViewportOverlay"]
+anchors_preset = 0
+offset_left = 112.0
+offset_top = 8.0
+offset_right = 264.0
+offset_bottom = 36.0
+mouse_filter = 2
+
+[node name="Panel" type="Panel" parent="ViewportOverlay/SACMode"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ViewportOverlay/SACMode"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 5
+alignment = 1
+
+[node name="SACMode0" type="Button" parent="ViewportOverlay/SACMode/HBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+text = "Corner"
+
+[node name="Corner" type="Label" parent="ViewportOverlay/SACMode/HBoxContainer/SACMode0"]
+visible = false
+layout_mode = 2
+offset_left = 75.0
+offset_top = 5.0
+offset_right = 119.0
+offset_bottom = 23.0
+text = "Corner"
+
+[node name="Outline" type="Panel" parent="ViewportOverlay/SACMode/HBoxContainer/SACMode0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
+
+[node name="SACMode1" type="Button" parent="ViewportOverlay/SACMode/HBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+text = "Handle"
+
+[node name="Handle" type="Label" parent="ViewportOverlay/SACMode/HBoxContainer/SACMode1"]
+visible = false
+layout_mode = 2
+offset_left = 50.0
+offset_top = 5.0
+offset_right = 95.0
+offset_bottom = 23.0
+text = "Handle"
+
+[node name="Outline" type="Panel" parent="ViewportOverlay/SACMode/HBoxContainer/SACMode1"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
+
+[node name="SACMode2" type="Button" parent="ViewportOverlay/SACMode/HBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+text = "Free"
+
+[node name="Free" type="Label" parent="ViewportOverlay/SACMode/HBoxContainer/SACMode2"]
+visible = false
+layout_mode = 2
+offset_left = 25.0
+offset_top = 5.0
+offset_right = 53.0
+offset_bottom = 23.0
+text = "Free"
+
+[node name="Outline" type="Panel" parent="ViewportOverlay/SACMode/HBoxContainer/SACMode2"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_iauxb")
+
+[node name="Orientation" type="HBoxContainer" parent="ViewportOverlay/SACMode"]
+layout_mode = 0
+offset_left = 1040.0
+offset_right = 1195.0
+offset_bottom = 26.0
+
+[node name="Global" type="Button" parent="ViewportOverlay/SACMode/Orientation"]
+layout_mode = 2
+text = "Global"
+
+[node name="Local" type="Button" parent="ViewportOverlay/SACMode/Orientation"]
+layout_mode = 2
+text = "Local"
+
+[node name="Camera" type="Button" parent="ViewportOverlay/SACMode/Orientation"]
+layout_mode = 2
+text = "Camera"
 
 [node name="Loading" type="Control" parent="."]
 visible = false
@@ -1084,6 +1203,9 @@ pivot_offset = Vector2(5, 5)
 [connection signal="mouse_entered" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_exited"]
 [connection signal="toggled" from="ViewportOverlay/EditingMode/ModeSwitch" to="ViewportOverlay" method="_on_mode_switch_toggled"]
+[connection signal="pressed" from="ViewportOverlay/SACMode/HBoxContainer/SACMode0" to="ViewportOverlay" method="_on_sac_mode_pressed" binds= [0]]
+[connection signal="pressed" from="ViewportOverlay/SACMode/HBoxContainer/SACMode1" to="ViewportOverlay" method="_on_sac_mode_pressed" binds= [1]]
+[connection signal="pressed" from="ViewportOverlay/SACMode/HBoxContainer/SACMode2" to="ViewportOverlay" method="_on_sac_mode_pressed" binds= [2]]
 [connection signal="file_selected" from="StartMenu/PathSelectWindow" to="StartMenu" method="_on_path_select_window_file_selected"]
 [connection signal="file_selected" from="StartMenu/OpenTerrainWindow" to="StartMenu" method="_on_open_terrain_window_file_selected"]
 [connection signal="pressed" from="StartMenu/New/NewPathChoice/NewPathChoiceButton" to="StartMenu" method="_on_new_path_choice_button_pressed"]
