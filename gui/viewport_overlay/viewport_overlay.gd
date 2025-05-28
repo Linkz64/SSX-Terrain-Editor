@@ -13,6 +13,10 @@ const SIDE_ALERT = preload("res://gui/viewport_overlay/side_alert/side_alert.tsc
 @onready var sac1_outline: Panel = $SACMode/HBoxContainer/SACMode1/Outline
 @onready var sac2_outline: Panel = $SACMode/HBoxContainer/SACMode2/Outline
 
+@onready var orient0_outline: Panel = $TransformOrientation/HBoxContainer/OrientMode0/Outline
+@onready var orient1_outline: Panel = $TransformOrientation/HBoxContainer/OrientMode1/Outline
+@onready var orient2_outline: Panel = $TransformOrientation/HBoxContainer/OrientMode2/Outline
+
 func _ready():
 	AlertBus.connect("side_alert_creation_requested", _instanticate_side_alert)
 	outline_mode_1.visible = false
@@ -41,6 +45,20 @@ func _on_sac_mode_pressed(sac_button_index) -> void:
 			sac1_outline.visible = false
 			sac2_outline.visible = true
 
+func _on_orient_mode_pressed(orient_button_index) -> void:
+	match orient_button_index:
+		0:
+			orient0_outline.visible = true
+			orient1_outline.visible = false
+			orient2_outline.visible = false
+		1:
+			orient0_outline.visible = false
+			orient1_outline.visible = true
+			orient2_outline.visible = false
+		2:
+			orient0_outline.visible = false
+			orient1_outline.visible = false
+			orient2_outline.visible = true
 
 func _instanticate_side_alert(text: String, type: Enum.SideAlertType):
 	for c in side_alerts_handler.get_children():
