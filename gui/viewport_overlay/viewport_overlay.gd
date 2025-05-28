@@ -5,9 +5,11 @@ const SIDE_ALERT = preload("res://gui/viewport_overlay/side_alert/side_alert.tsc
 
 @onready var object_mode_tools: PanelContainer = $ToolBar/ObjectModeTools
 @onready var edit_mode_tools: PanelContainer = $ToolBar/EditModeTools
+@onready var side_alerts_handler: Control = $SideAlertsHandler
+@onready var sac_mode: Control = $SACMode
+
 @onready var outline_mode_0: Panel = $EditingMode/ModeSwitch/OutlineMode0
 @onready var outline_mode_1: Panel = $EditingMode/ModeSwitch/OutlineMode1
-@onready var side_alerts_handler: Control = $SideAlertsHandler
 
 @onready var sac0_outline: Panel = $SACMode/HBoxContainer/SACMode0/Outline
 @onready var sac1_outline: Panel = $SACMode/HBoxContainer/SACMode1/Outline
@@ -21,13 +23,15 @@ func _ready():
 	AlertBus.connect("side_alert_creation_requested", _instanticate_side_alert)
 	outline_mode_1.visible = false
 	edit_mode_tools.visible = false
-
+	sac_mode.visible = edit_mode_tools.visible
 
 func _on_mode_switch_toggled(toggled_on: bool) -> void:
 	object_mode_tools.visible = not toggled_on
 	edit_mode_tools.visible = toggled_on
 	outline_mode_0.visible = not toggled_on
 	outline_mode_1.visible = toggled_on
+	
+	sac_mode.visible = outline_mode_1.visible
 
 
 func _on_sac_mode_pressed(sac_button_index) -> void:
