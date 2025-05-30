@@ -74,3 +74,7 @@ func _instanticate_side_alert(text: String, type: Enum.SideAlertType):
 	var alert = SIDE_ALERT.instantiate()
 	side_alerts_handler.add_child(alert)
 	alert.init(text, type)
+
+
+func _on_mode_switch_pressed() -> void:
+	pass # Replace with function body.

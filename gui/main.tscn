@@ -758,7 +758,6 @@ offset_right = 92.0
 offset_bottom = 28.0
 focus_mode = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_imv73")
-toggle_mode = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="ViewportOverlay/EditingMode/ModeSwitch"]
 layout_mode = 1
@@ -1263,6 +1262,7 @@ text_overrun_behavior = 3
 [connection signal="item_edited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_item_edited"]
 [connection signal="mouse_entered" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_exited"]
+[connection signal="pressed" from="ViewportOverlay/EditingMode/ModeSwitch" to="ViewportOverlay" method="_on_mode_switch_pressed"]
 [connection signal="toggled" from="ViewportOverlay/EditingMode/ModeSwitch" to="ViewportOverlay" method="_on_mode_switch_toggled"]
 [connection signal="pressed" from="ViewportOverlay/SACMode/HBoxContainer/SACMode0" to="ViewportOverlay" method="_on_sac_mode_pressed" binds= [0]]
 [connection signal="pressed" from="ViewportOverlay/SACMode/HBoxContainer/SACMode1" to="ViewportOverlay" method="_on_sac_mode_pressed" binds= [1]]
