@@ -14,6 +14,9 @@ func _ready():
 
 
 func _gui_input(_event: InputEvent) -> void:
+	if Input.is_action_just_pressed("ModeSwitch"):
+		viewport_overlay._on_mode_switch_pressed()
+	
 	if Input.is_action_just_pressed("RightClick"):
 		if is_mouse_inside_viewport:
 			world.get_camera().movable = true
@@ -22,10 +25,7 @@ func _gui_input(_event: InputEvent) -> void:
 			world.get_camera().movable = false
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 			
-	if Input.is_action_just_pressed("ModeSwitch"):
-		viewport_overlay._on_mode_switch_toggled()
-	
-	if Input.is_action_just_pressed("MultiSelect") and UserState.sac_mode == UserState.OBJECT:
+	if Input.is_action_just_pressed("MultiSelect") and UserState.editing_mode == UserState.OBJECT:
 		var space_state = world.get_world_3d().direct_space_state
 		var camera: Camera3D = world.get_camera()
 		
@@ -45,7 +45,7 @@ func _gui_input(_event: InputEvent) -> void:
 			world.get_node("Gizmo").select(result["collider"].get_parent().get_parent())
 			result["collider"].get_parent().material_overlay.albedo_color = Color.ORANGE * Color(1, 1, 1, 0.5)
 			
-	elif Input.is_action_just_pressed("LeftClick") and UserState.sac_mode == UserState.OBJECT:
+	elif Input.is_action_just_pressed("LeftClick") and UserState.editing_mode == UserState.OBJECT:
 		var space_state = world.get_world_3d().direct_space_state
 		var camera: Camera3D = world.get_camera()
 		

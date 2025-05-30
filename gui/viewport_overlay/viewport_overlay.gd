@@ -19,6 +19,12 @@ const SIDE_ALERT = preload("res://gui/viewport_overlay/side_alert/side_alert.tsc
 @onready var orient1_outline: Panel = $TransformOrientation/HBoxContainer/OrientMode1/Outline
 @onready var orient2_outline: Panel = $TransformOrientation/HBoxContainer/OrientMode2/Outline
 
+#@onready var orient_outlines: Array[Panel] = [
+	#$TransformOrientation/HBoxContainer/OrientMode0/Outline,
+	#$TransformOrientation/HBoxContainer/OrientMode1/Outline,
+	#$TransformOrientation/HBoxContainer/OrientMode2/Outline
+#]
+
 
 func _ready():
 	AlertBus.connect("side_alert_creation_requested", _instanticate_side_alert)
@@ -27,44 +33,47 @@ func _ready():
 	sac_mode.visible = edit_mode_tools.visible
 
 
-func _on_mode_switch_toggled(toggled_on: bool) -> void:
-	object_mode_tools.visible = not toggled_on
-	edit_mode_tools.visible = toggled_on
-	outline_mode_0.visible = not toggled_on
-	outline_mode_1.visible = toggled_on
+func _on_mode_switch_pressed() -> void:
+	object_mode_tools.hide()
+	edit_mode_tools.hide()
+	outline_mode_0.hide()
+	outline_mode_1.hide()
+	sac_mode.hide()
 	
-	sac_mode.visible = outline_mode_1.visible
+	if UserState.editing_mode == UserState.OBJECT:
+		UserState.editing_mode = UserState.EDIT
+		edit_mode_tools.show()
+		outline_mode_1.show()
+		sac_mode.show()
+	else:
+		UserState.editing_mode = UserState.OBJECT
+		object_mode_tools.show()
+		outline_mode_0.show()
 
 
 func _on_sac_mode_pressed(sac_button_index) -> void:
+	sac0_outline.hide()
+	sac1_outline.hide()
+	sac2_outline.hide()
+	
 	match sac_button_index:
-		0:
-			sac0_outline.visible = true
-			sac1_outline.visible = false
-			sac2_outline.visible = false
-		1:
-			sac0_outline.visible = false
-			sac1_outline.visible = true
-			sac2_outline.visible = false
-		2:
-			sac0_outline.visible = false
-			sac1_outline.visible = false
-			sac2_outline.visible = true
+		0: sac0_outline.show()
+		1: sac1_outline.show()
+		2: sac2_outline.show()
+
 
 func _on_orient_mode_pressed(orient_button_index) -> void:
+	orient0_outline.hide()
+	orient1_outline.hide()
+	orient2_outline.hide()
+	
 	match orient_button_index:
 		0:
-			orient0_outline.visible = true
-			orient1_outline.visible = false
-			orient2_outline.visible = false
+			orient0_outline.show()
 		1:
-			orient0_outline.visible = false
-			orient1_outline.visible = true
-			orient2_outline.visible = false
+			orient1_outline.show()
 		2:
-			orient0_outline.visible = false
-			orient1_outline.visible = false
-			orient2_outline.visible = true
+			orient2_outline.show()
 
 
 func _instanticate_side_alert(text: String, type: Enum.SideAlertType):
@@ -74,7 +83,3 @@ func _instanticate_side_alert(text: String, type: Enum.SideAlertType):
 	var alert = SIDE_ALERT.instantiate()
 	side_alerts_handler.add_child(alert)
 	alert.init(text, type)
-
-
-func _on_mode_switch_pressed() -> void:
-	pass # Replace with function body.

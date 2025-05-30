@@ -9,14 +9,20 @@ enum {
 	VIEW,
 }
 
-# SAC Modes
+# Editing modes
 enum {
 	OBJECT,
+	EDIT,
+}
+
+# SAC Modes
+enum {
 	CORNER,
 	HANDLE,
 	FREE,
 }
 
 var gizmo_orientation: int = LOCAL
-var sac_mode = OBJECT
-var selected_nnodes: Array
+var editing_mode = OBJECT
+var sac_mode = FREE
+var selected_nodes: Array

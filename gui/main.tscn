@@ -83,19 +83,8 @@ script = ExtResource("1_7ykw0")
 layout_mode = 0
 offset_right = 1600.0
 offset_bottom = 1080.0
-texture = SubResource("GradientTexture2D_ykfrj")
-
-[node name="ViewportBG" type="ColorRect" parent="."]
-visible = false
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.833333
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0.24938, 0.440319, 1)
-metadata/_edit_use_anchors_ = true
+texture = SubResource("GradientTexture2D_ykfrj")
 
 [node name="Viewport" type="SubViewportContainer" parent="." node_paths=PackedStringArray("viewport_overlay")]
 layout_mode = 1
@@ -1279,7 +1268,6 @@ text_overrun_behavior = 3
 [connection signal="mouse_entered" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_exited"]
 [connection signal="pressed" from="ViewportOverlay/EditingMode/ModeSwitch" to="ViewportOverlay" method="_on_mode_switch_pressed"]
-[connection signal="toggled" from="ViewportOverlay/EditingMode/ModeSwitch" to="ViewportOverlay" method="_on_mode_switch_toggled"]
 [connection signal="pressed" from="ViewportOverlay/SACMode/HBoxContainer/SACMode0" to="ViewportOverlay" method="_on_sac_mode_pressed" binds= [0]]
 [connection signal="pressed" from="ViewportOverlay/SACMode/HBoxContainer/SACMode1" to="ViewportOverlay" method="_on_sac_mode_pressed" binds= [1]]
 [connection signal="pressed" from="ViewportOverlay/SACMode/HBoxContainer/SACMode2" to="ViewportOverlay" method="_on_sac_mode_pressed" binds= [2]]
