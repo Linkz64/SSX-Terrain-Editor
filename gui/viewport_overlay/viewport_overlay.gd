@@ -19,11 +19,13 @@ const SIDE_ALERT = preload("res://gui/viewport_overlay/side_alert/side_alert.tsc
 @onready var orient1_outline: Panel = $TransformOrientation/HBoxContainer/OrientMode1/Outline
 @onready var orient2_outline: Panel = $TransformOrientation/HBoxContainer/OrientMode2/Outline
 
+
 func _ready():
 	AlertBus.connect("side_alert_creation_requested", _instanticate_side_alert)
 	outline_mode_1.visible = false
 	edit_mode_tools.visible = false
 	sac_mode.visible = edit_mode_tools.visible
+
 
 func _on_mode_switch_toggled(toggled_on: bool) -> void:
 	object_mode_tools.visible = not toggled_on
@@ -63,6 +65,7 @@ func _on_orient_mode_pressed(orient_button_index) -> void:
 			orient0_outline.visible = false
 			orient1_outline.visible = false
 			orient2_outline.visible = true
+
 
 func _instanticate_side_alert(text: String, type: Enum.SideAlertType):
 	for c in side_alerts_handler.get_children():

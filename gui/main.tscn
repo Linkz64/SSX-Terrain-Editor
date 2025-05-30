@@ -81,7 +81,7 @@ mouse_filter = 2
 color = Color(0, 0.24938, 0.440319, 1)
 metadata/_edit_use_anchors_ = true
 
-[node name="Viewport" type="SubViewportContainer" parent="."]
+[node name="Viewport" type="SubViewportContainer" parent="." node_paths=PackedStringArray("viewport_overlay")]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.833
@@ -91,6 +91,7 @@ offset_right = 0.646118
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("2_6eus7")
+viewport_overlay = NodePath("../ViewportOverlay")
 
 [node name="Render" type="SubViewport" parent="Viewport"]
 transparent_bg = true
@@ -1250,12 +1251,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 clip_text = true
 text_overrun_behavior = 3
-
-[node name="ColorRect" type="ColorRect" parent="."]
-layout_mode = 0
-offset_right = 10.0
-offset_bottom = 10.0
-pivot_offset = Vector2(5, 5)
 
 [connection signal="pressed" from="RightPanel/TreeButtons/Container/AddObject" to="RightPanel/Tree" method="_on_add_object_button_pressed"]
 [connection signal="pressed" from="RightPanel/TreeButtons/Container/AddGroup" to="RightPanel/Tree" method="_on_add_group_button_pressed"]
