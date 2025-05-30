@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://e3mf5oewrsw3"]
+[gd_scene load_steps=25 format=3 uid="uid://e3mf5oewrsw3"]
 
 [ext_resource type="Script" uid="uid://cc2fe8opu3qij" path="res://gui/main.gd" id="1_7ykw0"]
 [ext_resource type="Script" uid="uid://ds5elcpcvw0nj" path="res://gui/viewport.gd" id="2_6eus7"]
@@ -17,6 +17,15 @@
 [ext_resource type="Texture2D" uid="uid://b4x88756crr86" path="res://assets/ui/folder_file_choice.svg" id="16_2lfdd"]
 [ext_resource type="Script" uid="uid://dq1j5d7mhplgp" path="res://gui/viewport_overlay/loading/loading.gd" id="17_ykfrj"]
 [ext_resource type="Texture2D" uid="uid://bgxaivprkhk63" path="res://assets/icon_editor.svg" id="18_3yo8h"]
+
+[sub_resource type="Gradient" id="Gradient_c4ive"]
+colors = PackedColorArray(0.5772, 0.67488, 0.74, 1, 0.195, 0.228, 0.25, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_ykfrj"]
+gradient = SubResource("Gradient_c4ive")
+fill = 1
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ew3qc"]
 bg_color = Color(0.129412, 0.129412, 0.129412, 1)
@@ -70,7 +79,14 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_7ykw0")
 
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1600.0
+offset_bottom = 1080.0
+texture = SubResource("GradientTexture2D_ykfrj")
+
 [node name="ViewportBG" type="ColorRect" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.833333
