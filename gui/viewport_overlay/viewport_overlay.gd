@@ -11,19 +11,16 @@ const SIDE_ALERT = preload("res://gui/viewport_overlay/side_alert/side_alert.tsc
 @onready var outline_mode_0: Panel = $EditingMode/ModeSwitch/OutlineMode0
 @onready var outline_mode_1: Panel = $EditingMode/ModeSwitch/OutlineMode1
 
-@onready var sac0_outline: Panel = $SACMode/HBoxContainer/SACMode0/Outline
-@onready var sac1_outline: Panel = $SACMode/HBoxContainer/SACMode1/Outline
-@onready var sac2_outline: Panel = $SACMode/HBoxContainer/SACMode2/Outline
+@onready var sac_outlines: Array[Panel] = [
+	$SACMode/HBoxContainer/SACMode0/Outline,
+	$SACMode/HBoxContainer/SACMode1/Outline,
+	$SACMode/HBoxContainer/SACMode2/Outline,
+]
 
 @onready var orient0_outline: Panel = $TransformOrientation/HBoxContainer/OrientMode0/Outline
 @onready var orient1_outline: Panel = $TransformOrientation/HBoxContainer/OrientMode1/Outline
 @onready var orient2_outline: Panel = $TransformOrientation/HBoxContainer/OrientMode2/Outline
 
-#@onready var orient_outlines: Array[Panel] = [
-	#$TransformOrientation/HBoxContainer/OrientMode0/Outline,
-	#$TransformOrientation/HBoxContainer/OrientMode1/Outline,
-	#$TransformOrientation/HBoxContainer/OrientMode2/Outline
-#]
 
 
 func _ready():
@@ -52,15 +49,10 @@ func _on_mode_switch_pressed() -> void:
 
 
 func _on_sac_mode_pressed(sac_button_index) -> void:
-	sac0_outline.hide()
-	sac1_outline.hide()
-	sac2_outline.hide()
+	for outline in sac_outlines:
+		outline.hide()
+	sac_outlines[sac_button_index].show()
 	
-	match sac_button_index:
-		0: sac0_outline.show()
-		1: sac1_outline.show()
-		2: sac2_outline.show()
-
 
 func _on_orient_mode_pressed(orient_button_index) -> void:
 	orient0_outline.hide()
@@ -70,10 +62,14 @@ func _on_orient_mode_pressed(orient_button_index) -> void:
 	match orient_button_index:
 		0:
 			orient0_outline.show()
+			UserState.update_gizmo_orientation(UserState.GLOBAL)
 		1:
 			orient1_outline.show()
+			UserState.update_gizmo_orientation(UserState.LOCAL)
 		2:
 			orient2_outline.show()
+			# TODO
+			UserState.update_gizmo_orientation(UserState.GLOBAL)
 
 
 func _instanticate_side_alert(text: String, type: Enum.SideAlertType):
@@ -83,3 +79,21 @@ func _instanticate_side_alert(text: String, type: Enum.SideAlertType):
 	var alert = SIDE_ALERT.instantiate()
 	side_alerts_handler.add_child(alert)
 	alert.init(text, type)
+
+
+func _unhandled_input(_event: InputEvent) -> void:
+	if Input.is_action_just_pressed("ModeSwitch"):
+		_on_mode_switch_pressed()
+	
+	
+		
+	if UserState.editing_mode == UserState.EDIT:
+		if Input.is_action_just_pressed("CornerHotkey"):
+			UserState.sac_mode = UserState.CORNER
+			_on_sac_mode_pressed(0)
+		elif Input.is_action_just_pressed("HandleHotkey"):
+			UserState.sac_mode = UserState.HANDLE
+			_on_sac_mode_pressed(1)
+		elif Input.is_action_just_pressed("FreeHotkey"):
+			UserState.sac_mode = UserState.FREE
+			_on_sac_mode_pressed(2)
