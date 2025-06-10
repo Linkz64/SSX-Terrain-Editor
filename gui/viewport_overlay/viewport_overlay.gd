@@ -39,11 +39,13 @@ func _on_mode_switch_pressed() -> void:
 	
 	if UserState.editing_mode == UserState.OBJECT:
 		UserState.editing_mode = UserState.EDIT
+		UserState.switch_gizmo_to_edit()
 		edit_mode_tools.show()
 		outline_modes[1].show()
 		sac_mode.show()
 	else:
 		UserState.editing_mode = UserState.OBJECT
+		UserState.switch_gizmo_to_object()
 		object_mode_tools.show()
 		outline_modes[0].show()
 

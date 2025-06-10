@@ -55,6 +55,8 @@ script = ExtResource("6_fn3g3")
 mode = 3
 show_selection_box = false
 
+[node name="ControlPoints" type="Node3D" parent="."]
+
 [node name="AxisLines" type="MeshInstance3D" parent="." node_paths=PackedStringArray("main_camera")]
 material_override = SubResource("StandardMaterial3D_4717r")
 cast_shadow = 0

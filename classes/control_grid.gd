@@ -7,8 +7,8 @@ var colors: Array[Color] = []
 var _control_points: Array[Vector3] # Bus to transfer to _ready. clear after use.
 
 
-func _init(control_points: Array[Vector3], h_color: Color, v_color: Color):
-	_control_points = control_points.duplicate()
+func _init(segment: PatchSegment, h_color: Color, v_color: Color):
+	#_control_points = control_points.duplicate()
 	colors.append(h_color)
 	colors.append(v_color)
 	mesh = ImmediateMesh.new()
@@ -18,6 +18,18 @@ func _init(control_points: Array[Vector3], h_color: Color, v_color: Color):
 	mat.no_depth_test = true
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	material_override = mat
+
+#func _init(control_points: Array[Vector3], h_color: Color, v_color: Color):
+	#_control_points = control_points.duplicate()
+	#colors.append(h_color)
+	#colors.append(v_color)
+	#mesh = ImmediateMesh.new()
+	#var mat := StandardMaterial3D.new()
+	#mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	#mat.vertex_color_use_as_albedo = true
+	#mat.no_depth_test = true
+	#mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	#material_override = mat
 
 
 func _ready() -> void:

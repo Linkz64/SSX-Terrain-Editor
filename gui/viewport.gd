@@ -74,7 +74,6 @@ func _gui_input(_event: InputEvent) -> void:
 		UserState.hide_gizmo()
 	elif Input.is_action_just_released("HideGizmo"):
 		UserState.show_gizmo()
-		
 
 
 func _on_mouse_entered() -> void:

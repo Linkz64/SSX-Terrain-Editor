@@ -404,7 +404,6 @@ func _update_wireframe_with_normals(control_points: PackedVector3Array,
 		for y in 7:
 			for x in 8:
 				var normal_a = normals[y * 8 + x]
-				#normal_a += normal_a * WIREFRAME_MARGIN
 				normal_a *= WIREFRAME_MARGIN
 				if side[i] == "front":
 					normal_a *= -1
@@ -413,7 +412,6 @@ func _update_wireframe_with_normals(control_points: PackedVector3Array,
 				
 				var normal_b = normals[y * 8 + x + 8]
 				normal_b *= WIREFRAME_MARGIN
-				#normal_b += normal_b * WIREFRAME_MARGIN
 				if side[i] == "front":
 					normal_b *= -1
 				(_wireframe_instance.mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
@@ -422,7 +420,6 @@ func _update_wireframe_with_normals(control_points: PackedVector3Array,
 		for y in 8:
 			for x in 7:
 				var normal_a = normals[y * 8 + x]
-				#normal_a += normal_a * WIREFRAME_MARGIN
 				normal_a *= WIREFRAME_MARGIN
 				if side[i] == "front":
 					normal_a *= -1
@@ -431,7 +428,6 @@ func _update_wireframe_with_normals(control_points: PackedVector3Array,
 				
 				var normal_b = normals[y * 8 + x + 1]
 				normal_b *= WIREFRAME_MARGIN
-				#normal_b += normal_b * WIREFRAME_MARGIN
 				if side[i] == "front":
 					normal_b *= -1
 				(_wireframe_instance.mesh as ImmediateMesh).surface_set_color(WIREFRAME_COLOR)
