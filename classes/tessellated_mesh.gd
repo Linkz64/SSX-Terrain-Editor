@@ -14,7 +14,7 @@ memory usage.
 """
 
 
-## Vertex Indices
+## Vertex Indices SUS
 const CORNERS = {
 	"top-left": 0,
 	"top-right": 7,
