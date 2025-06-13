@@ -50,37 +50,42 @@ directional_shadow_mode = 0
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 fov = 70.0
 
-[node name="Gizmo" type="Node3D" parent="."]
-script = ExtResource("6_fn3g3")
-mode = 3
-show_selection_box = false
-
-[node name="ControlPoints" type="Node3D" parent="."]
-
 [node name="AxisLines" type="MeshInstance3D" parent="." node_paths=PackedStringArray("main_camera")]
 material_override = SubResource("StandardMaterial3D_4717r")
 cast_shadow = 0
 script = ExtResource("3_4717r")
 main_camera = NodePath("../MainCamera")
 
-[node name="start_gates_reference" parent="." instance=ExtResource("4_h5o24")]
+[node name="Gizmo" type="Node3D" parent="."]
+script = ExtResource("6_fn3g3")
+mode = 3
+show_selection_box = false
+
+[node name="Debug" type="Node" parent="."]
+
+[node name="start_gates_reference" parent="Debug" instance=ExtResource("4_h5o24")]
 transform = Transform3D(100, 0, 0, 0, -4.37114e-06, -100, 0, 100, -4.37114e-06, 0, 0, 0)
 visible = false
 
-[node name="Cube" type="MeshInstance3D" parent="."]
+[node name="Cube" type="MeshInstance3D" parent="Debug"]
 transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
 visible = false
 material_override = SubResource("StandardMaterial3D_mmdvd")
 mesh = SubResource("SphereMesh_mmdvd")
+skeleton = NodePath("../..")
 
-[node name="Cube2" type="MeshInstance3D" parent="."]
+[node name="Cube2" type="MeshInstance3D" parent="Debug"]
 transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
 visible = false
 material_override = SubResource("StandardMaterial3D_mmdvd")
 mesh = SubResource("SphereMesh_mmdvd")
+skeleton = NodePath("../..")
 
-[node name="Cube3" type="MeshInstance3D" parent="."]
+[node name="Cube3" type="MeshInstance3D" parent="Debug"]
 transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
 visible = false
 material_override = SubResource("StandardMaterial3D_mmdvd")
 mesh = SubResource("SphereMesh_mmdvd")
+skeleton = NodePath("../..")
+
+[node name="Groups" type="Node" parent="."]

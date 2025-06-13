@@ -93,7 +93,6 @@ func switch_gizmo_to_object():
 
 func switch_gizmo_to_edit():
 	gizmo.clear_selection()
-	var cp_parent = world.get_node("ControlPoints")
 	for object: PatchObject in selected_nodes:
 		for segment: PatchSegment in object.segments.values():
 			var ids = segment.control_point_ids

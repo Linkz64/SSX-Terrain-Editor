@@ -46,6 +46,16 @@ func _ready():
 			_create_copy()
 
 
+
+func tilemap_get_position(cp: ControlPoint) -> Variant:
+	return Vector2i.ZERO # or null
+
+func tilemap_get_control_point(cell: Vector2i) -> Variant:
+	return ControlPoint.new(ControlPoint.CORNER) # or null
+
+
+
+
 func set_wireframe_overlay(value: bool):
 	for c in get_children():
 		if c is TessellatedMesh:
@@ -73,14 +83,14 @@ func update_surface():
 		]
 		var surface := TessellatedMesh.new(cp_array, segment.texture_filename, uvs, true)
 		add_child(surface)
-		
+
 
 func _create_default():
 	for y in range(3, -1, -1):
 		for x in 4:
 			var new_x = x * DEFAULT_SEGMENT_SIZE/3.0
 			var new_y = y * DEFAULT_SEGMENT_SIZE/3.0
-			control_points[control_points_id] = ControlPoint.new(ControlPoint.Type.CORNER, self, Vector3(new_x, new_y, 0))
+			#control_points[control_points_id] = ControlPoint.new(ControlPoint.Type.CORNER, self, Vector3(new_x, new_y, 0))
 			control_points_id += 1
 			
 	# Set the ids for the segment

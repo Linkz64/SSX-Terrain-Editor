@@ -1,153 +1,182 @@
-extends RefCounted
+extends Node3D
 class_name ControlPoint
-## Base class for the 3 types of control points
+## A Control point can be a Corner, Handle, or Inner
 
 
-enum Type {
-	CORNER,
-	HANDLE,
-	INNER,
-}
-
-var type: Type
-
-## Patch object that this control point belongs to
-var patch_object: PatchObject
-	
-## Position local to the object it's part of.
-var position: Vector3
+enum {CORNER, HANDLE, INNER}
+var type: int
 
 ## If true, it influences the control points around it based on this
 ## control point's movement.
 var aligned: bool = true
 
-## Reference to the 4 neighbouring control points
-var neighbours: Dictionary[String, ControlPoint] = {
-	"north": null,
-	"west": null,
-	"east": null,
-	"south": null,
-}
 
-
-func _init(p_type: Type, p_patch_object: PatchObject, p_position: Vector3):
+func _init(p_type: int) -> void:
 	type = p_type
-	position = p_position
-	patch_object = p_patch_object
 
 
 ##------------Corner-------------
 ## They're located on the 4 corners of a patch segment.
 
 func get_inners() -> Array[ControlPoint]:
-	assert(type == Type.CORNER)
+	assert(type == CORNER)
+	
+	var patch_object: PatchObject = get_parent().get_parent()
+	var cell_position = patch_object.tilemap_get_position(self)
+	assert(cell_position)
+	
+	var offsets = {
+		"north_west": Vector2i(-1, -1),
+		"north_east": Vector2i(1, -1),
+		"south_west": Vector2i(-1, 1),
+		"south_east": Vector2i(1, 1),
+	}
 	var inners: Array[ControlPoint]
-	var north = neighbours.get("north")
-	var south = neighbours.get("south")
-	if north:
-		var west = south.neighbours.get("west")
-		var east = south.neighbours.get("east")
-		if west and west not in inners:
-			inners.append(west)
-		if east and east not in inners:
-			inners.append(east)
-	if south:
-		var west = south.neighbours.get("west")
-		var east = south.neighbours.get("east")
-		if west and west not in inners:
-			inners.append(west)
-		if east and east not in inners:
-			inners.append(east)
+	for offset: Vector2i in offsets.values():
+		var neighbor = patch_object.tilemap_get_control_point(cell_position + offset)
+		if neighbor:
+			inners.append(neighbor)
+	assert(not inners.is_empty(), "Corner has no inners")
 	return inners
 
 
-## Sets the aligned flag for all 9 Control points around it.
-func set_alignment(_align_flag: bool):
-	pass
+## Sets the aligned property for all 9 Control points around it.
+func set_alignment(_align_flag: bool) -> void:
+	assert(type == CORNER)
+	
+	var patch_object: PatchObject = get_parent().get_parent()
+	var cell_position = patch_object.tilemap_get_position(self)
+	assert(cell_position)
+	
+	var offsets = {
+		"north": Vector2i(0, -1),
+		"west": Vector2i(-1, 0),
+		"south": Vector2i(0, 1),
+		"east": Vector2i(1, 0),
+		"north_west": Vector2i(-1, -1),
+		"north_east": Vector2i(1, -1),
+		"south_west": Vector2i(-1, 1),
+		"south_east": Vector2i(1, 1),
+	}
+	var neighbors_count: int = 0
+	for offset: Vector2i in offsets.values():
+		var neighbor: ControlPoint = patch_object.tilemap_get_control_point(cell_position + offset)
+		if neighbor:
+			neighbor.aligned = true
+			neighbors_count += 1
+	assert(neighbors_count >= 3, "Corner has less than 3 neighbors.")
+	
 
 ##------------Handle-------------
 ## Handles are located othogonal to the corners.
 ## If aligned, they move the opposite handle to create a collinear line
 ## between the opposite, corner, and this handle.
 
-func align_opposite():
-	assert(type == Type.HANDLE)
+func align_opposite() -> void:
+	assert(type == HANDLE)
 	if not aligned:
 		return
-	var corner: ControlPoint
-	var side: String
-	for k in neighbours.keys():
-		if neighbours[k].type == Type.CORNER:
-			corner = neighbours[k]
-			side = k
+		
+	var patch_object: PatchObject = get_parent().get_parent()
+	var cell_position = patch_object.tilemap_get_position(self)
+	assert(cell_position)
+	
+	# Find the opposite handle.
+	# Moving 2 cells on each side will give us only one handle, the handle we need.
+	var offsets = {
+		"north": Vector2i(0, -2),
+		"west": Vector2i(-2, 0),
+		"south": Vector2i(0, 2),
+		"east": Vector2i(2, 0),
+	}
+	var opposite_handle: ControlPoint = null
+	var opposite_handle_position: Vector2i 
+	for offset: Vector2i in offsets.values():
+		var neighbor: ControlPoint = patch_object.tilemap_get_control_point(cell_position + offset)
+		if neighbor and neighbor.type == HANDLE:
+			opposite_handle = neighbor
+			opposite_handle_position = cell_position + offset
 			break
-	assert(corner)
+	if not opposite_handle:
+		return # Didn't find opposite handle 
 	
 	# Align to this handle's direction while preserving the distance
-	var normal_from_corner: Vector3 = (position - corner.position).normalized()
-	var opposite: ControlPoint = corner.neighbours[side]
-	var opposite_distance_to_corner: float = (opposite.local_position - corner.local_position).length()
-	opposite.local_position = (-normal_from_corner * opposite_distance_to_corner) + corner.position
+
+	var corner_position: Vector2i = (opposite_handle_position + cell_position) / 2 # Midpoint
+	var corner: ControlPoint = patch_object.tilemap_get_control_point(corner_position)
+	var normal_from_corner: Vector3 = ((position - corner.position) as Vector3).normalized()
+	var opposite_distance_to_corner: float = \
+			((opposite_handle.local_position - corner.local_position) as Vector3).length()
+	opposite_handle.local_position = \
+			(-normal_from_corner * opposite_distance_to_corner) + corner.position
+
+
+func get_side_inners() -> Array[ControlPoint]:
+	assert(type == HANDLE)
 	
+	var patch_object: PatchObject = get_parent().get_parent()
+	var cell_position = patch_object.tilemap_get_position(self)
+	assert(cell_position)
+	
+	var offsets = {
+		"north": Vector2i(0, -1),
+		"west": Vector2i(-1, 0),
+		"south": Vector2i(0, 1),
+		"east": Vector2i(1, 0),
+	}
+	var north: ControlPoint = patch_object.tilemap_get_control_point(cell_position + offsets["north"])
+	var south: ControlPoint = patch_object.tilemap_get_control_point(cell_position + offsets["south"])
+	if north and south:
+		return [north, south]
+	var west: ControlPoint = patch_object.tilemap_get_control_point(cell_position + offsets["west"])
+	var east: ControlPoint = patch_object.tilemap_get_control_point(cell_position + offsets["east"])
+	if west and east:
+		return [west, east]
+	assert(false, "There are no inners next to the handle.")
+	return []
+
 
 ##------------Inner-------------
 ## Inners are located diagonally to the corners.
 
 ## If aligned, it's position will be set to the sum of the vectors from the
-## corner, to neighbouring handles of the inner.
-## Corner -> Handle A + Corner -> Handle B = Inner position
+## corner, to neighboring handles of the inner.
+## (Corner -> Handle A) + (Corner -> Handle B) = Inner position
 func align():
-	assert(type == Type.HANDLE)
+	assert(type == INNER)
 	if not aligned:
 		return
 	
-	# Find corner
-	var corner: ControlPoint
-	var north = neighbours.get("north")
-	var south = neighbours.get("south")
-	var corner_direction: String
-	if north:
-		var west = north.neighbours.get("west")
-		var east = north.neighbours.get("east")
-		if west:
-			if west.type == Type.CORNER:
-				corner = west
-				corner_direction = "north-west"
-		elif east:
-			if west.type == Type.CORNER:
-				corner = east
-				corner_direction = "north-east"
-	if south:
-		var west = south.neighbours.get("west")
-		var east = south.neighbours.get("east")
-		if west:
-			if west.type == Type.CORNER:
-				corner = west
-				corner_direction = "south-west"
-		elif east:
-			if west.type == Type.CORNER:
-				corner = east
-				corner_direction = "south-east"
-	assert(corner)
-
-	var handle_A: ControlPoint
-	var handle_B: ControlPoint
-	match corner_direction:
-		"north-west":
-			handle_A = neighbours["north"]
-			handle_B = neighbours["west"]
-		"north-east":
-			handle_A = neighbours["north"]
-			handle_B = neighbours["east"]
-		"south-west":
-			handle_A = neighbours["south"]
-			handle_B = neighbours["west"]
-		"south-east":
-			handle_A = neighbours["south"]
-			handle_B = neighbours["east"]
-			
-	var a = handle_A.position - corner.position	
-	var b = handle_B.position - corner.position	
-	position = a + b
+	var patch_object: PatchObject = get_parent().get_parent()
+	var cell_position = patch_object.tilemap_get_position(self)
+	assert(cell_position)
 	
+	var offsets = {
+		"north": Vector2i(0, -1),
+		"west": Vector2i(-1, 0),
+		"south": Vector2i(0, 1),
+		"east": Vector2i(1, 0),
+		"north_west": Vector2i(-1, -1),
+		"north_east": Vector2i(1, -1),
+		"south_west": Vector2i(-1, 1),
+		"south_east": Vector2i(1, 1),
+	}
+	var corner: ControlPoint
+	var corner_count: int = 0
+	var handles: Array[ControlPoint]
+	for offset: Vector2i in offsets.values():
+		var neighbor: ControlPoint = patch_object.tilemap_get_control_point(cell_position + offset)
+		if neighbor and neighbor.type == CORNER:
+			corner = neighbor
+			corner_count += 1
+		elif neighbor and neighbor.type == HANDLE:
+			handles.append(neighbor)
+			
+	assert(corner, "Inner has no corner")
+	assert(corner_count == 1, "Inner has more than one corner ")
+	assert(handles.size() == 2, "Inner has more/less than 2 handles")
+	
+	var a = handles[0].position - corner.position	
+	var b = handles[1].position - corner.position	
+	position = a + b
 	
