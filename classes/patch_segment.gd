@@ -1,17 +1,9 @@
-extends RefCounted
+extends Node3D
 class_name PatchSegment
+## Patch segments represent a single patch from a Patch object.
+## It keeps a list of 16 cells from the Patch object's tilemap, each of those is a Control point
+## for rendering the meshes, and the collision shapes.
 
-"""
-	The 16 control points that make up this patch segment. Instead of storing them here,
-we just store the CP's id from the PatchObject. They should be in the same order as the json.
-
-	When deleting this segment, it should return this array so that the PatchObject can check
-which other patches are sharing these CPs. If none other is then delete the CPs from memory.
-"""
-
-
-var control_point_ids: Array[int] = []
-var patch_object: PatchObject = null
 
 var surface_type: Enum.SurfaceType = Enum.SurfaceType.SNOW_MAIN
 var texture_filename: String = "0001.png"
@@ -25,14 +17,20 @@ var uv_points: Dictionary = {
 var lightmap_point: Rect2 = Rect2(0, 0, 0.0625, 0.0625)
 var lightmap_id: int = 0
 
-
-func _init(p_control_point_ids: Array[int], p_patch_object: PatchObject):
-	control_point_ids = p_control_point_ids
-	patch_object = p_patch_object
+var control_point_cells: Array[Vector2i]
 
 
-# I can set the reference of this object to null after the PatchObject calls this.
-func mark_for_deletion() -> Array[int]:
-	return control_point_ids
+func _ready() -> void:
+	var patch_object: PatchObject = get_parent().get_parent()
+	for cell in control_point_cells:
+		var cp: ControlPoint = patch_object.tilemap_get_control_point(cell)
+		assert(cp)
+		cp.local_transform_changed.connect(_control_point_moved)
+		cp.selection_changed.connect(_control_point_selection_changed)
 	
-		
+
+func _control_point_moved():
+	pass
+
+func _control_point_selection_changed(select: bool):
+	pass

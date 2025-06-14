@@ -3,16 +3,24 @@ class_name ControlPoint
 ## A Control point can be a Corner, Handle, or Inner
 
 
+signal local_transform_changed
+signal selection_changed(select: bool)
+
 enum {CORNER, HANDLE, INNER}
 var type: int
 
 ## If true, it influences the control points around it based on this
 ## control point's movement.
 var aligned: bool = true
-
+var is_selected: bool = false
 
 func _init(p_type: int) -> void:
 	type = p_type
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_LOCAL_TRANSFORM_CHANGED:
+		local_transform_changed.emit()
 
 
 ##------------Corner-------------
@@ -41,7 +49,7 @@ func get_inners() -> Array[ControlPoint]:
 
 
 ## Sets the aligned property for all 9 Control points around it.
-func set_alignment(_align_flag: bool) -> void:
+func set_alignment(align: bool) -> void:
 	assert(type == CORNER)
 	
 	var patch_object: PatchObject = get_parent().get_parent()
@@ -62,7 +70,7 @@ func set_alignment(_align_flag: bool) -> void:
 	for offset: Vector2i in offsets.values():
 		var neighbor: ControlPoint = patch_object.tilemap_get_control_point(cell_position + offset)
 		if neighbor:
-			neighbor.aligned = true
+			neighbor.aligned = align
 			neighbors_count += 1
 	assert(neighbors_count >= 3, "Corner has less than 3 neighbors.")
 	
