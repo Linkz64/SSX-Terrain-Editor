@@ -10,36 +10,6 @@ const DIAMOND_SIZE = 3.0
 var _diamonds: Array[MeshInstance3D]
 
 
-func _ready() -> void:
-	# Setup main mesh
-	mesh = ImmediateMesh.new()
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.vertex_color_use_as_albedo = true
-	mat.no_depth_test = true
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	material_override = mat
-	
-	# Setup control point diamonds
-	var diamond_mat := StandardMaterial3D.new()
-	diamond_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	diamond_mat.vertex_color_use_as_albedo = true
-	diamond_mat.no_depth_test = true
-	diamond_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	diamond_mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	diamond_mat.fixed_size = true
-	
-	_diamonds.resize(16)
-	for d in _diamonds:
-		d = MeshInstance3D.new()
-		add_child(d)
-		await d.ready
-		d.position = Vector3.ZERO
-		d.mesh = ImmediateMesh.new()
-		d.material_override = diamond_mat
-	hide()
-	
-
 func update(control_points: Array[ControlPoint]):
 	# Update main mesh
 	var h_line_indices = [0, 1, 1, 2, 2, 3]
@@ -75,5 +45,33 @@ func update(control_points: Array[ControlPoint]):
 		for vert in vertices:
 			diamond_mesh.surface_add_vertex(vert * DIAMOND_SIZE + cp_position)
 		diamond_mesh.surface_end()
-		
+
+
+func _ready() -> void:
+	# Setup main mesh
+	mesh = ImmediateMesh.new()
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.vertex_color_use_as_albedo = true
+	mat.no_depth_test = true
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material_override = mat
 	
+	# Setup control point diamonds
+	var diamond_mat := StandardMaterial3D.new()
+	diamond_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	diamond_mat.vertex_color_use_as_albedo = true
+	diamond_mat.no_depth_test = true
+	diamond_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	diamond_mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	diamond_mat.fixed_size = true
+	
+	_diamonds.resize(16)
+	for d in _diamonds:
+		d = MeshInstance3D.new()
+		add_child(d)
+		await d.ready
+		d.position = Vector3.ZERO
+		d.mesh = ImmediateMesh.new()
+		d.material_override = diamond_mat
+	hide()

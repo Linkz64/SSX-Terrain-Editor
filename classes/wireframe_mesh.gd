@@ -7,18 +7,6 @@ const WIREFRAME_MARGIN = 0.5
 const WIREFRAME_COLOR = Color.BLACK
 
 
-func _ready() -> void:
-	var wireframe_material := StandardMaterial3D.new()
-	wireframe_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	wireframe_material.vertex_color_use_as_albedo = true
-	material_override = wireframe_material
-	
-	mesh = ImmediateMesh.new()
-	visibility_range_end = 100_000
-	visibility_range_end_margin = 10000
-	visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
-
-
 func update(control_points: Array[ControlPoint]) -> void:
 	var vertices: Array[Vector3] = []
 	vertices.resize(64)
@@ -52,6 +40,18 @@ func update(control_points: Array[ControlPoint]) -> void:
 			immediate_mesh.surface_set_color(WIREFRAME_COLOR)
 			immediate_mesh.surface_add_vertex(vertices[y * 8 + x + 1])
 	immediate_mesh.surface_end()
+
+
+func _ready() -> void:
+	var wireframe_material := StandardMaterial3D.new()
+	wireframe_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	wireframe_material.vertex_color_use_as_albedo = true
+	material_override = wireframe_material
+	
+	mesh = ImmediateMesh.new()
+	visibility_range_end = 100_000
+	visibility_range_end_margin = 10000
+	visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 
 
 static func _evaluate_bezier_surface(control_points: PackedVector3Array, u:float, v:float) -> Vector3:

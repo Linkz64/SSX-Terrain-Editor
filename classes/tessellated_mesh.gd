@@ -19,8 +19,6 @@ const EDGES = {
 # Blend distance between the 7 vertices. Multiplied by 7 should give ~1.
 const BLEND_DISTANCE = 1.0 / 7.0
 
-
-
 # Distance to offset from the textured vertices, towards the vertex normal.
 const WIREFRAME_MARGIN = 0.5
 const WIREFRAME_COLOR = Color.BLACK
