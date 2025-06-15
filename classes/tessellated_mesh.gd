@@ -1,17 +1,5 @@
 extends MeshInstance3D
 class_name TessellatedMesh
-"""
-The Bezier surface with the texture, uv, and lighting normals.
-8x8 vertices, 7x7 faces
-
-When created, they require the control points, the texture, and the UV map.
-As an optional it takes a bool telling it if it should render the wireframe overlay.
-If true - It'll render The textured mesh, and the wireframe overlay.
-If false - It'll only render the textured mesh.
-In both cases the wireframe is created in memory, just not rendered if false. 
-This is so its faster to enable/disable overlay at runtime with no lag, in exchange for 
-memory usage.
-"""
 
 
 ## Vertex Indices SUS
@@ -29,7 +17,9 @@ const EDGES = {
 }
 
 # Blend distance between the 7 vertices. Multiplied by 7 should give ~1.
-const BLEND_DISTANCE = 0.142857 
+const BLEND_DISTANCE = 1.0 / 7.0
+
+
 
 # Distance to offset from the textured vertices, towards the vertex normal.
 const WIREFRAME_MARGIN = 0.5

@@ -6,7 +6,7 @@ class_name ControlGridMesh
 const LINE_COLOR = Color.ORANGE
 const DIAMOND_COLOR = Color.BLACK
 const DIAMOND_HIGHLIGHT_COLOR = Color.ORANGE
-const DIAMOND_SIZE = 10.0
+const DIAMOND_SIZE = 3.0
 var _diamonds: Array[MeshInstance3D]
 
 
