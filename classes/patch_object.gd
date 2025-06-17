@@ -6,30 +6,6 @@ class_name PatchObject
 ## child nodes, like the tilemap database for control point neighbor detection.
 ## Everything else is a node as a child of this one, that includes Collision mesh,
 ## control points, segments, textured mesh, wireframe mesh, and control grid.
-##
-## World:
-##     Groups:
-##         -Group_0
-##         -Group_1
-##         ...
-##         -Group_6:
-##             -Patch_Object_0
-##             -Patch_Object_1
-##             ...
-##             -Patch_Object_6: ---StaticBody---
-##             	CollisionShapeMesh
-##                 Control_points:
-##                     -cp0
-##                     -cp1
-##                     ...
-##                 Patch_Segments: 
-##                     -segment_0
-## 		                Meshes:
-## 				            TexturedMesh
-## 				            WireframeMesh
-## 				            ControlGrid
-##                     -segment_1
-##                     ...
 
 
 enum {
@@ -42,28 +18,8 @@ enum {
 }
 
 const DEFAULT_SEGMENT_SIZE = 100_000 # 100_000x100_000
-
 var _init_type: int
-var _object_to_copy: PatchObject
-var _is_ready: bool
 var _tilemap: Dictionary[ControlPoint, Vector2i]
-
-
-#func _init(init_type: InitType = InitType.DEFAULT, object_to_copy: PatchObject = null):
-	#_init_type = init_type
-	#_object_to_copy = object_to_copy
-	#if init_type == InitType.COPY:
-		#assert(object_to_copy, "Object to copy is null while passing a Copy init type")
-
-
-#func _ready():
-	#_is_ready = true
-	#match _init_type:
-		#InitType.DEFAULT:
-			#_create_default()
-		#InitType.COPY:
-			#_create_copy()
-
 
 
 func tilemap_get_position(cp: ControlPoint) -> Variant:
@@ -79,69 +35,69 @@ func tilemap_clear_cell_with_cp(cp: ControlPoint) -> void:
 	pass
 
 
-func set_wireframe_overlay(value: bool):
-	for c in get_children():
-		if c is TessellatedMesh:
-			if value:
-				c.enable_wireframe_overlay()
-			else:
-				c.disable_wireframe_overlay()
+func _init(init_type: int):
+	_init_type = init_type
 
 
-#func update_surface():
-	#for child in get_children():
-		#child.queue_free()
-	#
-	#for segment:PatchSegment in segments.values():
-		#var cp_array: PackedVector3Array = []
-		#for cp in 16:
-			#var id = segment.control_point_ids[cp]
-			#cp_array.append(control_points[id].position)
-			#
-		#var uvs: PackedVector2Array = [
-			#segment.uv_points["top-left"],
-			#segment.uv_points["top-right"],
-			#segment.uv_points["bottom-left"],
-			#segment.uv_points["bottom-right"],
-		#]
-		#var surface := TessellatedMesh.new(cp_array, segment.texture_filename, uvs, true)
-		#add_child(surface)
+func _enter_tree() -> void:
+	# Collision mesh
+	var shape := ConcavePolygonShape3D.new()
+	shape.backface_collision = true
+	shape.name = "CollisionMesh"
+	var shape_node := CollisionShape3D.new()
+	shape_node.shape = shape
+	add_child(shape_node)
+	
+	# Control points parent
+	var control_points_parent := Node3D.new()
+	control_points_parent.name = "ControlPoints"
+	add_child(control_points_parent)
+	
+	# Segments parent
+	var segments_parent := Node3D.new()
+	segments_parent.name = "PatchSegments"
+	add_child(segments_parent)
+	
+	# Setup object if type is default
+	if _init_type == DEFAULT:
+		_create_default()
 
 
-#func _create_default():
-	#for y in range(3, -1, -1):
-		#for x in 4:
-			#var new_x = x * DEFAULT_SEGMENT_SIZE/3.0
-			#var new_y = y * DEFAULT_SEGMENT_SIZE/3.0
-			##control_points[control_points_id] = ControlPoint.new(ControlPoint.Type.CORNER, self, Vector3(new_x, new_y, 0))
-			#control_points_id += 1
-			#
-	## Set the ids for the segment
-	#var ids: Array[int]
-	#for i in 16:
-		#ids.append(i)
-	#
-	#segments[segment_id] = PatchSegment.new(ids, self)
-	#segment_id += 1
-	#
-	#var cp_array: Array[Vector3] = []
-	#for cp in 16:
-		#cp_array.append(control_points[cp].position)
-	#
-	## Test control grid
-	##var grid := ControlGrid.new(cp_array, Color.GREEN, Color.GREEN)
-	##add_child(grid)
-	#
-	## Test tesselated mesh
-	#var uv_points: Array[Vector2] = [
-		#Vector2.ZERO,
-		#Vector2(1, 0),
-		#Vector2(0, 1),
-		#Vector2(1, 1),
-	#]
-	#var surface := TessellatedMesh.new(cp_array, "0001.png", uv_points, true)
-	#add_child(surface)
-
-
-func _create_copy():
-	pass
+func _create_default():
+	# Create point positions
+	var points: Array[Vector3]
+	var tile_positions: Array[Vector2i]
+	for y in 4:
+		for x in range(0, -4, -1):
+			points.append(Vector3(x, y, 0) * DEFAULT_SEGMENT_SIZE)
+			tile_positions.append(Vector2i(x, y))
+			
+	# Create control points
+	var CORNERS = [0, 3, 12, 15]
+	var HANDLES = [1, 2, 4, 7, 8, 11, 13, 14]
+	var INNERS = [5, 6, 9, 10]
+	for point_idx: int in points.size():
+		var type: int
+		if point_idx in CORNERS:
+			type = ControlPoint.CORNER
+		elif point_idx in HANDLES:
+			type = ControlPoint.HANDLE
+		elif point_idx in INNERS:
+			type = ControlPoint.INNER
+		else:
+			assert(false, "Point index out of range")
+			
+		var cp = ControlPoint.new(type)
+		get_node("ControlPoints").add_child(cp)
+		cp.position = points[point_idx]
+		_tilemap[cp] = tile_positions[point_idx]
+	
+	# Create segment
+	var segment = PatchSegment.new(tile_positions)
+	get_node("PatchSegments").add_child(segment)
+	
+	
+	
+	
+	
+	

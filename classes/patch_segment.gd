@@ -1,10 +1,13 @@
 extends Node3D
 class_name PatchSegment
-## Patch segments represent a single patch from a Patch object.
+## Patch segments represent a single surface/patch from a Patch object.
 ## It keeps a list of 16 cells from the Patch object's tilemap, each of those is a Control point
 ## for rendering the meshes, and the collision shapes.
 
 
+signal mesh_changed(segment: TexturedMesh)
+
+# Must call update after changing any of these values
 var surface_type: Enum.SurfaceType = Enum.SurfaceType.SNOW_MAIN
 var texture_filename: String = "0001.png"
 var showoff_only: bool = false
@@ -16,21 +19,51 @@ var uv_points: Dictionary = {
 }
 var lightmap_point: Rect2 = Rect2(0, 0, 0.0625, 0.0625)
 var lightmap_id: int = 0
+var selected: bool = false # Set for highlighting
 
-var control_point_cells: Array[Vector2i]
+var _control_point_cells: Array[Vector2i]
+var _control_point_ref: Array[ControlPoint]
+var _textured_mesh: TexturedMesh
+var _wireframe_mesh: WireframeMesh
+var _control_grid_mesh: ControlGridMesh
+
+
+func update():
+	_control_point_moved()
+
+
+func _init(control_point_cells: Array[Vector2i]) -> void:
+	_control_point_cells = control_point_cells
+
+
+func _enter_tree() -> void:
+	_textured_mesh = TexturedMesh.new()
+	_wireframe_mesh = WireframeMesh.new()
+	_control_grid_mesh = ControlGridMesh.new()
+	var mesh_parent := Node3D.new()
+	add_child(mesh_parent)
+	mesh_parent.name = "Meshes"
+	mesh_parent.add_child(_textured_mesh)
+	mesh_parent.add_child(_wireframe_mesh)
+	mesh_parent.add_child(_control_grid_mesh)
 
 
 func _ready() -> void:
 	var patch_object: PatchObject = get_parent().get_parent()
-	for cell in control_point_cells:
+	for cell in _control_point_cells:
 		var cp: ControlPoint = patch_object.tilemap_get_control_point(cell)
 		assert(cp)
+		_control_point_ref.append(cp)
 		cp.local_transform_changed.connect(_control_point_moved)
 		cp.selection_changed.connect(_control_point_selection_changed)
 	
 
 func _control_point_moved():
-	pass
+	_textured_mesh.update(_control_point_ref, texture_filename, uv_points.values(), selected)
+	_wireframe_mesh.update(_control_point_ref)
+	_control_grid_mesh.update(_control_point_ref)
+	mesh_changed.emit() # Call at the end of the function
+
 
 func _control_point_selection_changed(select: bool):
-	pass
+	_control_grid_mesh.update(_control_point_ref)

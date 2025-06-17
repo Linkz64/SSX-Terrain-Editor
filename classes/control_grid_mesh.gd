@@ -70,7 +70,6 @@ func _ready() -> void:
 	for d in _diamonds:
 		d = MeshInstance3D.new()
 		add_child(d)
-		await d.ready
 		d.position = Vector3.ZERO
 		d.mesh = ImmediateMesh.new()
 		d.material_override = diamond_mat

@@ -387,7 +387,7 @@ func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> Node:
 		root.add_child(group_node)
 		
 		for object: ObjectEntry in group.objects:
-			var object_node := PatchObject.new(PatchObject.InitType.EMPTY)
+			var object_node := PatchObject.new(PatchObject.EMPTY)
 			object_node.name = object.object_name
 			object_node.transform = object.object_xform
 			group_node.add_child(object_node)
@@ -416,10 +416,7 @@ func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> Node:
 				segment_id += 1
 			object_node.segment_id = segment_id
 			object_node.update_surface()
-				
-			# Do this later
-			#if cp.has_north_ref:
-			#control_point.neighbours["north"] = cp.ref_north_id
+			
 
 	return root
 

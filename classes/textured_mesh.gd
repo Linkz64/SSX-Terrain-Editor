@@ -10,6 +10,7 @@ const HIGHLIGHT_COLOR = Color.ORANGE
 func update(control_points: Array[ControlPoint], \
 		texture_name: String, \
 		uv_points: PackedVector2Array, \
+		highlight: bool = false \
 	) -> void:
 	var triangles: Array[Triangle]
 	
@@ -49,8 +50,9 @@ func update(control_points: Array[ControlPoint], \
 			if not triangle2.is_degenerate:
 				triangle2.append(triangle2)		
 	
-	# Get texture
+	# Get texture and enable highlight if provided
 	material_override.albedo_texture = TextureManager.get_texture(texture_name)
+	material_override.vertex_color_use_as_albedo = highlight
 	
 	# Create mesh
 	var immediate_mesh := mesh as ImmediateMesh
