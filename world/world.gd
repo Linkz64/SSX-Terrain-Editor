@@ -8,7 +8,7 @@ var object_pool: Node
 
 
 func _ready():
-	SaveHandler.dep_world = self
+	SaveHandler.world = self
 	UserState.world = self
 	UserState.gizmo = gizmo
 	$DirectionalLight3D.directional_shadow_max_distance = BIG

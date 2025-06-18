@@ -28,12 +28,6 @@ func tilemap_get_position(cp: ControlPoint) -> Variant:
 func tilemap_get_control_point(cell: Vector2i) -> Variant:
 	return ControlPoint.new(ControlPoint.CORNER) # or null
 
-func tilemap_clear_cell(cell: Vector2i) -> void:
-	pass
-
-func tilemap_clear_cell_with_cp(cp: ControlPoint) -> void:
-	pass
-
 
 func _init(init_type: int):
 	_init_type = init_type
@@ -95,9 +89,11 @@ func _create_default():
 	# Create segment
 	var segment = PatchSegment.new(tile_positions)
 	get_node("PatchSegments").add_child(segment)
+	segment.mesh_changed.connect(_on_mesh_changed)
 	
 	
 	
-	
+func _on_mesh_changed(tex_mesh: TexturedMesh) -> void:
+	get_node("CollisionMesh").shape.set_faces(tex_mesh.get_faces())
 	
 	

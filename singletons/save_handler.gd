@@ -2,21 +2,20 @@ extends Node
 
 signal new_terrain_created
 
+var world: Node3D
+var terrain_path: String:
+	set(value): terrain_path = ""
+	get: return _current_working_terrain_path
 
-# The terrain path that was opened or created. i.e the terrain currently
-# active in the editor.
-var current_working_terrain_path: String
-# Dependancy injection of the 3D world root node.
-var dep_world: Node3D
-# Dependancy injection of the Tree node.
-var dep_tree: Node
+var _current_working_terrain_path: String
 var _thread: Thread
 
 
 #---------Public methods--------
 func new_terrain(terrain_path: String, import_json: bool, grouping: Enum.GroupingIndex):
-	current_working_terrain_path = terrain_path
+	_current_working_terrain_path = terrain_path
 	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
+	_clear_scene()
 	if import_json:
 		_thread.start(_create_ssxt_from_json.bind(terrain_path, grouping))
 	else:
@@ -24,7 +23,7 @@ func new_terrain(terrain_path: String, import_json: bool, grouping: Enum.Groupin
 
 
 func open_terrain(terrain_path: String):
-	current_working_terrain_path = terrain_path
+	_current_working_terrain_path = terrain_path
 	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
 	_thread.start(func(): return _ssxt_struct_to_nodes(_read_struct_from_disk(terrain_path)))
 
@@ -35,24 +34,20 @@ func _ready():
 	get_tree().process_frame.connect(_check_thread_finished)
 
 
-func _exit_tree() -> void:
-	_thread.wait_to_finish()
-
-
 func _check_thread_finished() -> void:
 	if _thread.is_started() and not _thread.is_alive():
 		var node: Node = _thread.wait_to_finish()
-		var old_node = dep_world.object_pool
+		var old_node = world.object_pool
 		if old_node:
 			old_node.queue_free()
-		dep_world.add_child(node)
-		dep_world.object_pool = node
+		world.add_child(node)
+		world.object_pool = node
 		new_terrain_created.emit()
 
 
-func _update_camera(xform: Transform3D):
-	dep_world.get_camera().transform = xform
-	dep_world.get_camera().init_rotation = Vector2.ZERO
+func _clear_scene() -> void:
+	for child: Node in world.get_node("Groups"):
+		child.queue_free()
 
 
 func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
@@ -90,7 +85,7 @@ func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 
 func _create_ssxt_default(terrain_path: String):
 	# create the ssxt with a predefined structure
-	const SEGMENT_SIZE = 300
+	const SEGMENT_SIZE = 10_000
 	var ssxt_struct := SsxtFileStructure.new()
 	
 	var version_str: String = ProjectSettings.get_setting("application/config/version")
@@ -99,53 +94,40 @@ func _create_ssxt_default(terrain_path: String):
 	for digit in version_str_array:
 		editor_version.append(int(digit))
 	ssxt_struct.editor_version = editor_version
-	
 	ssxt_struct.date_time_created = Time.get_datetime_string_from_system()
-	
 	ssxt_struct.camera_xform = Transform3D().rotated(Vector3.RIGHT, TAU/4)
-	
 	ssxt_struct.group_count = 1
+	
 	var group_entry := GroupEntry.new()
+	ssxt_struct.groups.append(group_entry)
 	group_entry.group_name = "Group.0"
 	group_entry.group_name_size = group_entry.group_name.length()
 	group_entry.group_visible = true
 	group_entry.object_count = 1
 	
 	var object_entry := ObjectEntry.new()
+	group_entry.objects.append(object_entry)
 	object_entry.object_name = "Object.0"
 	object_entry.object_name_size = object_entry.object_name.length()
 	object_entry.object_xform = Transform3D()
-	object_entry.greatest_control_point_id = 16
 	object_entry.control_point_count = 16
-	
-	for y in range(3, -1, -1):
-		for x in 4: 
-			var cp_index = y * 4 + x
+	var cp_index: int = 0
+	for y in 4:
+		for x in range(0, -4, -1):
+			object_entry.tilemap.append(Vector2i(x, y))
 			var control_point_entry := ControlPointEntry.new()
-			control_point_entry.type = _get_control_point_type(cp_index)
-			control_point_entry.id = cp_index
-			control_point_entry.aligned = true
-			control_point_entry.position = Vector3(x * SEGMENT_SIZE, y * SEGMENT_SIZE, 0) - object_entry.object_xform.origin
-			
-			var north = _get_neighbour(cp_index, "north")
-			var west = _get_neighbour(cp_index, "west")
-			var south = _get_neighbour(cp_index, "south")
-			var east = _get_neighbour(cp_index, "east")
-			control_point_entry.has_north_ref = north != null
-			control_point_entry.ref_north_id = north if north else 0
-			control_point_entry.has_west_ref = west != null
-			control_point_entry.ref_west_id = west if west else 0
-			control_point_entry.has_south_ref = south != null
-			control_point_entry.ref_south_id = south if south else 0
-			control_point_entry.has_east_ref = east != null
-			control_point_entry.ref_east_id = east if east else 0
 			object_entry.control_points.append(control_point_entry)
+			control_point_entry.type = _get_control_point_type(cp_index)
+			control_point_entry.aligned = true
+			control_point_entry.position = Vector3(x * SEGMENT_SIZE, y * SEGMENT_SIZE, 0)
+			cp_index += 1
 	
-	object_entry.greatest_segment_id = 1
+	object_entry.segment_count = 1
 	var segment := SegmentEntry.new()
-	segment.id = 0
-	for i in 16:
-		segment.control_point_ids.append(i)
+	object_entry.segments.append(segment)
+	for y in 4:
+		for x in range(0, -4, -1):
+			segment.control_point_cells.append(Vector2i(x, y))
 	segment.lightmap_rect = Rect2(0, 0, 0.0625, 0.0625)
 	segment.lightmap_id = 0
 	segment.uv_points = [
@@ -154,13 +136,10 @@ func _create_ssxt_default(terrain_path: String):
 		Vector2(0, 1),
 		Vector2(1, 1),
 	]
-	segment.patch_style = Enum.SurfaceType.SNOW_MAIN
-	segment.tricky_only_patch = false
+	segment.surface_type = Enum.SurfaceType.SNOW_MAIN
+	segment.showoff_only = false
 	segment.texture_path = "0000.png"
 	segment.texture_path_size = segment.texture_path.length()
-	object_entry.segments.append(segment)
-	group_entry.objects.append(object_entry)
-	ssxt_struct.groups.append(group_entry)
 	
 	_write_struct_to_disk(terrain_path, ssxt_struct)
 	return _ssxt_struct_to_nodes(ssxt_struct)
@@ -375,8 +354,12 @@ func _grouping_surface_type_edit(ssxt_struct: SsxtFileStructure, json_data: Arra
 
 
 func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> Node:
-	assert(dep_world, "World node dependancy was not set.")
-	call_thread_safe("_update_camera", ssxt_struct.camera_xform)
+	assert(world, "World node dependancy was not set.")
+	
+	var update_camera = func():
+		world.get_camera().transform = ssxt_struct.camera_xform
+		world.get_camera().init_rotation = Vector2.ZERO
+	update_camera.call_deferred()
 	
 	var root := Node.new()
 	root.name = "ObjectPool"
@@ -571,33 +554,24 @@ static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStr
 			ssxt_file.store_float(object.object_xform.basis.z.x)
 			ssxt_file.store_float(object.object_xform.basis.z.y)
 			ssxt_file.store_float(object.object_xform.basis.z.z)
-			
-			ssxt_file.store_32(object.greatest_control_point_id)
 			ssxt_file.store_32(object.control_point_count)
 			
 			for control_point in object.control_points:
 				ssxt_file.store_8(control_point.type)
-				ssxt_file.store_32(control_point.id)
 				ssxt_file.store_8(int(control_point.aligned))
 				ssxt_file.store_float(control_point.position.x)
 				ssxt_file.store_float(control_point.position.y)
 				ssxt_file.store_float(control_point.position.z)
-				ssxt_file.store_8(int(control_point.has_north_ref))
-				ssxt_file.store_32(control_point.ref_north_id)
-				ssxt_file.store_8(int(control_point.has_west_ref))
-				ssxt_file.store_32(control_point.ref_west_id)
-				ssxt_file.store_8(int(control_point.has_south_ref))
-				ssxt_file.store_32(control_point.ref_south_id)
-				ssxt_file.store_8(int(control_point.has_east_ref))
-				ssxt_file.store_32(control_point.ref_east_id)
 
-			ssxt_file.store_32(object.greatest_segment_id)
+			for cell: Vector2i in object.tilemap:
+				ssxt_file.store_32(cell.x)
+				ssxt_file.store_32(cell.y)
 			
+			ssxt_file.store_32(object.segment_count)
 			for segment in object.segments:
-				ssxt_file.store_32(segment.id)
-				
-				for cp_id in segment.control_point_ids:
-					ssxt_file.store_32(cp_id)
+				for cell: Vector2i in segment.control_point_cells:
+					ssxt_file.store_32(cell.x)
+					ssxt_file.store_32(cell.y)
 				
 				ssxt_file.store_float(segment.lightmap_rect.position.x)
 				ssxt_file.store_float(segment.lightmap_rect.position.y)
@@ -609,9 +583,8 @@ static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStr
 					ssxt_file.store_float(uv.x)
 					ssxt_file.store_float(uv.y)
 					
-				ssxt_file.store_8(segment.patch_style)
-				ssxt_file.store_8(int(segment.tricky_only_patch))
-				
+				ssxt_file.store_8(segment.surface_type)
+				ssxt_file.store_8(int(segment.showoff_only))
 				ssxt_file.store_32(segment.texture_path_size)
 				ssxt_file.store_string(segment.texture_path)
 
@@ -650,13 +623,13 @@ static func _get_control_point_type(index: int) -> int:
 	const HANDLES = [1, 2, 4, 7, 8, 11, 13, 14]
 	const INNERS = [5, 6, 9, 10]
 	if index in CORNERS:
-		return 0 # corner
+		return ControlPoint.CORNER # 0
 	elif index in HANDLES:
-		return 1 # handle
+		return ControlPoint.HANDLE # 1
 	elif index in INNERS:
-		return 2 # inner
+		return ControlPoint.INNER # 2
 	else:
-		push_error("Invalid control point index ", index)
+		assert(false, "Invalid control point index " + str(index))
 		return 0
 
 
@@ -664,9 +637,9 @@ static func _get_control_point_type(index: int) -> int:
 class SsxtFileStructure:
 	var signature: String = "ssxt"
 	var file_structure_version: Array[int] = [0, 1, 0] # Bytes. Major, Minor, Patch
-	var editor_version: Array[int] = [0, 1, 0] # Bytes. Major, Minor, Patch
+	var editor_version: Array[int] = [0, 3, 0] # Bytes. Major, Minor, Patch
 	var date_time_created: String # 19 bytes
-	var camera_xform: Transform3D
+	var camera_xform: Transform3D # 4 Vector3's
 	var group_count: int
 	var groups: Array[GroupEntry]
 
@@ -681,35 +654,26 @@ class ObjectEntry:
 	var object_name_size: int # byte
 	var object_name: String
 	var object_xform: Transform3D
-	var greatest_control_point_id: int
 	var control_point_count: int
 	var control_points: Array[ControlPointEntry]
-	var greatest_segment_id: int
+	# Size: control_point_count 
+	# The tilemap element index corresponds to the cp in the cp array.
+	var tilemap: Array[Vector2i]
 	var segment_count: int
 	var segments: Array[SegmentEntry]
 	
 class ControlPointEntry:
 	var type: int # byte
-	var id: int
 	var aligned: bool
 	var position: Vector3
-	var has_north_ref: bool # If the below id is valid (i.e Does this cp have a north neighbour?)
-	var ref_north_id: int # References to the neighbouring CPs to complete the doubly linked grid
-	var has_west_ref: bool
-	var ref_west_id: int
-	var has_south_ref: bool
-	var ref_south_id: int
-	var has_east_ref: bool
-	var ref_east_id: int
 
 class SegmentEntry:
-	var id: int
-	var control_point_ids: Array[int] # Size 16
+	var control_point_cells: Array[Vector2i] # Size 16
 	var lightmap_rect: Rect2
 	var lightmap_id: int
 	var uv_points: Array[Vector2] # Size 4
-	var patch_style: int # byte
-	var tricky_only_patch: bool
+	var surface_type: int # byte
+	var showoff_only: bool
 	var texture_path_size: int
 	var texture_path: String
 	

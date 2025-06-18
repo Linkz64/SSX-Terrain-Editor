@@ -18,10 +18,6 @@ var is_mouse_inside_tree: bool = false
 var is_tree_focused: bool = false
 
 
-func _enter_tree() -> void:
-	SaveHandler.dep_tree = self
-	
-
 func _ready():
 	root = self.create_item()
 	create_object(create_group()) # Create initial group and object
