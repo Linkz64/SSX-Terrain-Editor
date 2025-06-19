@@ -15,7 +15,6 @@ var _thread: Thread
 func new_terrain(terrain_path: String, import_json: bool, grouping: Enum.GroupingIndex):
 	_current_working_terrain_path = terrain_path
 	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
-	_clear_scene()
 	if import_json:
 		_thread.start(_create_ssxt_from_json.bind(terrain_path, grouping))
 	else:
@@ -25,7 +24,7 @@ func new_terrain(terrain_path: String, import_json: bool, grouping: Enum.Groupin
 func open_terrain(terrain_path: String):
 	_current_working_terrain_path = terrain_path
 	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
-	_thread.start(func(): return _ssxt_struct_to_nodes(_read_struct_from_disk(terrain_path)))
+	#_thread.start(func(): return _ssxt_struct_to_nodes(_read_struct_from_disk(terrain_path)))
 
 
 #----------Private methods-------
@@ -43,11 +42,6 @@ func _check_thread_finished() -> void:
 		world.add_child(node)
 		world.object_pool = node
 		new_terrain_created.emit()
-
-
-func _clear_scene() -> void:
-	for child: Node in world.get_node("Groups"):
-		child.queue_free()
 
 
 func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
@@ -78,9 +72,8 @@ func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 	var write_thread := Thread.new()
 	write_thread.start(_write_struct_to_disk.bind(terrain_path, ssxt_struct))
 	
-	var nodes = _ssxt_struct_to_nodes(ssxt_struct)
+	_ssxt_struct_to_nodes(ssxt_struct)
 	write_thread.wait_to_finish()
-	return nodes
 
 
 func _create_ssxt_default(terrain_path: String):
@@ -142,7 +135,7 @@ func _create_ssxt_default(terrain_path: String):
 	segment.texture_path_size = segment.texture_path.length()
 	
 	_write_struct_to_disk(terrain_path, ssxt_struct)
-	return _ssxt_struct_to_nodes(ssxt_struct)
+	_ssxt_struct_to_nodes(ssxt_struct)
 
 
 ## Edits the struct if the grouping flag is None.
@@ -353,57 +346,82 @@ func _grouping_surface_type_edit(ssxt_struct: SsxtFileStructure, json_data: Arra
 		ssxt_struct.groups[patch.patch_style].objects.append(object_entry)
 
 
-func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> Node:
+func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> void:
 	assert(world, "World node dependancy was not set.")
+	
+	for child: Node in world.get_node("Groups"):
+		child.queue_free()
 	
 	var update_camera = func():
 		world.get_camera().transform = ssxt_struct.camera_xform
 		world.get_camera().init_rotation = Vector2.ZERO
 	update_camera.call_deferred()
 	
-	var root := Node.new()
-	root.name = "ObjectPool"
+	var group_parent = world.get_node("Groups")
 	for group: GroupEntry in ssxt_struct.groups:
 		var group_node := Node3D.new()
+		group_parent.add_child.call_deferred(group_node)
 		group_node.name = group.group_name
 		group_node.visible = group.group_visible
-		root.add_child(group_node)
 		
 		for object: ObjectEntry in group.objects:
-			var object_node := PatchObject.new(PatchObject.EMPTY)
+			var object_node := PatchObject.new()
+			group_node.add_child.call_deferred(object_node)
 			object_node.name = object.object_name
 			object_node.transform = object.object_xform
-			group_node.add_child(object_node)
+			var collision_shape_node := CollisionShape3D.new()
+			collision_shape_node.name = "CollisionShape"
+			collision_shape_node.shape = ConcavePolygonShape3D.new()
+			object_node.add_node.call_deferred(collision_shape_node)
+			var control_points_parent := Node3D.new()
+			control_points_parent.name = "ControlPoints"
+			object_node.add_node.call_deferred(control_points_parent)
+			var segments_parent := Node3D.new()
+			segments_parent.name = "PatchSegments"
+			object_node.add_node.call_deferred(segments_parent)
 			
-			var cp_id := 0
-			for cp_entry:ControlPointEntry in object.control_points:
-				var control_point = ControlPoint.new(cp_entry.type, object_node, cp_entry.position)
-				control_point.aligned = cp_entry.aligned
-				object_node.control_points[cp_id] = control_point
-				cp_id += 1
-			object_node.control_points_id = cp_id
-			
-			var segment_id := 0
+			for cp_idx in object.control_points.size():
+				var cp = object.control_points[cp_idx]
+				var control_point = ControlPoint.new(cp.type)
+				control_point.aligned = cp.aligned
+				object_node.get_node("ControlPoints").add_child.call_deferred(control_point)
+				control_point.position = cp.position
+				object_node.tilemap_set_control_point_at_cell(control_point, object.tilemap[cp_idx])
+				
 			for segment_entry:SegmentEntry in object.segments:
-				var segment := PatchSegment.new(segment_entry.control_point_ids, object_node)
+				var segment := PatchSegment.new(segment_entry.control_point_cells)
+				object_node.get_node("PatchSegments").add_child.call_deferred(segment)
 				segment.surface_type = segment_entry.patch_style as Enum.SurfaceType
 				segment.texture_filename = segment_entry.texture_path
 				segment.showoff_only = segment_entry.tricky_only_patch
-				segment.uv_points["top-left"] = segment_entry.uv_points[0]
-				segment.uv_points["top-right"] = segment_entry.uv_points[1]
-				segment.uv_points["bottom-left"] = segment_entry.uv_points[2]
-				segment.uv_points["bottom-right"] = segment_entry.uv_points[3]
+				for i in 4:
+					segment.uv_points[i] = segment_entry.uv_points[i]
 				segment.lightmap_id = segment_entry.lightmap_id
 				segment.lightmap_point = segment_entry.lightmap_rect
-				object_node.segments[segment_id] = segment
-				segment_id += 1
-			object_node.segment_id = segment_id
-			object_node.update_surface()
-			
+				
+				# Connect the CP signals to the segment
+				for cell: Vector2i in segment.control_point_cells:
+					var cp: ControlPoint = object_node.tilemap_get_control_point(cell)
+					assert(cp)
+					segment.control_point_ref.append(cp)
+					cp.local_transform_changed.connect(segment._control_point_moved)
+					cp.selection_changed.connect(segment._control_point_selection_changed)
+				
+				# Connect the segment signals to the object. 
+				# Create meshes
+				
+				#_textured_mesh = TexturedMesh.new()
+				#_wireframe_mesh = WireframeMesh.new()
+				#_control_grid_mesh = ControlGridMesh.new()
+				#var mesh_parent := Node3D.new()
+				#add_child(mesh_parent)
+				#mesh_parent.name = "Meshes"
+				#mesh_parent.add_child(_textured_mesh)
+				#mesh_parent.add_child(_wireframe_mesh)
+				#mesh_parent.add_child(_control_grid_mesh)
 
-	return root
 
-
+## @deprecated
 static func _read_struct_from_disk(terrain_path: String) -> SsxtFileStructure:
 	var ssxt_file := FileAccess.open(terrain_path, FileAccess.READ)
 	var ssxt_struct := SsxtFileStructure.new()

@@ -7,19 +7,20 @@ signal local_transform_changed
 signal selection_changed(select: bool)
 
 enum {CORNER, HANDLE, INNER}
-var type: int
 
 ## If true, it influences the control points around it based on this
 ## control point's movement.
 var aligned: bool = true
+var type: int # CORNER, HANDLE, INNER
 var is_selected: bool = false
+
 
 func _init(p_type: int) -> void:
 	type = p_type
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_LOCAL_TRANSFORM_CHANGED:
+	if what == NOTIFICATION_LOCAL_TRANSFORM_CHANGED and is_node_ready():
 		local_transform_changed.emit()
 
 
