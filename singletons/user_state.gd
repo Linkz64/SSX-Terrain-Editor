@@ -101,7 +101,7 @@ func switch_gizmo_to_edit():
 				cps.append(object.control_points[id].position + object.position)
 				CP_database.append(cps.back())
 			
-			var color = Color.GREEN
+			#var color = Color.GREEN
 			#var grid = ControlGrid.new(cps, color, color)
 			#cp_parent.add_child(grid)
 	

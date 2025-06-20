@@ -36,12 +36,25 @@ func _init(control_point_cells: Array[Vector2i]) -> void:
 	_control_point_cells = control_point_cells
 
 
+func _ready() -> void:
+	_textured_mesh = TexturedMesh.new()
+	_wireframe_mesh = WireframeMesh.new()
+	_control_grid_mesh = ControlGridMesh.new()
+	var mesh_parent := Node3D.new()
+	add_child(mesh_parent)
+	mesh_parent.name = "Meshes"
+	mesh_parent.add_child(_textured_mesh)
+	mesh_parent.add_child(_wireframe_mesh)
+	mesh_parent.add_child(_control_grid_mesh)
+	update()
+
+
 func _control_point_moved():
 	_textured_mesh.update(control_point_ref, texture_filename, uv_points.values(), selected)
 	_wireframe_mesh.update(control_point_ref)
 	_control_grid_mesh.update(control_point_ref)
-	mesh_changed.emit() # Call at the end of the function
+	mesh_changed.emit(_textured_mesh) # Call at the end of the function
 
 
-func _control_point_selection_changed(select: bool):
+func _control_point_selection_changed(_select: bool):
 	_control_grid_mesh.update(control_point_ref)

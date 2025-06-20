@@ -29,6 +29,6 @@ func tilemap_set_control_point_at_cell(cp: ControlPoint, cell: Vector2i) -> void
 
 	
 func _on_mesh_changed(tex_mesh: TexturedMesh) -> void:
-	get_node("CollisionMesh").shape.set_faces(tex_mesh.get_faces())
+	get_node("CollisionMesh").shape.set_faces(tex_mesh.mesh.get_faces())
 	
 	

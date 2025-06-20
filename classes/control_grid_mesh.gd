@@ -11,6 +11,7 @@ var _diamonds: Array[MeshInstance3D]
 
 
 func update(control_points: Array[ControlPoint]):
+	assert(is_node_ready())
 	# Update main mesh
 	var h_line_indices = [0, 1, 1, 2, 2, 3]
 	var v_line_indices = [0, 4, 4, 8, 8, 12]
@@ -67,10 +68,10 @@ func _ready() -> void:
 	diamond_mat.fixed_size = true
 	
 	_diamonds.resize(16)
-	for d in _diamonds:
-		d = MeshInstance3D.new()
-		add_child(d)
-		d.position = Vector3.ZERO
-		d.mesh = ImmediateMesh.new()
-		d.material_override = diamond_mat
+	for i in _diamonds.size():
+		_diamonds[i] = MeshInstance3D.new()
+		add_child(_diamonds[i])
+		_diamonds[i].position = Vector3.ZERO
+		_diamonds[i].mesh = ImmediateMesh.new()
+		_diamonds[i].material_override = diamond_mat
 	hide()

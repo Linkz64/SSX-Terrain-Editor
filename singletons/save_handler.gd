@@ -3,8 +3,8 @@ extends Node
 signal new_terrain_created
 
 var world: Node3D
-var terrain_path: String:
-	set(value): terrain_path = ""
+var current_terrain_path: String:
+	set(value): current_terrain_path = ""
 	get: return _current_working_terrain_path
 
 var _current_working_terrain_path: String
@@ -18,7 +18,9 @@ func new_terrain(terrain_path: String, import_json: bool, grouping: Enum.Groupin
 	if import_json:
 		_thread.start(_create_ssxt_from_json.bind(terrain_path, grouping))
 	else:
-		_thread.start(_create_ssxt_default.bind(terrain_path))
+		#_thread.start(_create_ssxt_default.bind(terrain_path))
+		_create_ssxt_default(terrain_path)
+		new_terrain_created.emit()
 
 
 func open_terrain(terrain_path: String):
@@ -34,14 +36,15 @@ func _ready():
 
 
 func _check_thread_finished() -> void:
-	if _thread.is_started() and not _thread.is_alive():
-		var node: Node = _thread.wait_to_finish()
-		var old_node = world.object_pool
-		if old_node:
-			old_node.queue_free()
-		world.add_child(node)
-		world.object_pool = node
-		new_terrain_created.emit()
+	return
+	#if _thread.is_started() and not _thread.is_alive():
+		#var node: Node = _thread.wait_to_finish()
+		#var old_node = world.object_pool
+		#if old_node:
+			#old_node.queue_free()
+		#world.add_child(node)
+		#world.object_pool = node
+		#new_terrain_created.emit()
 
 
 func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
@@ -78,7 +81,7 @@ func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 
 func _create_ssxt_default(terrain_path: String):
 	# create the ssxt with a predefined structure
-	const SEGMENT_SIZE = 10_000
+	const SEGMENT_SIZE = 1_000
 	var ssxt_struct := SsxtFileStructure.new()
 	
 	var version_str: String = ProjectSettings.get_setting("application/config/version")
@@ -349,7 +352,7 @@ func _grouping_surface_type_edit(ssxt_struct: SsxtFileStructure, json_data: Arra
 func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> void:
 	assert(world, "World node dependancy was not set.")
 	
-	for child: Node in world.get_node("Groups"):
+	for child: Node in world.get_node("Groups").get_children():
 		child.queue_free()
 	
 	var update_camera = func():
@@ -370,55 +373,49 @@ func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> void:
 			object_node.name = object.object_name
 			object_node.transform = object.object_xform
 			var collision_shape_node := CollisionShape3D.new()
-			collision_shape_node.name = "CollisionShape"
+			collision_shape_node.name = "CollisionMesh"
 			collision_shape_node.shape = ConcavePolygonShape3D.new()
-			object_node.add_node.call_deferred(collision_shape_node)
+			object_node.add_child.call_deferred(collision_shape_node)
 			var control_points_parent := Node3D.new()
 			control_points_parent.name = "ControlPoints"
-			object_node.add_node.call_deferred(control_points_parent)
+			object_node.add_child.call_deferred(control_points_parent)
 			var segments_parent := Node3D.new()
 			segments_parent.name = "PatchSegments"
-			object_node.add_node.call_deferred(segments_parent)
+			object_node.add_child.call_deferred(segments_parent)
 			
 			for cp_idx in object.control_points.size():
 				var cp = object.control_points[cp_idx]
 				var control_point = ControlPoint.new(cp.type)
 				control_point.aligned = cp.aligned
-				object_node.get_node("ControlPoints").add_child.call_deferred(control_point)
+				control_points_parent.add_child.call_deferred(control_point)
 				control_point.position = cp.position
 				object_node.tilemap_set_control_point_at_cell(control_point, object.tilemap[cp_idx])
 				
 			for segment_entry:SegmentEntry in object.segments:
 				var segment := PatchSegment.new(segment_entry.control_point_cells)
-				object_node.get_node("PatchSegments").add_child.call_deferred(segment)
-				segment.surface_type = segment_entry.patch_style as Enum.SurfaceType
+				segments_parent.add_child.call_deferred(segment)
+				segment.surface_type = segment_entry.surface_type as Enum.SurfaceType
 				segment.texture_filename = segment_entry.texture_path
-				segment.showoff_only = segment_entry.tricky_only_patch
+				segment.showoff_only = segment_entry.showoff_only
 				for i in 4:
 					segment.uv_points[i] = segment_entry.uv_points[i]
 				segment.lightmap_id = segment_entry.lightmap_id
 				segment.lightmap_point = segment_entry.lightmap_rect
 				
 				# Connect the CP signals to the segment
-				for cell: Vector2i in segment.control_point_cells:
-					var cp: ControlPoint = object_node.tilemap_get_control_point(cell)
+				for cell: Vector2i in segment._control_point_cells:
+					var cp: ControlPoint = object_node.tilemap_get_control_point_from_cell(cell)
 					assert(cp)
 					segment.control_point_ref.append(cp)
 					cp.local_transform_changed.connect(segment._control_point_moved)
 					cp.selection_changed.connect(segment._control_point_selection_changed)
 				
 				# Connect the segment signals to the object. 
-				# Create meshes
+				segment.mesh_changed.connect(object_node._on_mesh_changed)
 				
-				#_textured_mesh = TexturedMesh.new()
-				#_wireframe_mesh = WireframeMesh.new()
-				#_control_grid_mesh = ControlGridMesh.new()
-				#var mesh_parent := Node3D.new()
-				#add_child(mesh_parent)
-				#mesh_parent.name = "Meshes"
-				#mesh_parent.add_child(_textured_mesh)
-				#mesh_parent.add_child(_wireframe_mesh)
-				#mesh_parent.add_child(_control_grid_mesh)
+				# Create meshes
+				# The segments automatically generate the meshes on ready
+				
 
 
 ## @deprecated

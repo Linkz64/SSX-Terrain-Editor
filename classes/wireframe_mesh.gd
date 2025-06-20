@@ -4,7 +4,7 @@ class_name WireframeMesh
 
 # Distance to offset from the textured vertices, towards the camera.
 const WIREFRAME_MARGIN = 0.5
-const WIREFRAME_COLOR = Color.BLACK
+const WIREFRAME_COLOR = Color.GREEN
 
 
 func update(control_points: Array[ControlPoint]) -> void:
@@ -33,8 +33,8 @@ func update(control_points: Array[ControlPoint]) -> void:
 			immediate_mesh.surface_set_color(WIREFRAME_COLOR)
 			immediate_mesh.surface_add_vertex(vertices[y * 8 + x + 8])
 	# Horizontal lines
-	for y in 7:
-		for x in 8:
+	for x in 7:
+		for y in 8:
 			immediate_mesh.surface_set_color(WIREFRAME_COLOR)
 			immediate_mesh.surface_add_vertex(vertices[y * 8 + x])
 			immediate_mesh.surface_set_color(WIREFRAME_COLOR)

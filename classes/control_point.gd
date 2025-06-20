@@ -4,6 +4,7 @@ class_name ControlPoint
 
 
 signal local_transform_changed
+@warning_ignore("unused_signal")
 signal selection_changed(select: bool)
 
 enum {CORNER, HANDLE, INNER}
@@ -50,7 +51,7 @@ func get_inners() -> Array[ControlPoint]:
 
 
 ## Sets the aligned property for all 9 Control points around it.
-func set_alignment(align: bool) -> void:
+func set_alignment(align_value: bool) -> void:
 	assert(type == CORNER)
 	
 	var patch_object: PatchObject = get_parent().get_parent()
@@ -71,7 +72,7 @@ func set_alignment(align: bool) -> void:
 	for offset: Vector2i in offsets.values():
 		var neighbor: ControlPoint = patch_object.tilemap_get_control_point(cell_position + offset)
 		if neighbor:
-			neighbor.aligned = align
+			neighbor.aligned = align_value
 			neighbors_count += 1
 	assert(neighbors_count >= 3, "Corner has less than 3 neighbors.")
 	
