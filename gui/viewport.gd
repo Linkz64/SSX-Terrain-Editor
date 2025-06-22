@@ -5,7 +5,7 @@ const RAY_DISTANCE = 1_000_000
 var is_mouse_inside_viewport: bool = false
 @onready var render: SubViewport = $Render
 @onready var world: Node3D = $Render/World
-@onready var gizmo: Node3D = $Render/World/Gizmo
+#@onready var gizmo: Node3D = $Render/World/Gizmo
 @export var viewport_overlay: Node
 
 
@@ -29,8 +29,8 @@ func _gui_input(_event: InputEvent) -> void:
 		
 		# wait one frame to see if the user clicked over the gizmo
 		await get_tree().process_frame
-		if gizmo._editing:
-			return
+		#if gizmo._editing:
+			#return
 			
 		var screen_position = get_viewport().get_mouse_position() + Vector2(0, 32)#position
 		var start = camera.project_ray_origin(screen_position)
@@ -48,8 +48,8 @@ func _gui_input(_event: InputEvent) -> void:
 		
 		# Wait one frame to see if the user clicked over the gizmo
 		await get_tree().process_frame
-		if gizmo._editing:
-			return
+		#if gizmo._editing:
+			#return
 			
 		var screen_position = render.get_mouse_position()
 		var start = camera.project_ray_origin(screen_position)

@@ -4,7 +4,7 @@ class_name TexturedMesh
 
 # Blend distance between the 7 vertices.
 const BLEND_DISTANCE = 1.0 / 7.0
-const HIGHLIGHT_COLOR = Color.WHITE#Color.ORANGE
+const HIGHLIGHT_COLOR = Color.ORANGE
 
 
 func update(control_points: Array[ControlPoint], \
@@ -52,8 +52,7 @@ func update(control_points: Array[ControlPoint], \
 	
 	# Get texture and enable highlight if provided
 	material_override.albedo_texture = TextureManager.get_texture(texture_name)
-	#material_override.vertex_color_use_as_albedo = highlight
-	material_override.vertex_color_use_as_albedo = false
+	material_override.albedo_color = HIGHLIGHT_COLOR if highlight else Color.WHITE
 	
 	# Create mesh
 	var immediate_mesh := mesh as ImmediateMesh
@@ -75,7 +74,7 @@ func update(control_points: Array[ControlPoint], \
 static func _triangle_normal(a: Vector3, b: Vector3, c: Vector3) -> Variant:
 	var _b := (b - a).normalized()
 	var _c := (c - a).normalized()
-	var cross = _b.cross(_c)
+	var cross = _c.cross(_b)
 	if cross == Vector3.ZERO:
 		return null
 	return cross

@@ -24,6 +24,8 @@ AlertBus="*res://singletons/alert_bus.gd"
 TextureManager="*res://singletons/texture_manager.gd"
 UserState="*res://singletons/user_state.gd"
 SaveHandler="*res://singletons/save_handler.gd"
+GizmoProxy="*res://singletons/gizmo_proxy.gd"
+MainCamera="*res://singletons/main_camera_ref.gd"
 
 [display]
 

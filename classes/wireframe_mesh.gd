@@ -5,7 +5,7 @@ class_name WireframeMesh
 # Distance to offset from the textured vertices, towards the camera.
 const WIREFRAME_MARGIN = 0.5
 const WIREFRAME_COLOR = Color.GREEN
-
+const WIREFRAME_SHADER = preload("res://assets/world/wireframe.gdshader")
 
 func update(control_points: Array[ControlPoint]) -> void:
 	var vertices: Array[Vector3] = []
@@ -43,9 +43,8 @@ func update(control_points: Array[ControlPoint]) -> void:
 
 
 func _ready() -> void:
-	var wireframe_material := StandardMaterial3D.new()
-	wireframe_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	wireframe_material.vertex_color_use_as_albedo = true
+	var wireframe_material := ShaderMaterial.new()
+	wireframe_material.shader = WIREFRAME_SHADER
 	material_override = wireframe_material
 	
 	mesh = ImmediateMesh.new()

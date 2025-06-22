@@ -8,31 +8,32 @@ var current_terrain_path: String:
 	get: return _current_working_terrain_path
 
 var _current_working_terrain_path: String
-var _thread: Thread
+#var _thread: Thread
 
 
 #---------Public methods--------
 func new_terrain(terrain_path: String, import_json: bool, grouping: Enum.GroupingIndex):
 	_current_working_terrain_path = terrain_path
 	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
-	if import_json:
-		_thread.start(_create_ssxt_from_json.bind(terrain_path, grouping))
-	else:
+	#if import_json:
+		#_thread.start(_create_ssxt_from_json.bind(terrain_path, grouping))
+	#else:
 		#_thread.start(_create_ssxt_default.bind(terrain_path))
-		_create_ssxt_default(terrain_path)
-		new_terrain_created.emit()
+	_create_ssxt_default(terrain_path)
+	new_terrain_created.emit()
 
 
 func open_terrain(terrain_path: String):
 	_current_working_terrain_path = terrain_path
 	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
-	#_thread.start(func(): return _ssxt_struct_to_nodes(_read_struct_from_disk(terrain_path)))
+	var struct = _read_struct_from_disk(terrain_path)
+	_ssxt_struct_to_nodes(struct)
 
 
 #----------Private methods-------
-func _ready():
-	_thread = Thread.new()
-	get_tree().process_frame.connect(_check_thread_finished)
+#func _ready():
+	#_thread = Thread.new()
+	#get_tree().process_frame.connect(_check_thread_finished)
 
 
 func _check_thread_finished() -> void:
@@ -386,6 +387,7 @@ func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> void:
 			for cp_idx in object.control_points.size():
 				var cp = object.control_points[cp_idx]
 				var control_point = ControlPoint.new(cp.type)
+				
 				control_point.aligned = cp.aligned
 				control_points_parent.add_child.call_deferred(control_point)
 				control_point.position = cp.position
@@ -413,12 +415,9 @@ func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> void:
 				# Connect the segment signals to the object. 
 				segment.mesh_changed.connect(object_node._on_mesh_changed)
 				
-				# Create meshes
 				# The segments automatically generate the meshes on ready
 				
 
-
-## @deprecated
 static func _read_struct_from_disk(terrain_path: String) -> SsxtFileStructure:
 	var ssxt_file := FileAccess.open(terrain_path, FileAccess.READ)
 	var ssxt_struct := SsxtFileStructure.new()
@@ -472,35 +471,34 @@ static func _read_struct_from_disk(terrain_path: String) -> SsxtFileStructure:
 			object.object_xform.basis.z.y = ssxt_file.get_float()
 			object.object_xform.basis.z.z = ssxt_file.get_float()
 			
-			object.greatest_control_point_id = ssxt_file.get_32()
 			object.control_point_count = ssxt_file.get_32()
 			for cp_index in object.control_point_count:
 				var control_point = ControlPointEntry.new()
 				object.control_points.append(control_point)
 				control_point.type = ssxt_file.get_8()
-				control_point.id = ssxt_file.get_32()
 				control_point.aligned = ssxt_file.get_8()
 				control_point.position.x = ssxt_file.get_float()
 				control_point.position.y = ssxt_file.get_float()
 				control_point.position.z = ssxt_file.get_float()
-				control_point.has_north_ref = ssxt_file.get_8()
-				control_point.ref_north_id = ssxt_file.get_32()
-				control_point.has_west_ref = ssxt_file.get_8()
-				control_point.ref_west_id = ssxt_file.get_32()
-				control_point.has_south_ref = ssxt_file.get_8()
-				control_point.ref_south_id = ssxt_file.get_32()
-				control_point.has_east_ref = ssxt_file.get_8()
-				control_point.ref_east_id = ssxt_file.get_32()
+				
+			#object.tilemap_size = ssxt_file.get_32()
+			print(object.tilemap.size())
+			for cell in object.tilemap.size():
+				var vec: Vector2i
+				vec.x = ssxt_file.get_32()
+				vec.y = ssxt_file.get_32()
+				object.tilemap.append(vec)
 			
-			object.greatest_segment_id = ssxt_file.get_32()
-			
-			for segment_index in object.greatest_segment_id:
+			object.segment_count = ssxt_file.get_32()
+			for segment_index in object.segment_count:
 				var segment := SegmentEntry.new()
 				object.segments.append(segment)
-				segment.id = ssxt_file.get_32()
 				
-				for cp_id in 16:
-					segment.control_point_ids.append(ssxt_file.get_32())
+				for cell_index in 16:
+					var cell: Vector2i
+					cell.x = ssxt_file.get_32()
+					cell.y = ssxt_file.get_32()
+					segment.control_point_cells.append(cell)
 			
 				segment.lightmap_rect.position.x = ssxt_file.get_float()
 				segment.lightmap_rect.position.y = ssxt_file.get_float()
@@ -514,11 +512,11 @@ static func _read_struct_from_disk(terrain_path: String) -> SsxtFileStructure:
 					point.y = ssxt_file.get_float() 
 					segment.uv_points.append(point)
 			
-				segment.patch_style = ssxt_file.get_8()
-				segment.tricky_only_patch = ssxt_file.get_8()
+				segment.surface_type = ssxt_file.get_8()
+				segment.showoff_only = ssxt_file.get_8()
 				segment.texture_path_size = ssxt_file.get_32()
 				segment.texture_path = ssxt_file.get_buffer(segment.texture_path_size).get_string_from_utf8()
-			
+			print(object.tilemap)
 	return ssxt_struct
 
 	
@@ -577,6 +575,8 @@ static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStr
 				ssxt_file.store_float(control_point.position.x)
 				ssxt_file.store_float(control_point.position.y)
 				ssxt_file.store_float(control_point.position.z)
+
+			ssxt_file.store_32(object.tilemap_size)
 
 			for cell: Vector2i in object.tilemap:
 				ssxt_file.store_32(cell.x)
@@ -673,6 +673,7 @@ class ObjectEntry:
 	var control_points: Array[ControlPointEntry]
 	# Size: control_point_count 
 	# The tilemap element index corresponds to the cp in the cp array.
+	var tilemap_size: int
 	var tilemap: Array[Vector2i]
 	var segment_count: int
 	var segments: Array[SegmentEntry]

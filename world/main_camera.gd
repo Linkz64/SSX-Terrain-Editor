@@ -10,6 +10,7 @@ var init_rotation: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
+	MainCamera.camera = self
 	far = BIG
 	# Initial rotation. Set _rotation to a custom initial rotation
 	init_rotation.y = 0
