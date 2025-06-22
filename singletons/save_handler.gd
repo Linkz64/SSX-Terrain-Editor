@@ -112,6 +112,7 @@ func _create_ssxt_default(terrain_path: String):
 	for y in 4:
 		for x in range(0, -4, -1):
 			object_entry.tilemap.append(Vector2i(x, y))
+			object_entry.tilemap_size += 1
 			var control_point_entry := ControlPointEntry.new()
 			object_entry.control_points.append(control_point_entry)
 			control_point_entry.type = _get_control_point_type(cp_index)
@@ -431,6 +432,7 @@ static func _read_struct_from_disk(terrain_path: String) -> SsxtFileStructure:
 	
 	ssxt_struct.date_time_created = ssxt_file.get_buffer(19).get_string_from_utf8()
 	
+	
 	ssxt_struct.camera_xform.origin.x = ssxt_file.get_float()
 	ssxt_struct.camera_xform.origin.y = ssxt_file.get_float()
 	ssxt_struct.camera_xform.origin.z = ssxt_file.get_float()
@@ -480,15 +482,17 @@ static func _read_struct_from_disk(terrain_path: String) -> SsxtFileStructure:
 				control_point.position.x = ssxt_file.get_float()
 				control_point.position.y = ssxt_file.get_float()
 				control_point.position.z = ssxt_file.get_float()
-				
-			#object.tilemap_size = ssxt_file.get_32()
-			print(object.tilemap.size())
+			
+			object.tilemap_size = ssxt_file.get_32()
+			print("Read: ", ssxt_file.get_position()," ", object.tilemap_size)
+			
+			object.tilemap.resize(object.tilemap_size)
 			for cell in object.tilemap.size():
 				var vec: Vector2i
 				vec.x = ssxt_file.get_32()
 				vec.y = ssxt_file.get_32()
 				object.tilemap.append(vec)
-			
+				
 			object.segment_count = ssxt_file.get_32()
 			for segment_index in object.segment_count:
 				var segment := SegmentEntry.new()
@@ -516,7 +520,6 @@ static func _read_struct_from_disk(terrain_path: String) -> SsxtFileStructure:
 				segment.showoff_only = ssxt_file.get_8()
 				segment.texture_path_size = ssxt_file.get_32()
 				segment.texture_path = ssxt_file.get_buffer(segment.texture_path_size).get_string_from_utf8()
-			print(object.tilemap)
 	return ssxt_struct
 
 	
@@ -531,6 +534,7 @@ static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStr
 	ssxt_file.store_8(ssxt_struct.editor_version[2])
 
 	ssxt_file.store_string(ssxt_struct.date_time_created)
+	
 
 	ssxt_file.store_float(ssxt_struct.camera_xform.origin.x)
 	ssxt_file.store_float(ssxt_struct.camera_xform.origin.y)
@@ -575,12 +579,15 @@ static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStr
 				ssxt_file.store_float(control_point.position.x)
 				ssxt_file.store_float(control_point.position.y)
 				ssxt_file.store_float(control_point.position.z)
-
+			
 			ssxt_file.store_32(object.tilemap_size)
+			print("Write: ", ssxt_file.get_position(), " ", object.tilemap_size)
 
+			print("Size is: ", object.tilemap.size())
 			for cell: Vector2i in object.tilemap:
 				ssxt_file.store_32(cell.x)
 				ssxt_file.store_32(cell.y)
+			print(ssxt_file.get_position())
 			
 			ssxt_file.store_32(object.segment_count)
 			for segment in object.segments:
@@ -602,6 +609,13 @@ static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStr
 				ssxt_file.store_8(int(segment.showoff_only))
 				ssxt_file.store_32(segment.texture_path_size)
 				ssxt_file.store_string(segment.texture_path)
+	
+	#print(ssxt_file.get_position())
+	#var pos = ssxt_file.get_position()
+	#ssxt_file.seek_end(0)
+	#print("Bytes Left: ", pos - ssxt_file.get_position())
+	
+	
 
 
 ## Get the neighbour of a cp from all 4 sides, returns null if its not valid,

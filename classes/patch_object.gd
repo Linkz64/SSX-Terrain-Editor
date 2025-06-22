@@ -24,6 +24,11 @@ func tilemap_get_control_point_from_cell(cell: Vector2i) -> ControlPoint:
 	
 
 func tilemap_set_control_point_at_cell(cp: ControlPoint, cell: Vector2i) -> void:
+	if cp in _tilemap.keys():
+		if _tilemap[cp] == cell:
+			return # Its ok if the cp is on the same cell as the argument
+		else:
+			assert(false, "Cell already in use")
 	assert(cell not in _tilemap.values(), "Cell already in use")
 	_tilemap[cp] = cell
 
