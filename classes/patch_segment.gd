@@ -20,12 +20,12 @@ var uv_points: Dictionary = {
 var lightmap_point: Rect2 = Rect2(0, 0, 0.0625, 0.0625)
 var lightmap_id: int = 0
 var selected: bool = false # Set for highlighting
-var control_point_ref: Array[ControlPoint]
+var tilemap_cells: Array[Vector2i]
 
-var _control_point_cells: Array[Vector2i]
 var _textured_mesh: TexturedMesh
 var _wireframe_mesh: WireframeMesh
 var _control_grid_mesh: ControlGridMesh
+var _control_point_ref: Array[ControlPoint]
 
 
 func update():
@@ -33,7 +33,7 @@ func update():
 
 
 func _init(control_point_cells: Array[Vector2i]) -> void:
-	_control_point_cells = control_point_cells
+	tilemap_cells = control_point_cells
 
 
 func _ready() -> void:
@@ -46,15 +46,29 @@ func _ready() -> void:
 	mesh_parent.add_child(_textured_mesh)
 	mesh_parent.add_child(_wireframe_mesh)
 	mesh_parent.add_child(_control_grid_mesh)
+	
+	# Get control point references for easy access
+	for cell in tilemap_cells:
+		var cp := _tilemap_get_cp_from_cell(cell)
+		assert(cp)
+		_control_point_ref.append(cp)
 	update()
 
 
 func _control_point_moved():
-	_textured_mesh.update(control_point_ref, texture_filename, uv_points.values(), selected)
-	_wireframe_mesh.update(control_point_ref)
-	_control_grid_mesh.update(control_point_ref)
+	_textured_mesh.update(_control_point_ref, texture_filename, uv_points.values(), selected)
+	_wireframe_mesh.update(_control_point_ref)
+	_control_grid_mesh.update(_control_point_ref)
 	mesh_changed.emit(_textured_mesh) # Call at the end of the function
 
 
 func _control_point_selection_changed(_select: bool):
-	_control_grid_mesh.update(control_point_ref)
+	_control_grid_mesh.update(_control_point_ref)
+
+
+func _tilemap_get_cp_from_cell(cell: Vector2i) -> ControlPoint:
+	var control_points = get_parent().get_parent().get_node("ControlPoints").get_children()
+	for cp in control_points:
+		if cell == cp.tilemap_cell:
+			return cp
+	return null

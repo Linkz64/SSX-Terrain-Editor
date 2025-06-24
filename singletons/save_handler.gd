@@ -8,17 +8,12 @@ var current_terrain_path: String:
 	get: return _current_working_terrain_path
 
 var _current_working_terrain_path: String
-#var _thread: Thread
 
 
 #---------Public methods--------
 func new_terrain(terrain_path: String, import_json: bool, grouping: Enum.GroupingIndex):
 	_current_working_terrain_path = terrain_path
 	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
-	#if import_json:
-		#_thread.start(_create_ssxt_from_json.bind(terrain_path, grouping))
-	#else:
-		#_thread.start(_create_ssxt_default.bind(terrain_path))
 	_create_ssxt_default(terrain_path)
 	new_terrain_created.emit()
 
@@ -26,28 +21,10 @@ func new_terrain(terrain_path: String, import_json: bool, grouping: Enum.Groupin
 func open_terrain(terrain_path: String):
 	_current_working_terrain_path = terrain_path
 	TextureManager.load_textures(terrain_path.get_base_dir().path_join("Textures"))
-	var struct = _read_struct_from_disk(terrain_path)
-	_ssxt_struct_to_nodes(struct)
+	_ssxt_struct_to_nodes(_read_struct_from_disk(terrain_path))
 
 
-#----------Private methods-------
-#func _ready():
-	#_thread = Thread.new()
-	#get_tree().process_frame.connect(_check_thread_finished)
-
-
-func _check_thread_finished() -> void:
-	return
-	#if _thread.is_started() and not _thread.is_alive():
-		#var node: Node = _thread.wait_to_finish()
-		#var old_node = world.object_pool
-		#if old_node:
-			#old_node.queue_free()
-		#world.add_child(node)
-		#world.object_pool = node
-		#new_terrain_created.emit()
-
-
+#-------Private methods--------
 func _create_ssxt_from_json(terrain_path: String, grouping: Enum.GroupingIndex):
 	# Read the json and turn it into a Godot ssxt structured class
 	#var start = Time.get_ticks_msec()
@@ -93,6 +70,7 @@ func _create_ssxt_default(terrain_path: String):
 	ssxt_struct.editor_version = editor_version
 	ssxt_struct.date_time_created = Time.get_datetime_string_from_system()
 	ssxt_struct.camera_xform = Transform3D().rotated(Vector3.RIGHT, TAU/4)
+	ssxt_struct.camera_xform.origin = Vector3(0, -100, 100)
 	ssxt_struct.group_count = 1
 	
 	var group_entry := GroupEntry.new()
@@ -110,11 +88,10 @@ func _create_ssxt_default(terrain_path: String):
 	object_entry.control_point_count = 16
 	var cp_index: int = 0
 	for y in 4:
-		for x in range(0, -4, -1):
-			object_entry.tilemap.append(Vector2i(x, y))
-			object_entry.tilemap_size += 1
+		for x in 4:
 			var control_point_entry := ControlPointEntry.new()
 			object_entry.control_points.append(control_point_entry)
+			control_point_entry.tilemap_cell = Vector2i(x, y)
 			control_point_entry.type = _get_control_point_type(cp_index)
 			control_point_entry.aligned = true
 			control_point_entry.position = Vector3(x * SEGMENT_SIZE, y * SEGMENT_SIZE, 0)
@@ -124,8 +101,8 @@ func _create_ssxt_default(terrain_path: String):
 	var segment := SegmentEntry.new()
 	object_entry.segments.append(segment)
 	for y in 4:
-		for x in range(0, -4, -1):
-			segment.control_point_cells.append(Vector2i(x, y))
+		for x in 4:
+			segment.tilemap_cells.append(Vector2i(x, y))
 	segment.lightmap_rect = Rect2(0, 0, 0.0625, 0.0625)
 	segment.lightmap_id = 0
 	segment.uv_points = [
@@ -139,7 +116,7 @@ func _create_ssxt_default(terrain_path: String):
 	segment.texture_path = "0000.png"
 	segment.texture_path_size = segment.texture_path.length()
 	
-	_write_struct_to_disk(terrain_path, ssxt_struct)
+	#_write_struct_to_disk(terrain_path, ssxt_struct)
 	_ssxt_struct_to_nodes(ssxt_struct)
 
 
@@ -357,64 +334,65 @@ func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> void:
 	for child: Node in world.get_node("Groups").get_children():
 		child.queue_free()
 	
-	var update_camera = func():
-		world.get_camera().transform = ssxt_struct.camera_xform
-		world.get_camera().init_rotation = Vector2.ZERO
-	update_camera.call_deferred()
+	world.get_camera().transform = ssxt_struct.camera_xform
+	world.get_camera().init_rotation = Vector2.ZERO
 	
 	var group_parent = world.get_node("Groups")
-	for group: GroupEntry in ssxt_struct.groups:
+	for group_entry: GroupEntry in ssxt_struct.groups:
 		var group_node := Node3D.new()
-		group_parent.add_child.call_deferred(group_node)
-		group_node.name = group.group_name
-		group_node.visible = group.group_visible
+		group_parent.add_child(group_node)
+		group_node.name = group_entry.group_name
+		group_node.visible = group_entry.group_visible
 		
-		for object: ObjectEntry in group.objects:
+		for object_entry: ObjectEntry in group_entry.objects:
 			var object_node := PatchObject.new()
-			group_node.add_child.call_deferred(object_node)
-			object_node.name = object.object_name
-			object_node.transform = object.object_xform
+			group_node.add_child(object_node)
+			object_node.name = object_entry.object_name
+			object_node.transform = object_entry.object_xform
 			var collision_shape_node := CollisionShape3D.new()
 			collision_shape_node.name = "CollisionMesh"
 			collision_shape_node.shape = ConcavePolygonShape3D.new()
-			object_node.add_child.call_deferred(collision_shape_node)
+			object_node.add_child(collision_shape_node)
 			var control_points_parent := Node3D.new()
 			control_points_parent.name = "ControlPoints"
-			object_node.add_child.call_deferred(control_points_parent)
+			object_node.add_child(control_points_parent)
 			var segments_parent := Node3D.new()
 			segments_parent.name = "PatchSegments"
-			object_node.add_child.call_deferred(segments_parent)
+			object_node.add_child(segments_parent)
 			
-			for cp_idx in object.control_points.size():
-				var cp = object.control_points[cp_idx]
-				var control_point = ControlPoint.new(cp.type)
+			for cp_entry in object_entry.control_points:
+				var control_point = ControlPoint.new(cp_entry.type,cp_entry.tilemap_cell)
+				control_point.aligned = cp_entry.aligned
+				control_points_parent.add_child(control_point)
+				control_point.position = cp_entry.position
 				
-				control_point.aligned = cp.aligned
-				control_points_parent.add_child.call_deferred(control_point)
-				control_point.position = cp.position
-				object_node.tilemap_set_control_point_at_cell(control_point, object.tilemap[cp_idx])
-				
-			for segment_entry:SegmentEntry in object.segments:
-				var segment := PatchSegment.new(segment_entry.control_point_cells)
-				segments_parent.add_child.call_deferred(segment)
-				segment.surface_type = segment_entry.surface_type as Enum.SurfaceType
-				segment.texture_filename = segment_entry.texture_path
-				segment.showoff_only = segment_entry.showoff_only
+			for segment_entry:SegmentEntry in object_entry.segments:
+				var segment_node := PatchSegment.new(segment_entry.tilemap_cells)
+				segments_parent.add_child(segment_node)
+				segment_node.surface_type = segment_entry.surface_type as Enum.SurfaceType
+				segment_node.texture_filename = segment_entry.texture_path
+				segment_node.showoff_only = segment_entry.showoff_only
 				for i in 4:
-					segment.uv_points[i] = segment_entry.uv_points[i]
-				segment.lightmap_id = segment_entry.lightmap_id
-				segment.lightmap_point = segment_entry.lightmap_rect
+					segment_node.uv_points[i] = segment_entry.uv_points[i]
+				segment_node.lightmap_id = segment_entry.lightmap_id
+				segment_node.lightmap_point = segment_entry.lightmap_rect
+				
+				segment_node.tilemap_cells = segment_entry.tilemap_cells
 				
 				# Connect the CP signals to the segment
-				for cell: Vector2i in segment._control_point_cells:
-					var cp: ControlPoint = object_node.tilemap_get_control_point_from_cell(cell)
-					assert(cp)
-					segment.control_point_ref.append(cp)
-					cp.local_transform_changed.connect(segment._control_point_moved)
-					cp.selection_changed.connect(segment._control_point_selection_changed)
+				for cell: Vector2i in segment_node.tilemap_cells:
+					# Find the Cp from the cell
+					var cp_found: ControlPoint
+					for cp: ControlPoint in control_points_parent.get_children():
+						if cp.tilemap_cell == cell:
+							cp_found = cp
+							break
+					assert(cp_found)
+					cp_found.local_transform_changed.connect(segment_node._control_point_moved)
+					cp_found.selection_changed.connect(segment_node._control_point_selection_changed)
 				
 				# Connect the segment signals to the object. 
-				segment.mesh_changed.connect(object_node._on_mesh_changed)
+				segment_node.mesh_changed.connect(object_node._on_mesh_changed)
 				
 				# The segments automatically generate the meshes on ready
 				
@@ -615,8 +593,6 @@ static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStr
 	#ssxt_file.seek_end(0)
 	#print("Bytes Left: ", pos - ssxt_file.get_position())
 	
-	
-
 
 ## Get the neighbour of a cp from all 4 sides, returns null if its not valid,
 ## returns the neighbour index if is valid. 
@@ -685,20 +661,17 @@ class ObjectEntry:
 	var object_xform: Transform3D
 	var control_point_count: int
 	var control_points: Array[ControlPointEntry]
-	# Size: control_point_count 
-	# The tilemap element index corresponds to the cp in the cp array.
-	var tilemap_size: int
-	var tilemap: Array[Vector2i]
 	var segment_count: int
 	var segments: Array[SegmentEntry]
 	
 class ControlPointEntry:
 	var type: int # byte
+	var tilemap_cell: Vector2i
 	var aligned: bool
 	var position: Vector3
 
 class SegmentEntry:
-	var control_point_cells: Array[Vector2i] # Size 16
+	var tilemap_cells: Array[Vector2i] # Size 16
 	var lightmap_rect: Rect2
 	var lightmap_id: int
 	var uv_points: Array[Vector2] # Size 4
