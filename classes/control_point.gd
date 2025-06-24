@@ -19,7 +19,8 @@ var is_selected: bool = false
 func select():
 	is_selected = true
 	selection_changed.emit(true)
-	
+
+
 func deselect():
 	is_selected = false
 	selection_changed.emit(false)

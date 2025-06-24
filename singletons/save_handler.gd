@@ -70,7 +70,7 @@ func _create_ssxt_default(terrain_path: String):
 	ssxt_struct.editor_version = editor_version
 	ssxt_struct.date_time_created = Time.get_datetime_string_from_system()
 	ssxt_struct.camera_xform = Transform3D().rotated(Vector3.RIGHT, TAU/4)
-	ssxt_struct.camera_xform.origin = Vector3(0, -100, 100)
+	ssxt_struct.camera_xform.origin = Vector3(0, -1000, 1000)
 	ssxt_struct.group_count = 1
 	
 	var group_entry := GroupEntry.new()
@@ -116,7 +116,7 @@ func _create_ssxt_default(terrain_path: String):
 	segment.texture_path = "0000.png"
 	segment.texture_path_size = segment.texture_path.length()
 	
-	#_write_struct_to_disk(terrain_path, ssxt_struct)
+	_write_struct_to_disk(terrain_path, ssxt_struct)
 	_ssxt_struct_to_nodes(ssxt_struct)
 
 
@@ -513,7 +513,6 @@ static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStr
 
 	ssxt_file.store_string(ssxt_struct.date_time_created)
 	
-
 	ssxt_file.store_float(ssxt_struct.camera_xform.origin.x)
 	ssxt_file.store_float(ssxt_struct.camera_xform.origin.y)
 	ssxt_file.store_float(ssxt_struct.camera_xform.origin.z)
@@ -553,23 +552,16 @@ static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStr
 			
 			for control_point in object.control_points:
 				ssxt_file.store_8(control_point.type)
+				ssxt_file.store_32(control_point.tilemap_cell.x)
+				ssxt_file.store_32(control_point.tilemap_cell.y)
 				ssxt_file.store_8(int(control_point.aligned))
 				ssxt_file.store_float(control_point.position.x)
 				ssxt_file.store_float(control_point.position.y)
 				ssxt_file.store_float(control_point.position.z)
 			
-			ssxt_file.store_32(object.tilemap_size)
-			print("Write: ", ssxt_file.get_position(), " ", object.tilemap_size)
-
-			print("Size is: ", object.tilemap.size())
-			for cell: Vector2i in object.tilemap:
-				ssxt_file.store_32(cell.x)
-				ssxt_file.store_32(cell.y)
-			print(ssxt_file.get_position())
-			
 			ssxt_file.store_32(object.segment_count)
 			for segment in object.segments:
-				for cell: Vector2i in segment.control_point_cells:
+				for cell: Vector2i in segment.tilemap_cells:
 					ssxt_file.store_32(cell.x)
 					ssxt_file.store_32(cell.y)
 				
@@ -587,11 +579,6 @@ static func _write_struct_to_disk(terrain_path: String, ssxt_struct: SsxtFileStr
 				ssxt_file.store_8(int(segment.showoff_only))
 				ssxt_file.store_32(segment.texture_path_size)
 				ssxt_file.store_string(segment.texture_path)
-	
-	#print(ssxt_file.get_position())
-	#var pos = ssxt_file.get_position()
-	#ssxt_file.seek_end(0)
-	#print("Bytes Left: ", pos - ssxt_file.get_position())
 	
 
 ## Get the neighbour of a cp from all 4 sides, returns null if its not valid,
