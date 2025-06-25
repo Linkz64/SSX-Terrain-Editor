@@ -37,15 +37,15 @@ func _on_mode_switch_pressed() -> void:
 	outline_modes[1].hide()
 	sac_mode.hide()
 	
-	if UserState.editing_mode == UserState.OBJECT:
-		UserState.editing_mode = UserState.EDIT
-		UserState.switch_gizmo_to_edit()
+	if GizmoProxy.editing_mode == GizmoProxy.OBJECT:
+		GizmoProxy.editing_mode = GizmoProxy.EDIT
+		GizmoProxy.switch_to_edit()
 		edit_mode_tools.show()
 		outline_modes[1].show()
 		sac_mode.show()
 	else:
-		UserState.editing_mode = UserState.OBJECT
-		UserState.switch_gizmo_to_object()
+		GizmoProxy.editing_mode = GizmoProxy.OBJECT
+		GizmoProxy.switch_to_object()
 		object_mode_tools.show()
 		outline_modes[0].show()
 
@@ -63,7 +63,7 @@ func _on_orient_mode_pressed(orient_button_index) -> void:
 	for outline in orient_outlines:
 		outline.hide()
 	orient_outlines[orient_button_index].show()
-	UserState.update_gizmo_orientation(orient_button_index)
+	GizmoProxy.orientation = orient_button_index
 
 
 func _instanticate_side_alert(text: String, type: Enum.SideAlertType):
@@ -79,15 +79,13 @@ func _unhandled_input(_event: InputEvent) -> void:
 	if Input.is_action_just_pressed("ModeSwitch"):
 		_on_mode_switch_pressed()
 	
-	
-		
-	if UserState.editing_mode == UserState.EDIT:
-		if Input.is_action_just_pressed("CornerHotkey"):
-			UserState.sac_mode = UserState.CORNER
-			_on_sac_mode_pressed(0)
-		elif Input.is_action_just_pressed("HandleHotkey"):
-			UserState.sac_mode = UserState.HANDLE
-			_on_sac_mode_pressed(1)
-		elif Input.is_action_just_pressed("FreeHotkey"):
-			UserState.sac_mode = UserState.FREE
-			_on_sac_mode_pressed(2)
+	#if UserState.editing_mode == UserState.EDIT:
+		#if Input.is_action_just_pressed("CornerHotkey"):
+			#UserState.sac_mode = UserState.CORNER
+			#_on_sac_mode_pressed(0)
+		#elif Input.is_action_just_pressed("HandleHotkey"):
+			#UserState.sac_mode = UserState.HANDLE
+			#_on_sac_mode_pressed(1)
+		#elif Input.is_action_just_pressed("FreeHotkey"):
+			#UserState.sac_mode = UserState.FREE
+			#_on_sac_mode_pressed(2)

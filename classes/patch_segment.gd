@@ -38,8 +38,11 @@ func _init(control_point_cells: Array[Vector2i]) -> void:
 
 func _ready() -> void:
 	_textured_mesh = TexturedMesh.new()
+	_textured_mesh.name = "TexturedMesh"
 	_wireframe_mesh = WireframeMesh.new()
+	_wireframe_mesh.name = "WireframeMesh"
 	_control_grid_mesh = ControlGridMesh.new()
+	_control_grid_mesh.name = "ControlGridMesh"
 	var mesh_parent := Node3D.new()
 	add_child(mesh_parent)
 	mesh_parent.name = "Meshes"

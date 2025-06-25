@@ -7,7 +7,6 @@ const BIG = 0xBBBBB
 func _ready():
 	SaveHandler.world = self
 	GizmoProxy.gizmo_proxy_node = get_node("GizmoProxy")
-	UserState.world = self
 	$DirectionalLight3D.directional_shadow_max_distance = BIG
 	
 

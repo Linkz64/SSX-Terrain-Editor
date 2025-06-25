@@ -8,6 +8,16 @@ class_name PatchObject
 ## control points, segments, textured mesh, wireframe mesh, and control grid.
 
 	
+func _ready() -> void:
+	await get_tree().process_frame
+	var faces: PackedVector3Array
+	for m in get_node("PatchSegments").get_children():
+		faces.append_array(m.get_node("Meshes/TexturedMesh").mesh.get_faces())
+	get_node("CollisionMesh").shape.set_faces(faces)
+		
+	
+	
+	
 func _on_mesh_changed(tex_mesh: TexturedMesh) -> void:
 	get_node("CollisionMesh").shape.set_faces(tex_mesh.mesh.get_faces())
 	

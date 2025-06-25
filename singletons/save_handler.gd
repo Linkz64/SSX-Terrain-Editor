@@ -351,8 +351,10 @@ func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> void:
 			object_node.name = object_entry.object_name
 			object_node.transform = object_entry.object_xform
 			var collision_shape_node := CollisionShape3D.new()
+			collision_shape_node.debug_color = Color.SKY_BLUE
 			collision_shape_node.name = "CollisionMesh"
 			collision_shape_node.shape = ConcavePolygonShape3D.new()
+			collision_shape_node.shape.backface_collision = true
 			object_node.add_child(collision_shape_node)
 			var control_points_parent := Node3D.new()
 			control_points_parent.name = "ControlPoints"

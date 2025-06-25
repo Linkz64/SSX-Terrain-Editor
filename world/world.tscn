@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://u05bpkyyiist"]
+[gd_scene load_steps=13 format=3 uid="uid://u05bpkyyiist"]
 
 [ext_resource type="Script" uid="uid://b36brfw6yyoya" path="res://world/world.gd" id="1_tcf2h"]
 [ext_resource type="PackedScene" uid="uid://cb0osf8ki8tco" path="res://world/main_camera.tscn" id="2_4717r"]
@@ -35,6 +35,8 @@ albedo_color = Color(1, 0, 1, 1)
 radial_segments = 32
 rings = 16
 
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_mmdvd"]
+
 [node name="World" type="Node3D"]
 script = ExtResource("1_tcf2h")
 
@@ -54,7 +56,6 @@ main_camera = NodePath("../MainCamera")
 
 [node name="MainCamera" parent="." instance=ExtResource("2_4717r")]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
-fov = 70.0
 
 [node name="GizmoProxy" type="Node3D" parent="."]
 
@@ -94,3 +95,6 @@ mesh = SubResource("SphereMesh_mmdvd")
 skeleton = NodePath("../..")
 
 [node name="Groups" type="Node" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("ConcavePolygonShape3D_mmdvd")

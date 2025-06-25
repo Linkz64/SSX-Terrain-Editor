@@ -2,13 +2,7 @@ extends Node
 ## Handles the state of the user.
 ## Like edit mode or gizmo orientation.
 
-# Gizmo orientation
-enum {
-	GLOBAL,
-	LOCAL,
-	VIEW,
-}
-
+"""
 # Editing modes
 enum {
 	OBJECT,
@@ -106,7 +100,7 @@ func switch_gizmo_to_edit():
 			#cp_parent.add_child(grid)
 	
 	
-	
+"""
 	
 	
 	

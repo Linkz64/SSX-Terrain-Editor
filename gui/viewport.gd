@@ -23,14 +23,14 @@ func _gui_input(_event: InputEvent) -> void:
 			world.get_camera().movable = false
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 			
-	if Input.is_action_just_pressed("MultiSelect") and UserState.editing_mode == UserState.OBJECT:
+	if Input.is_action_just_pressed("MultiSelect") and GizmoProxy.editing_mode == GizmoProxy.OBJECT:
 		var space_state = world.get_world_3d().direct_space_state
 		var camera: Camera3D = world.get_camera()
 		
 		# wait one frame to see if the user clicked over the gizmo
 		await get_tree().process_frame
-		#if gizmo._editing:
-			#return
+		if GizmoProxy.is_editing:
+			return
 			
 		var screen_position = get_viewport().get_mouse_position() + Vector2(0, 32)#position
 		var start = camera.project_ray_origin(screen_position)
@@ -40,16 +40,16 @@ func _gui_input(_event: InputEvent) -> void:
 		
 		if result:
 			# Selecting PatchObject
-			UserState.select(result["collider"].get_parent().get_parent())
-			result["collider"].get_parent().material_overlay.albedo_color = Color.ORANGE * Color(1, 1, 1, 0.5)
-	elif Input.is_action_just_pressed("LeftClick") and UserState.editing_mode == UserState.OBJECT:
+			GizmoProxy.select_multi_object(result["collider"])
+			#result["collider"].get_parent().material_overlay.albedo_color = Color.ORANGE * Color(1, 1, 1, 0.5)
+	elif Input.is_action_just_pressed("LeftClick") and GizmoProxy.editing_mode == GizmoProxy.OBJECT:
 		var space_state = world.get_world_3d().direct_space_state
 		var camera: Camera3D = world.get_camera()
 		
 		# Wait one frame to see if the user clicked over the gizmo
 		await get_tree().process_frame
-		#if gizmo._editing:
-			#return
+		if GizmoProxy.is_editing:
+			return
 			
 		var screen_position = render.get_mouse_position()
 		var start = camera.project_ray_origin(screen_position)
@@ -60,20 +60,20 @@ func _gui_input(_event: InputEvent) -> void:
 		#world.get_node("Cube").position = start
 		#world.get_node("Cube2").position = end
 		
-		for node in UserState.get_selection():
-			node.get_child(0).material_overlay.albedo_color = Color(1, 1, 1, 0)
-		UserState.clear_selection()
+		#for node in GizmoProxy.selected_objects:
+			#node.get_child(0).material_overlay.albedo_color = Color(1, 1, 1, 0)
+		GizmoProxy.deselect_objects()
 		
 		if result:
 			# Selecting PatchObject
-			UserState.select(result["collider"].get_parent().get_parent())
-			result["collider"].get_parent().material_overlay.albedo_color = Color.ORANGE * Color(1, 1, 1, 0.5)
+			GizmoProxy.select_single_object(result["collider"])
+			#result["collider"].get_parent().material_overlay.albedo_color = Color.ORANGE * Color(1, 1, 1, 0.5)
 			#world.get_node("Cube3").position = result["position"]
 
 	if Input.is_action_just_pressed("HideGizmo"):
-		UserState.hide_gizmo()
+		GizmoProxy.hide_gizmo()
 	elif Input.is_action_just_released("HideGizmo"):
-		UserState.show_gizmo()
+		GizmoProxy.show_gizmo()
 
 
 func _on_mouse_entered() -> void:
