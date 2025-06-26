@@ -28,6 +28,15 @@ var _control_grid_mesh: ControlGridMesh
 var _control_point_ref: Array[ControlPoint]
 
 
+func show_grid():
+	_control_grid_mesh.show()
+	update()
+
+
+func hide_grid():
+	_control_grid_mesh.hide()
+	
+
 func update():
 	_control_point_moved()
 
@@ -43,6 +52,7 @@ func _ready() -> void:
 	_wireframe_mesh.name = "WireframeMesh"
 	_control_grid_mesh = ControlGridMesh.new()
 	_control_grid_mesh.name = "ControlGridMesh"
+	_control_grid_mesh.hide()
 	var mesh_parent := Node3D.new()
 	add_child(mesh_parent)
 	mesh_parent.name = "Meshes"

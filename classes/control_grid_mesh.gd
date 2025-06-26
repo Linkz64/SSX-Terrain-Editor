@@ -6,7 +6,7 @@ class_name ControlGridMesh
 const LINE_COLOR = Color.ORANGE
 const DIAMOND_COLOR = Color.BLACK
 const DIAMOND_HIGHLIGHT_COLOR = Color.ORANGE
-const DIAMOND_SIZE = 3.0
+const DIAMOND_SIZE = 0.01
 var _diamonds: Array[MeshInstance3D]
 
 
@@ -44,8 +44,9 @@ func update(control_points: Array[ControlPoint]):
 			Vector3(-1, 0, 0), Vector3(1, 0, 0), Vector3(0, -1, 0),
 		]
 		for vert in vertices:
-			diamond_mesh.surface_add_vertex(vert * DIAMOND_SIZE + cp_position)
+			diamond_mesh.surface_add_vertex(vert * DIAMOND_SIZE)
 		diamond_mesh.surface_end()
+		_diamonds[i].position = cp_position
 
 
 func _ready() -> void:
@@ -54,7 +55,7 @@ func _ready() -> void:
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.vertex_color_use_as_albedo = true
-	mat.no_depth_test = true
+	mat.no_depth_test = false
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	material_override = mat
 	

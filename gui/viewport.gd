@@ -57,9 +57,6 @@ func _gui_input(_event: InputEvent) -> void:
 		var query = PhysicsRayQueryParameters3D.create(start, end)
 		var result = space_state.intersect_ray(query)
 
-		#world.get_node("Cube").position = start
-		#world.get_node("Cube2").position = end
-		
 		#for node in GizmoProxy.selected_objects:
 			#node.get_child(0).material_overlay.albedo_color = Color(1, 1, 1, 0)
 		GizmoProxy.deselect_objects()
@@ -67,8 +64,6 @@ func _gui_input(_event: InputEvent) -> void:
 		if result:
 			# Selecting PatchObject
 			GizmoProxy.select_single_object(result["collider"])
-			#result["collider"].get_parent().material_overlay.albedo_color = Color.ORANGE * Color(1, 1, 1, 0.5)
-			#world.get_node("Cube3").position = result["position"]
 
 	if Input.is_action_just_pressed("HideGizmo"):
 		GizmoProxy.hide_gizmo()

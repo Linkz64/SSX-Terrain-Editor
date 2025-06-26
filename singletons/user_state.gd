@@ -2,6 +2,17 @@ extends Node
 ## Handles the state of the user.
 ## Like edit mode or gizmo orientation.
 
+
+
+
+
+
+var cp_editing: Array[ControlPoint]
+
+
+
+
+
 """
 # Editing modes
 enum {

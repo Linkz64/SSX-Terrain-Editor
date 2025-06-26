@@ -4,7 +4,7 @@ class_name TexturedMesh
 
 # Blend distance between the 7 vertices.
 const BLEND_DISTANCE = 1.0 / 7.0
-const HIGHLIGHT_COLOR = Color.ORANGE
+const HIGHLIGHT_COLOR = Color.SKY_BLUE
 
 
 func update(control_points: Array[ControlPoint], \

@@ -1,4 +1,9 @@
 extends Node
+## The pivot is what the gizmo's orientation/rotation is.
+##  
+
+
+
 
 
 # Orientation
@@ -27,7 +32,7 @@ var gizmo_proxy_node: Node3D:
 		gizmo = value.get_node("Gizmo")
 		pivot = value.get_node("Pivot")
 		set_process(true)
-var gizmo: Gizmo3D
+var gizmo: GizmoCustom
 var pivot: Node3D
 
 var orientation: int = GLOBAL
@@ -57,13 +62,8 @@ func deselect_control_points() -> void:
 
 func select_single_object(object: PatchObject) -> void:
 	selected_objects.clear()
-	selected_objects.append(object)
-	_init_transform()
-	gizmo.select(pivot)
-	for obj in selected_objects:
-		var pos = pivot.to_local(obj.position)
-		_initial_relative_position.append(pos)
-	_pivot_initial = pivot.position
+	select_multi_object(object)
+	object.highlight(true)
 	
 
 func select_multi_object(object: PatchObject) -> void:
@@ -73,6 +73,7 @@ func select_multi_object(object: PatchObject) -> void:
 	for obj in selected_objects:
 		var pos = pivot.to_local(obj.position)
 		_initial_relative_position.append(pos)
+	_pivot_initial = pivot.position
 
 
 func deselect_objects() -> void:
@@ -99,6 +100,16 @@ func hide_gizmo() -> void:
 
 
 ##----------Private methods---------------
+func _on_transform_start(mode: Gizmo3D.TransformMode):
+	pass
+
+func _on_transform_changed(mode: Gizmo3D.TransformMode, value : Vector3):
+	pass
+
+func _on_transform_end(mode: Gizmo3D.TransformMode):
+	pass
+
+
 func _init() -> void:
 	set_process(false) # Safety, to prevent process from using the null pivot
 
@@ -121,6 +132,15 @@ func _process(_delta: float) -> void:
 		#pivot.rotate(MainCamera.camera.transform.basis.x, -TAU/4)
 
 
+
+static func _average(nodes: Array[Node3D]) -> Vector3:
+	var average := Vector3.ZERO
+	for n in nodes:
+		average += n.position
+	if nodes.size() == 0:
+		return Vector3.ZERO
+	return average / nodes.size()
+	
 
 func _init_transform() -> void:
 	match orientation:

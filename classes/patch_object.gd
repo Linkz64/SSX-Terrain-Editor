@@ -7,6 +7,23 @@ class_name PatchObject
 ## Everything else is a node as a child of this one, that includes Collision mesh,
 ## control points, segments, textured mesh, wireframe mesh, and control grid.
 
+
+func highlight(value: bool) -> void:
+	for m in get_node("PatchSegments").get_children():
+		m.selected = value
+		m.update()
+		m.show_grid()
+
+
+func enable_edit_mode():
+	for m in get_node("PatchSegments").get_children():
+		m.show_grid()
+
+
+func disable_edit_mode():
+	pass
+
+
 	
 func _ready() -> void:
 	await get_tree().process_frame
@@ -14,9 +31,9 @@ func _ready() -> void:
 	for m in get_node("PatchSegments").get_children():
 		faces.append_array(m.get_node("Meshes/TexturedMesh").mesh.get_faces())
 	get_node("CollisionMesh").shape.set_faces(faces)
-		
-	
-	
+
+
+
 	
 func _on_mesh_changed(tex_mesh: TexturedMesh) -> void:
 	get_node("CollisionMesh").shape.set_faces(tex_mesh.mesh.get_faces())
