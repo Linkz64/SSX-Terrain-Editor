@@ -3,7 +3,7 @@
 An editor built in the Godot engine that lets modders edit existing terrain bezier surfaces, or create terrains of their own. Works along side the 
 [SSX Collection Multitool](https://github.com/GlitcherOG/SSX-Collection-Multitool)
 
-[screenshot-mesablanca](https://github.com/Linkz64/SSX-Terrain-Editor/blob/Node-system/screenshot.png)
+![screenshot-mesablanca](https://github.com/Linkz64/SSX-Terrain-Editor/blob/Node-system/screenshot.png)
 
 
 ### Features
