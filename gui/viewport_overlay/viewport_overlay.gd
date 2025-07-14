@@ -31,6 +31,9 @@ func _ready():
 
 
 func _on_mode_switch_pressed() -> void:
+	if GizmoProxy.selected_object == null:
+		return
+	
 	object_mode_tools.hide()
 	edit_mode_tools.hide()
 	outline_modes[0].hide()
@@ -38,13 +41,11 @@ func _on_mode_switch_pressed() -> void:
 	sac_mode.hide()
 	
 	if GizmoProxy.editing_mode == GizmoProxy.OBJECT:
-		GizmoProxy.editing_mode = GizmoProxy.EDIT
 		GizmoProxy.switch_to_edit()
 		edit_mode_tools.show()
 		outline_modes[1].show()
 		sac_mode.show()
 	else:
-		GizmoProxy.editing_mode = GizmoProxy.OBJECT
 		GizmoProxy.switch_to_object()
 		object_mode_tools.show()
 		outline_modes[0].show()

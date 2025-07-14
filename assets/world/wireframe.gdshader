@@ -9,4 +9,3 @@ void vertex() {
 void fragment() {
 	ALBEDO = vec3(0);
 }
-

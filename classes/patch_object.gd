@@ -16,15 +16,6 @@ func highlight(value: bool) -> void:
 func show_grid(value: bool) -> void:
 	for segment: PatchSegment in get_node("PatchSegments").get_children():
 		segment.show_grid(value)
-			
-
-func enable_edit_mode():
-	for m in get_node("PatchSegments").get_children():
-		m.show_grid()
-
-
-func disable_edit_mode():
-	pass
 
 
 	

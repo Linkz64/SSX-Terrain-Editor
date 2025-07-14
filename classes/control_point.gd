@@ -183,6 +183,10 @@ func _init(p_type: int, p_tilemap_cell: Vector2i) -> void:
 	tilemap_cell = p_tilemap_cell
 
 
+func _ready() -> void:
+	set_notify_local_transform(true)
+
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_LOCAL_TRANSFORM_CHANGED and is_node_ready():
 		local_transform_changed.emit()
