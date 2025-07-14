@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode cull_disabled, unshaded;
+render_mode cull_disabled, unshaded, world_vertex_coords;
 
 void vertex() {
 	vec3 direction_to_vertex = normalize(CAMERA_POSITION_WORLD - VERTEX);
