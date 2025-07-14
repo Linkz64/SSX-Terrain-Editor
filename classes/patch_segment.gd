@@ -28,14 +28,13 @@ var _control_grid_mesh: ControlGridMesh
 var _control_point_ref: Array[ControlPoint]
 
 
-func show_grid():
-	_control_grid_mesh.show()
-	update()
-
-
-func hide_grid():
-	_control_grid_mesh.hide()
-	
+func show_grid(value: bool):
+	if value:
+		_control_grid_mesh.show()
+		update()
+	else:
+		_control_grid_mesh.hide()
+		
 
 func update():
 	_control_point_moved()

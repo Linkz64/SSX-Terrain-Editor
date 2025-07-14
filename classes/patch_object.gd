@@ -9,11 +9,14 @@ class_name PatchObject
 
 
 func highlight(value: bool) -> void:
-	for m in get_node("PatchSegments").get_children():
-		m.selected = value
-		m.update()
-		m.show_grid()
+	for segment: PatchSegment in get_node("PatchSegments").get_children():
+		segment.selected = value
+		segment.update()
 
+func show_grid(value: bool) -> void:
+	for segment: PatchSegment in get_node("PatchSegments").get_children():
+		segment.show_grid(value)
+			
 
 func enable_edit_mode():
 	for m in get_node("PatchSegments").get_children():
