@@ -59,12 +59,14 @@ func select_object(object: PatchObject) -> void:
 	selected_object = object
 	selected_object.highlight(true)
 	gizmo.select(selected_object)
+	gizmo.mode |= gizmo.ToolMode.ROTATE
 	
 func deselect_object() -> void:
 	gizmo.clear_selection()
 	if selected_object:
 		selected_object.highlight(false)
 	selected_object = null
+	gizmo.mode &= ~gizmo.ToolMode.ROTATE
 	
 
 func switch_to_object() -> void:
@@ -77,6 +79,7 @@ func switch_to_object() -> void:
 		selected_control_point.deselect()
 	
 	selected_control_point = null
+	gizmo.mode |= gizmo.ToolMode.ROTATE
 	
 	gizmo.clear_selection()
 	if selected_object:
@@ -89,6 +92,7 @@ func switch_to_edit() -> void:
 	selected_object.show_grid(true)
 	for cp in selected_object.get_node("ControlPoints").get_children():
 		cp.add_to_group("selectable_cps")
+	gizmo.mode &= ~gizmo.ToolMode.ROTATE
 		
 
 ##----------Private methods---------------
