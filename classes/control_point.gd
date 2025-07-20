@@ -29,9 +29,31 @@ func deselect():
 ##------------Corner-------------
 ## They're located on the 4 corners of a patch segment.
 
+func get_neighbors() -> Array[ControlPoint]:
+	assert(type == CORNER)
+	
+	var offsets = {
+		"north_west": Vector2i(-1, -1),
+		"north_east": Vector2i(1, -1),
+		"south_west": Vector2i(-1, 1),
+		"south_east": Vector2i(1, 1),
+		"north": Vector2i(0, -1),
+		"west": Vector2i(-1, 0),
+		"south": Vector2i(0, 1),
+		"east": Vector2i(1, 0),
+	}
+	var neighbors: Array[ControlPoint]
+	for offset: Vector2i in offsets.values():
+		var neighbor = _tilemap_get_cp_from_cell(tilemap_cell + offset)
+		if neighbor:
+			neighbors.append(neighbor)
+	assert(not neighbors.is_empty(), "Corner has no neighbors")
+	print(neighbors.size())
+	return neighbors
+
+
 func get_inners() -> Array[ControlPoint]:
 	assert(type == CORNER)
-	assert(tilemap_cell)
 	
 	var offsets = {
 		"north_west": Vector2i(-1, -1),
@@ -51,7 +73,6 @@ func get_inners() -> Array[ControlPoint]:
 ## Sets the aligned property for all 9 Control points around it.
 func set_alignment(align_value: bool) -> void:
 	assert(type == CORNER)
-	assert(tilemap_cell)
 	
 	var offsets = {
 		"north": Vector2i(0, -1),
@@ -115,7 +136,6 @@ func align_opposite() -> void:
 
 func get_side_inners() -> Array[ControlPoint]:
 	assert(type == HANDLE)
-	assert(tilemap_cell)
 	
 	var offsets = {
 		"north": Vector2i(0, -1),
@@ -123,16 +143,22 @@ func get_side_inners() -> Array[ControlPoint]:
 		"south": Vector2i(0, 1),
 		"east": Vector2i(1, 0),
 	}
+	
+	var inners: Array[ControlPoint]
 	var north: ControlPoint = _tilemap_get_cp_from_cell(tilemap_cell + offsets["north"])
 	var south: ControlPoint = _tilemap_get_cp_from_cell(tilemap_cell + offsets["south"])
-	if north and south:
-		return [north, south]
+	if north and north.type == INNER:
+		inners.append(north)
+	if south and south.type == INNER:
+		inners.append(south)
 	var west: ControlPoint = _tilemap_get_cp_from_cell(tilemap_cell + offsets["west"])
 	var east: ControlPoint = _tilemap_get_cp_from_cell(tilemap_cell + offsets["east"])
-	if west and east:
-		return [west, east]
-	assert(false, "There are no inners next to the handle.")
-	return []
+	if west and west.type == INNER:
+		inners.append(west)
+	if east and east.type == INNER:
+		inners.append(east)
+	assert(not inners.is_empty(), "There are no inners next to the handle.")
+	return inners
 
 
 ##------------Inner-------------
@@ -145,7 +171,6 @@ func align():
 	assert(type == INNER)
 	if not aligned:
 		return
-	assert(tilemap_cell)
 	
 	var offsets = {
 		"north": Vector2i(0, -1),
@@ -158,23 +183,26 @@ func align():
 		"south_east": Vector2i(1, 1),
 	}
 	var corner: ControlPoint
+	var corner_offset: Vector2i
 	var corner_count: int = 0
-	var handles: Array[ControlPoint]
+	# Find the corner
 	for offset: Vector2i in offsets.values():
 		var neighbor: ControlPoint = _tilemap_get_cp_from_cell(tilemap_cell + offset)
 		if neighbor and neighbor.type == CORNER:
 			corner = neighbor
+			corner_offset = offset
 			corner_count += 1
-		elif neighbor and neighbor.type == HANDLE:
-			handles.append(neighbor)
-			
 	assert(corner, "Inner has no corner")
 	assert(corner_count == 1, "Inner has more than one corner ")
+	# Find handles
+	var handles: Array[ControlPoint]
+	handles.append(_tilemap_get_cp_from_cell(tilemap_cell + Vector2i(corner_offset.x, 0)))
+	handles.append(_tilemap_get_cp_from_cell(tilemap_cell + Vector2i(0, corner_offset.y)))
 	assert(handles.size() == 2, "Inner has more/less than 2 handles")
 	
 	var a = handles[0].position - corner.position	
 	var b = handles[1].position - corner.position	
-	position = a + b
+	position = (a + b) + corner.position	
 	
 
 ##------------Private-----------
@@ -193,8 +221,8 @@ func _notification(what: int) -> void:
 
 
 func _tilemap_get_cp_from_cell(cell: Vector2i) -> ControlPoint:
-	var control_points := get_parent().get_children() as Array[ControlPoint]
-	for cp in control_points:
+	var control_points := get_parent().get_children()
+	for cp: ControlPoint in control_points:
 		if cell == cp.tilemap_cell:
 			return cp
 	return null

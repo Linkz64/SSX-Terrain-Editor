@@ -28,6 +28,7 @@ func _ready():
 	outline_modes[1].visible = false
 	edit_mode_tools.visible = false
 	sac_mode.visible = edit_mode_tools.visible
+	_on_sac_mode_pressed(2)
 
 
 func _on_mode_switch_pressed() -> void:
@@ -80,13 +81,16 @@ func _unhandled_input(_event: InputEvent) -> void:
 	if Input.is_action_just_pressed("ModeSwitch"):
 		_on_mode_switch_pressed()
 	
-	#if UserState.editing_mode == UserState.EDIT:
-		#if Input.is_action_just_pressed("CornerHotkey"):
-			#UserState.sac_mode = UserState.CORNER
-			#_on_sac_mode_pressed(0)
-		#elif Input.is_action_just_pressed("HandleHotkey"):
-			#UserState.sac_mode = UserState.HANDLE
-			#_on_sac_mode_pressed(1)
-		#elif Input.is_action_just_pressed("FreeHotkey"):
-			#UserState.sac_mode = UserState.FREE
-			#_on_sac_mode_pressed(2)
+	if GizmoProxy.editing_mode == GizmoProxy.EDIT:
+		if Input.is_action_just_pressed("CornerHotkey"):
+			GizmoProxy.sac_mode = GizmoProxy.CORNER
+			_on_sac_mode_pressed(0)
+			GizmoProxy.deselect_control_point()
+		elif Input.is_action_just_pressed("HandleHotkey"):
+			GizmoProxy.sac_mode = GizmoProxy.HANDLE
+			_on_sac_mode_pressed(1)
+			GizmoProxy.deselect_control_point()
+		elif Input.is_action_just_pressed("FreeHotkey"):
+			GizmoProxy.sac_mode = GizmoProxy.FREE
+			_on_sac_mode_pressed(2)
+			GizmoProxy.deselect_control_point()

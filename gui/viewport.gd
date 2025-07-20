@@ -42,7 +42,7 @@ func _gui_input(_event: InputEvent) -> void:
 		if result:
 			GizmoProxy.select_object(result["collider"])
 	elif Input.is_action_just_pressed("LeftClick") and GizmoProxy.editing_mode == GizmoProxy.EDIT:
-		const CLICK_THRESHHOLD = 5
+		const CLICK_THRESHHOLD = 10
 		var selected_cp: ControlPoint
 		var mouse_position = render.get_mouse_position()
 		var camera: Camera3D = world.get_camera()
@@ -61,6 +61,7 @@ func _gui_input(_event: InputEvent) -> void:
 			GizmoProxy.select_control_point(selected_cp)
 		else:
 			GizmoProxy.deselect_control_point()
+
 
 func _on_mouse_entered() -> void:
 	is_mouse_inside_viewport = true
