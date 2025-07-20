@@ -85,11 +85,11 @@ func _create_ssxt_default(terrain_path: String):
 	group_entry.objects.append(object_entry)
 	object_entry.object_name = "Object.0"
 	object_entry.object_name_size = object_entry.object_name.length()
-	object_entry.object_xform = Transform3D()
-	object_entry.control_point_count = 16
+	object_entry.object_xform = Transform3D(Basis.IDENTITY, Vector3(-SEGMENT_SIZE*3, 0, 0))
+	object_entry.control_point_count = 28
 	var cp_index: int = 0
 	for y in 4:
-		for x in 4:
+		for x in 7:
 			var control_point_entry := ControlPointEntry.new()
 			object_entry.control_points.append(control_point_entry)
 			control_point_entry.tilemap_cell = Vector2i(x, y)
@@ -98,24 +98,45 @@ func _create_ssxt_default(terrain_path: String):
 			control_point_entry.position = Vector3(x * SEGMENT_SIZE, y * SEGMENT_SIZE, 0)
 			cp_index += 1
 	
-	object_entry.segment_count = 1
-	var segment := SegmentEntry.new()
-	object_entry.segments.append(segment)
+	object_entry.segment_count = 2
+	
+	# Segment 1
+	var segment_left := SegmentEntry.new()
+	object_entry.segments.append(segment_left)
 	for y in 4:
 		for x in 4:
-			segment.tilemap_cells.append(Vector2i(x, y))
-	segment.lightmap_rect = Rect2(0, 0, 0.0625, 0.0625)
-	segment.lightmap_id = 0
-	segment.uv_points = [
+			segment_left.tilemap_cells.append(Vector2i(x, y))
+	segment_left.lightmap_rect = Rect2(0, 0, 0.0625, 0.0625)
+	segment_left.lightmap_id = 0
+	segment_left.uv_points = [
 		Vector2.ZERO,
 		Vector2(1, 0),
 		Vector2(0, 1),
 		Vector2(1, 1),
 	]
-	segment.surface_type = Enum.SurfaceType.SNOW_MAIN
-	segment.showoff_only = false
-	segment.texture_path = "0000.png"
-	segment.texture_path_size = segment.texture_path.length()
+	segment_left.surface_type = Enum.SurfaceType.SNOW_MAIN
+	segment_left.showoff_only = false
+	segment_left.texture_path = "0000.png"
+	segment_left.texture_path_size = segment_left.texture_path.length()
+	
+	# Segment 2
+	var segment_right := SegmentEntry.new()
+	object_entry.segments.append(segment_right)
+	for y in 4:
+		for x in 4:
+			segment_right.tilemap_cells.append(Vector2i(x + 3, y))
+	segment_right.lightmap_rect = Rect2(0, 0, 0.0625, 0.0625)
+	segment_right.lightmap_id = 0
+	segment_right.uv_points = [
+		Vector2.ZERO,
+		Vector2(1, 0),
+		Vector2(0, 1),
+		Vector2(1, 1),
+	]
+	segment_right.surface_type = Enum.SurfaceType.SNOW_MAIN
+	segment_right.showoff_only = false
+	segment_right.texture_path = "0000.png"
+	segment_right.texture_path_size = segment_right.texture_path.length()
 	
 	_write_struct_to_disk(terrain_path, ssxt_struct)
 	_ssxt_struct_to_nodes(ssxt_struct)
@@ -604,10 +625,12 @@ static func _get_neighbour(index: int, side: String) -> Variant:
 		return null
 
 
+## Gets the control point type based on its index. Only used for making the
+## default struct with 2 segments.
 static func _get_control_point_type(index: int) -> int:
-	const CORNERS = [0, 3, 12, 15]
-	const HANDLES = [1, 2, 4, 7, 8, 11, 13, 14]
-	const INNERS = [5, 6, 9, 10]
+	const CORNERS = [0, 3, 6, 21, 24, 27]
+	const HANDLES = [1, 2, 4, 5, 7, 10, 13, 14, 17, 20, 22, 23, 25, 26]
+	const INNERS = [8, 9, 11, 12, 15, 16, 18, 19]
 	if index in CORNERS:
 		return ControlPoint.CORNER # 0
 	elif index in HANDLES:
