@@ -68,6 +68,16 @@ func _on_orient_mode_pressed(orient_button_index) -> void:
 	GizmoProxy.orientation = orient_button_index
 
 
+func _on_add_segment_pressed() -> void:
+	var object = GizmoProxy.selected_object
+	var control_point = GizmoProxy.selected_control_point
+	if object == null or control_point == null:
+		return
+	if control_point.type != ControlPoint.HANDLE:
+		AlertBus.create_side_alert("Can only create segments from handles", Enum.SideAlertType.ERROR)
+		return
+	object.create_segment_from_handle(control_point)
+
 func _instanticate_side_alert(text: String, type: Enum.SideAlertType):
 	for c in side_alerts_handler.get_children():
 		c.move_up()
@@ -82,6 +92,12 @@ func _unhandled_input(_event: InputEvent) -> void:
 		_on_mode_switch_pressed()
 	
 	if GizmoProxy.editing_mode == GizmoProxy.EDIT:
+		if Input.is_action_just_pressed("AlignToggle"):
+			var cp = GizmoProxy.selected_control_point
+			if cp and cp.type == ControlPoint.HANDLE:
+				cp.aligned = not cp.aligned
+				print("Pressed")
+		
 		if Input.is_action_just_pressed("CornerHotkey"):
 			GizmoProxy.sac_mode = GizmoProxy.CORNER
 			_on_sac_mode_pressed(0)

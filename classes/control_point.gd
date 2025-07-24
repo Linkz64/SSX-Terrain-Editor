@@ -26,12 +26,15 @@ func deselect():
 	selection_changed.emit(false)
 
 
-##------------Corner-------------
-## They're located on the 4 corners of a patch segment.
+func tilemap_get_cp_from_cell(cell: Vector2i) -> ControlPoint:
+	var control_points := get_parent().get_children()
+	for cp: ControlPoint in control_points:
+		if cell == cp.tilemap_cell:
+			return cp
+	return null
+
 
 func get_neighbors() -> Array[ControlPoint]:
-	assert(type == CORNER)
-	
 	var offsets = {
 		"north_west": Vector2i(-1, -1),
 		"north_east": Vector2i(1, -1),
@@ -44,13 +47,15 @@ func get_neighbors() -> Array[ControlPoint]:
 	}
 	var neighbors: Array[ControlPoint]
 	for offset: Vector2i in offsets.values():
-		var neighbor = _tilemap_get_cp_from_cell(tilemap_cell + offset)
+		var neighbor = tilemap_get_cp_from_cell(tilemap_cell + offset)
 		if neighbor:
 			neighbors.append(neighbor)
-	assert(not neighbors.is_empty(), "Corner has no neighbors")
-	print(neighbors.size())
+	assert(not neighbors.is_empty(), "Contorl Point has no neighbors")
 	return neighbors
 
+
+##------------Corner-------------
+## They're located on the 4 corners of a patch segment.
 
 func get_inners() -> Array[ControlPoint]:
 	assert(type == CORNER)
@@ -63,7 +68,7 @@ func get_inners() -> Array[ControlPoint]:
 	}
 	var inners: Array[ControlPoint]
 	for offset: Vector2i in offsets.values():
-		var neighbor = _tilemap_get_cp_from_cell(tilemap_cell + offset)
+		var neighbor = tilemap_get_cp_from_cell(tilemap_cell + offset)
 		if neighbor:
 			inners.append(neighbor)
 	assert(not inners.is_empty(), "Corner has no inners")
@@ -86,7 +91,7 @@ func set_alignment(align_value: bool) -> void:
 	}
 	var neighbors_count: int = 0
 	for offset: Vector2i in offsets.values():
-		var neighbor: ControlPoint = _tilemap_get_cp_from_cell(tilemap_cell + offset)
+		var neighbor: ControlPoint = tilemap_get_cp_from_cell(tilemap_cell + offset)
 		if neighbor:
 			neighbor.aligned = align_value
 			neighbors_count += 1
@@ -102,7 +107,6 @@ func align_opposite() -> void:
 	assert(type == HANDLE)
 	if not aligned:
 		return
-	assert(tilemap_cell)
 	
 	# Find the opposite handle.
 	# Moving 2 cells on each side will give us only one handle, the handle we need.
@@ -115,7 +119,7 @@ func align_opposite() -> void:
 	var opposite_handle: ControlPoint = null
 	var opposite_handle_cell: Vector2i 
 	for offset: Vector2i in offsets.values():
-		var neighbor: ControlPoint = _tilemap_get_cp_from_cell(tilemap_cell + offset)
+		var neighbor: ControlPoint = tilemap_get_cp_from_cell(tilemap_cell + offset)
 		if neighbor and neighbor.type == HANDLE:
 			opposite_handle = neighbor
 			opposite_handle_cell = tilemap_cell + offset
@@ -126,12 +130,15 @@ func align_opposite() -> void:
 	# Align to this handle's direction while preserving the distance
 
 	var corner_position: Vector2i = (opposite_handle_cell + tilemap_cell) / 2 # Midpoint
-	var corner: ControlPoint = _tilemap_get_cp_from_cell(corner_position)
+	var corner: ControlPoint = tilemap_get_cp_from_cell(corner_position)
 	var normal_from_corner: Vector3 = ((position - corner.position) as Vector3).normalized()
 	var opposite_distance_to_corner: float = \
-			((opposite_handle.local_position - corner.local_position) as Vector3).length()
-	opposite_handle.local_position = \
+			((opposite_handle.position - corner.position) as Vector3).length()
+	opposite_handle.position = \
 			(-normal_from_corner * opposite_distance_to_corner) + corner.position
+	
+	for inner in opposite_handle.get_side_inners():
+		inner.align()
 
 
 func get_side_inners() -> Array[ControlPoint]:
@@ -145,20 +152,28 @@ func get_side_inners() -> Array[ControlPoint]:
 	}
 	
 	var inners: Array[ControlPoint]
-	var north: ControlPoint = _tilemap_get_cp_from_cell(tilemap_cell + offsets["north"])
-	var south: ControlPoint = _tilemap_get_cp_from_cell(tilemap_cell + offsets["south"])
+	var north: ControlPoint = tilemap_get_cp_from_cell(tilemap_cell + offsets["north"])
+	var south: ControlPoint = tilemap_get_cp_from_cell(tilemap_cell + offsets["south"])
 	if north and north.type == INNER:
 		inners.append(north)
 	if south and south.type == INNER:
 		inners.append(south)
-	var west: ControlPoint = _tilemap_get_cp_from_cell(tilemap_cell + offsets["west"])
-	var east: ControlPoint = _tilemap_get_cp_from_cell(tilemap_cell + offsets["east"])
+	var west: ControlPoint = tilemap_get_cp_from_cell(tilemap_cell + offsets["west"])
+	var east: ControlPoint = tilemap_get_cp_from_cell(tilemap_cell + offsets["east"])
 	if west and west.type == INNER:
 		inners.append(west)
 	if east and east.type == INNER:
 		inners.append(east)
 	assert(not inners.is_empty(), "There are no inners next to the handle.")
 	return inners
+
+
+func get_corner() -> ControlPoint:
+	for n in get_neighbors():
+		if n.type == CORNER:
+			return n
+	assert(false, "No neighbor on handle")
+	return null
 
 
 ##------------Inner-------------
@@ -187,7 +202,7 @@ func align():
 	var corner_count: int = 0
 	# Find the corner
 	for offset: Vector2i in offsets.values():
-		var neighbor: ControlPoint = _tilemap_get_cp_from_cell(tilemap_cell + offset)
+		var neighbor: ControlPoint = tilemap_get_cp_from_cell(tilemap_cell + offset)
 		if neighbor and neighbor.type == CORNER:
 			corner = neighbor
 			corner_offset = offset
@@ -196,8 +211,8 @@ func align():
 	assert(corner_count == 1, "Inner has more than one corner ")
 	# Find handles
 	var handles: Array[ControlPoint]
-	handles.append(_tilemap_get_cp_from_cell(tilemap_cell + Vector2i(corner_offset.x, 0)))
-	handles.append(_tilemap_get_cp_from_cell(tilemap_cell + Vector2i(0, corner_offset.y)))
+	handles.append(tilemap_get_cp_from_cell(tilemap_cell + Vector2i(corner_offset.x, 0)))
+	handles.append(tilemap_get_cp_from_cell(tilemap_cell + Vector2i(0, corner_offset.y)))
 	assert(handles.size() == 2, "Inner has more/less than 2 handles")
 	
 	var a = handles[0].position - corner.position	
@@ -218,11 +233,3 @@ func _ready() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_LOCAL_TRANSFORM_CHANGED and is_node_ready():
 		local_transform_changed.emit()
-
-
-func _tilemap_get_cp_from_cell(cell: Vector2i) -> ControlPoint:
-	var control_points := get_parent().get_children()
-	for cp: ControlPoint in control_points:
-		if cell == cp.tilemap_cell:
-			return cp
-	return null

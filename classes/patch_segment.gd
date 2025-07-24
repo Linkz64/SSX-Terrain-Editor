@@ -40,6 +40,7 @@ func update():
 	_control_point_moved()
 
 
+#---------Private functions-------------
 func _init(control_point_cells: Array[Vector2i]) -> void:
 	tilemap_cells = control_point_cells
 
@@ -60,6 +61,7 @@ func _ready() -> void:
 	mesh_parent.add_child(_control_grid_mesh)
 	
 	# Get control point references for easy access
+	
 	for cell in tilemap_cells:
 		var cp := _tilemap_get_cp_from_cell(cell)
 		assert(cp)

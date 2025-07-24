@@ -1267,6 +1267,7 @@ text_overrun_behavior = 3
 [connection signal="item_edited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_item_edited"]
 [connection signal="mouse_entered" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="RightPanel/Tree" to="RightPanel/Tree" method="_on_mouse_exited"]
+[connection signal="pressed" from="ViewportOverlay/ToolBar/EditModeTools/VBoxContainer2/AddSegment" to="ViewportOverlay" method="_on_add_segment_pressed"]
 [connection signal="pressed" from="ViewportOverlay/EditingMode/ModeSwitch" to="ViewportOverlay" method="_on_mode_switch_pressed"]
 [connection signal="pressed" from="ViewportOverlay/SACMode/HBoxContainer/SACMode0" to="ViewportOverlay" method="_on_sac_mode_pressed" binds= [0]]
 [connection signal="pressed" from="ViewportOverlay/SACMode/HBoxContainer/SACMode1" to="ViewportOverlay" method="_on_sac_mode_pressed" binds= [1]]
