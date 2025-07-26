@@ -63,6 +63,7 @@ func _ready() -> void:
 	# Get control point references for easy access
 	
 	for cell in tilemap_cells:
+		print(cell)
 		var cp := _tilemap_get_cp_from_cell(cell)
 		assert(cp)
 		_control_point_ref.append(cp)

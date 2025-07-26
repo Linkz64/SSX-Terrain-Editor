@@ -128,15 +128,18 @@ func create_segment_from_handle(handle: ControlPoint) -> void:
 				new_cps.append(create_new_point_at.call(ControlPoint.INNER, top_left_corner.tilemap_cell + Vector2i(2, -1), inner6_position))
 				new_cps.append(create_new_point_at.call(ControlPoint.INNER, top_left_corner.tilemap_cell + Vector2i(1, -2), inner9_position))
 				new_cps.append(create_new_point_at.call(ControlPoint.INNER, top_left_corner.tilemap_cell + Vector2i(2, -2), inner10_position))
-				
+				#print(top_left_corner.tilemap_cell)
 				await get_tree().process_frame
-				var segment = create_segment.call(top_left_corner.tilemap_cell)
+				var segment := create_segment.call(top_left_corner.tilemap_cell) as PatchSegment
 				segment.mesh_changed.connect(_on_mesh_changed)
 				
 				for cp in new_cps:
+					#print(cp.tilemap_cell)
 					cp.local_transform_changed.connect(segment._control_point_moved)
 					cp.selection_changed.connect(segment._control_point_selection_changed)
 				
+				segment.update()
+				segment.show_grid(true)
 				GizmoProxy.deselect_control_point()
 				
 				

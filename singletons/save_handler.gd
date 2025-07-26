@@ -417,7 +417,6 @@ func _ssxt_struct_to_nodes(ssxt_struct: SsxtFileStructure) -> void:
 				
 				# Connect the segment signals to the object. 
 				segment_node.mesh_changed.connect(object_node._on_mesh_changed)
-				
 				# The segments automatically generate the meshes on ready
 				
 
